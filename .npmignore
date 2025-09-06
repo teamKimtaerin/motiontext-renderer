@@ -1,0 +1,56 @@
+# Source files
+src/
+*.ts
+*.tsx
+!dist/
+
+# Configuration files
+tsconfig.json
+vite.config.ts
+.eslintrc.json
+.prettierrc
+
+# Development files
+.github/
+.changeset/
+examples/
+docs/
+tests/
+*.test.*
+*.spec.*
+
+# Build tools
+*.config.js
+*.config.ts
+*.config.mjs
+
+# Environment
+.env*
+
+# Logs
+*.log
+
+# Cache
+.cache
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# NPM
+.npmignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary
+tmp/
+temp/
