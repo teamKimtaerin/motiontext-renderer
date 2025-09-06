@@ -47,6 +47,7 @@ export class MotionTextController {
     this.injectStyles();
     const root = document.createElement("div");
     root.setAttribute("data-mtx-controls", "");
+    root.style.outline = "none";
     root.style.position = "absolute";
     root.style.left = "0";
     root.style.right = "0";
@@ -290,6 +291,7 @@ export class MotionTextController {
       }
     };
     root.tabIndex = 0; // focusable for key events
+    root.style.outline = "none"; // remove focus outline
     root.addEventListener("keydown", onKey);
     this.cleanupFns.push(() => root.removeEventListener("keydown", onKey));
     // Focus root on enter/click so keys work also in non-fullscreen when interacting
@@ -297,15 +299,48 @@ export class MotionTextController {
     const onEnter = () => { this.showControls(); focusRoot(); };
     const onLeave = () => { this.scheduleHide(); };
     const onMove = () => { this.showControls(); this.scheduleHide(); };
+    
+    // Video click to play/pause (YouTube-style)
+    const onVideoClick = (e: MouseEvent) => {
+      // Prevent play/pause when clicking on controls
+      if (this.root && this.root.contains(e.target as Node)) {
+        // Clicked on controls, only focus
+        focusRoot();
+        return;
+      }
+      
+      // Clicked on video area, toggle play/pause
+      if (this.video.paused) {
+        this.video.play();
+      } else {
+        this.video.pause();
+      }
+      
+      // Also show controls briefly and focus for keyboard access
+      this.showControls();
+      this.scheduleHide();
+      focusRoot();
+    };
+    
+    // Double-click fullscreen toggle (YouTube UX)
+    const onVideoDoubleClick = (e: MouseEvent) => {
+      // Prevent when clicking on controls
+      if (this.root && this.root.contains(e.target as Node)) return;
+      
+      this.requestFullscreen();
+    };
+    
     this.container.addEventListener("mouseenter", onEnter);
     this.container.addEventListener("mouseleave", onLeave);
     this.container.addEventListener("mousemove", onMove);
-    this.container.addEventListener("click", focusRoot);
+    this.container.addEventListener("click", onVideoClick);
+    this.container.addEventListener("dblclick", onVideoDoubleClick);
     this.cleanupFns.push(() => {
       this.container.removeEventListener("mouseenter", onEnter);
       this.container.removeEventListener("mouseleave", onLeave);
       this.container.removeEventListener("mousemove", onMove);
-      this.container.removeEventListener("click", focusRoot);
+      this.container.removeEventListener("click", onVideoClick);
+      this.container.removeEventListener("dblclick", onVideoDoubleClick);
     });
 
     // reflect play/pause icon
@@ -402,6 +437,20 @@ export class MotionTextController {
         background: linear-gradient(transparent, rgba(0,0,0,0.7));
         padding: 0;
         transition: opacity 0.2s ease;
+      }
+      
+      /* Remove all focus outlines and tap highlights */
+      [data-mtx-controls]:focus,
+      [data-mtx-controls] *:focus,
+      [data-mtx-controls] *:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      
+      [data-mtx-controls],
+      [data-mtx-controls] * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-focus-ring-color: transparent;
       }
       
       .mtx-progress-container {
@@ -515,6 +564,12 @@ export class MotionTextController {
       
       .mtx-btn:active {
         transform: scale(0.95);
+      }
+      
+      .mtx-btn:focus,
+      .mtx-btn:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
       }
       
       .mtx-btn[aria-pressed="true"]:not(.mtx-caption-btn) {

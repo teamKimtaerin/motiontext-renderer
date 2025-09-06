@@ -98,17 +98,17 @@
 - [x] 키보드 조작(비전체화면 포함): 컨테이너 클릭/호버 시 Space/←/→/ESC 동작
 - [x] 컨트롤 오토 히드: 호버 시 표시, 이탈/유휴시 일정 시간 후 숨김(전체/일반 공통)
 - [x] 전체화면 유휴 시 커서 숨김, 움직이면 재표시
-- [ ] 데모 패널: 초기부터 단일 재생 버튼만 표시(일시정지 버튼 제거)
+- [x] 데모 패널: 초기부터 단일 재생 버튼만 표시(일시정지 버튼 제거)
 
 3) 파서/검증 (M3)
-- [ ] `parseScenario(json)`: 스키마 유효성 + 기본값 채움 + 친절한 오류
-- [ ] 시간 규칙: absStart≤t<absEnd 활성, hintTime는 보조
-- [ ] pluginChain 창 계산은 런타임에 위임(파서는 정합성 검증만)
+- [x] `parseScenario(json)`: 스키마 유효성 + 기본값 채움 + 친절한 오류
+- [x] 시간 필드 정합성 검증(absStart<absEnd), hintTime 형식 검증
+- [x] plugin/pluginChain/effectScope 필드 정합성만 검증(창 계산은 런타임 위임)
 
 검증
-- [ ] 정상 케이스: 샘플 JSON이 파서 통과, 내부 구조 생성됨
-- [ ] 오류 케이스: version 누락/불일치, track 참조 불일치, 필수 필드 누락 시 의미 있는 오류 메시지
-- [ ] `pnpm typecheck`/`pnpm lint` 통과
+- [x] 정상 케이스: 샘플 JSON이 파서 통과, 내부 구조 생성됨
+- [x] 오류 케이스: version 불일치/track 참조 불일치/필수 필드 누락 시 명확한 에러 메시지
+- [x] `pnpm typecheck`/`pnpm lint` 통과
 
 4) 합성(PluginChain) (M4)
 - [ ] 활성 플러그인 필터링(현재 시간 in 창)
