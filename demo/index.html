@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MotionText Renderer Demo</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="demo-container">
+      <header class="demo-header">
+        <h1>🎬 MotionText Renderer Demo</h1>
+        <p>웹 기반 애니메이션 자막 렌더러 테스트 페이지</p>
+      </header>
+
+      <main class="demo-main">
+        <!-- 비디오 및 자막 영역 -->
+        <section class="video-section">
+          <div class="video-container">
+            <video
+              id="demo-video"
+              width="800"
+              height="450"
+              controls
+              crossorigin="anonymous"
+            >
+              <!-- 샘플 비디오 URL (저작권 프리) -->
+              <source
+                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                type="video/mp4"
+              />
+              <source
+                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.webm"
+                type="video/webm"
+              />
+              Your browser does not support the video tag.
+            </video>
+
+            <!-- 자막 렌더러 컨테이너 -->
+            <div id="caption-container" class="caption-overlay"></div>
+          </div>
+        </section>
+
+        <!-- 컨트롤 패널 -->
+        <section class="control-panel">
+          <div class="panel-group">
+            <h3>📁 샘플 선택</h3>
+            <select id="sample-selector" class="sample-selector">
+              <option value="">-- 샘플 선택 --</option>
+              <option value="basic">기본 자막</option>
+              <option value="animated">애니메이션 효과</option>
+              <option value="plugin">플러그인 테스트</option>
+            </select>
+            <button id="load-sample" class="btn btn-primary">샘플 로드</button>
+          </div>
+
+          <div class="panel-group">
+            <h3>🎮 재생 컨트롤</h3>
+            <div class="control-buttons">
+              <button id="play-btn" class="btn btn-success">재생</button>
+              <button id="pause-btn" class="btn btn-warning">일시정지</button>
+              <button id="reset-btn" class="btn btn-secondary">리셋</button>
+            </div>
+          </div>
+
+          <div class="panel-group">
+            <h3>📊 상태 정보</h3>
+            <div class="status-info">
+              <div class="status-item">
+                <span class="label">렌더러 상태:</span>
+                <span id="renderer-status" class="value">미초기화</span>
+              </div>
+              <div class="status-item">
+                <span class="label">현재 시간:</span>
+                <span id="current-time" class="value">0.00s</span>
+              </div>
+              <div class="status-item">
+                <span class="label">활성 큐:</span>
+                <span id="active-cues" class="value">0</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- JSON 뷰어/에디터 -->
+        <section class="json-section">
+          <h3>⚙️ 설정 (JSON)</h3>
+          <div class="json-container">
+            <textarea
+              id="config-editor"
+              class="json-editor"
+              placeholder="샘플을 선택하면 JSON 설정이 여기에 표시됩니다..."
+            ></textarea>
+          </div>
+          <div class="json-actions">
+            <button id="apply-config" class="btn btn-primary">설정 적용</button>
+            <button id="reset-config" class="btn btn-secondary">초기화</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="demo-footer">
+        <p>
+          Made with ❤️ by Team Kimtaerin | 
+          <a href="https://github.com/teamKimtaerin/motiontext-renderer" target="_blank">
+            GitHub Repository
+          </a>
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "@teamkimtaerin/motiontext-renderer",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Web-based animated caption/subtitle renderer with plugin system",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,7 +17,9 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode development",
+    "dev:build": "vite build --watch",
+    "preview": "vite preview --mode development",
     "build": "tsc && vite build",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",

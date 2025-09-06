@@ -13,6 +13,7 @@ vite.config.ts
 # Development files
 .github/
 .changeset/
+demo/
 examples/
 docs/
 tests/
@@ -54,3 +55,9 @@ Thumbs.db
 # Temporary
 tmp/
 temp/
+
+# Media files (for demo)
+*.mp4
+*.webm
+*.mov
+*.avi

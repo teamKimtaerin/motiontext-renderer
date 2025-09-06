@@ -1,11 +1,5 @@
-/**
- * MotionText Renderer - Web-based animated caption/subtitle renderer
- * @version 0.0.0
- * @author Team Kimtaerin
- */
+// Public entry for motiontext-renderer
+// Note: Actual implementations will be added incrementally per specs.
 
-export { MotionTextRenderer } from './core/renderer';
-export type * from './types';
+export {};
 
-// Version info
-export const VERSION = '0.0.0';
