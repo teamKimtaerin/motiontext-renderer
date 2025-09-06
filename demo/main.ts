@@ -2,7 +2,7 @@
  * MotionText Renderer Demo Application
  */
 
-import { MotionTextRenderer } from '../src/index';
+import { MotionTextRenderer, MotionTextController } from '../src/index';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -24,6 +24,7 @@ const activeCues = document.getElementById('active-cues') as HTMLSpanElement;
 
 // Application state
 let renderer: MotionTextRenderer | null = null;
+let controller: MotionTextController | null = null;
 let currentConfig: RendererConfig | null = null;
 
 // Sample configurations
@@ -223,6 +224,10 @@ async function loadConfiguration(config: RendererConfig) {
     if (renderer) {
       renderer.dispose();
     }
+    if (controller) {
+      controller.destroy();
+      controller = null;
+    }
     renderer = new MotionTextRenderer(captionContainer);
     (window as any).demoApp.renderer = renderer;
     updateStatus('렌더러 초기화됨');
@@ -230,6 +235,19 @@ async function loadConfiguration(config: RendererConfig) {
     // Load configuration and attach media
     await renderer.loadConfig(config);
     renderer.attachMedia(video);
+
+    // Mount custom controller overlay for testing
+    try {
+      const container = document.querySelector('.video-container') as HTMLElement;
+      if (container) {
+        video.controls = false; // hide native controls when using custom controller
+        controller = new MotionTextController(video, renderer, container, { captionsVisible: true });
+        controller.mount();
+        (window as any).demoApp.controller = controller;
+      }
+    } catch (e) {
+      console.warn('Custom controller mount skipped:', e);
+    }
 
     updateStatus('설정 로드 완료');
     activeCues.textContent = config.cues.length.toString();
@@ -298,6 +316,7 @@ document.addEventListener('DOMContentLoaded', initDemo);
 // Export for debugging
 (window as any).demoApp = {
   renderer,
+  controller,
   video,
   loadConfiguration,
   sampleConfigs,

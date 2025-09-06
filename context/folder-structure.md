@@ -47,6 +47,9 @@
 │  │  └─ TimelineController.ts
 │  ├─ layout/
 │  │  └─ LayoutEngine.ts
+│  ├─ controller/
+│  │  ├─ index.ts
+│  │  └─ MotionTextController.ts
 │  ├─ loader/
 │  │  ├─ AssetFetcher.ts
 │  │  ├─ CacheStore.ts
@@ -105,6 +108,10 @@
 
 ### layout
 - LayoutEngine.ts: 레이아웃 모드(flow/grid/absolute/path), anchor, position/size/transform/override를 적용하여 최종 픽셀 레이아웃을 계산. 안전 영역(safeArea)과 클램프 처리 포함.
+
+### controller
+- MotionTextController.ts: 비디오 컨테이너 위 오버레이 컨트롤(UI) 생성/마운트. 재생/일시정지, 자막 토글, 전체화면 요청 등 렌더러/플레이어 연동 진입점.
+- index.ts: 컨트롤러 배럴(export) 엔트리.
 
 ### loader
 - PluginLoader.ts: 보안 로딩 파이프라인 구현. manifest → 무결성 검증 → preload 자산 → entry 코드 fetch+검증 → Blob URL import → 플러그인 인터페이스 획득.

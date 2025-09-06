@@ -73,22 +73,26 @@
 - [ ] 수용 기준: 비디오 재생 시 지정 구간에 텍스트가 나타나고/사라짐(플러그인 없이)
 
 검증
-- [ ] `pnpm dev`로 데브 서버 실행, 콘솔 에러 0
-- [ ] Demo에서 basic 샘플 로드 → absStart~absEnd 동안만 텍스트 표시
-- [ ] 일시정지/재생/시킹 시 텍스트 표시 상태가 정확히 동기화
+- [x] `pnpm dev`로 데브 서버 실행, 콘솔 에러 0
+- [x] Demo에서 basic 샘플 로드 → absStart~absEnd 동안만 텍스트 표시
+- [x] 일시정지/재생/시킹 시 텍스트 표시 상태가 정확히 동기화
 - [ ] 창 크기 변경 시 텍스트 위치가 스테이지 정규화 좌표에 맞게 유지
 
 2.6) 커스텀 컨트롤러(Controller UI) (M2.6)
-- [ ] 네이티브 controls 비활성화, 커스텀 오버레이 컨트롤 추가(재생/일시정지/시킹/볼륨)
-- [ ] 자막 토글(Show/Hide captions) → 렌더러 레이어 visibility 토글
-- [ ] 전체화면: `.video-container`를 기준으로 requestFullscreen하여 오버레이 포함 풀스크린
-- [ ] `fullscreenchange`/ResizeObserver로 컨테이너 크기 추적, 스테이지/레이아웃 리플로우
-- [ ] 키보드 접근성(스페이스/좌우 화살표/ESC), 마우스 대기시 자동 숨김
+- [x] 폴더 생성: `src/controller/` (`MotionTextController.ts`, `index.ts`)
+- [x] 렌더러 API: `setCaptionsVisible(visible)` 추가
+- [ ] 플레이어 어댑터: `player/HtmlVideoAdapter` (선택)
+- [x] 컨트롤 UI: mount/unmount + play/pause, captions toggle, fullscreen 버튼
+- [x] 이벤트 연동: Video 이벤트(timeupdate/loadedmetadata/volumechange)로 UI 동기화
+- [x] 전체화면 대응: `requestFullscreen` + `fullscreenchange` 반영
+- [x] 접근성: aria-pressed/label, 키보드 핸들러(스페이스/좌우/ESC)
+- [x] 시킹/볼륨: range 입력으로 currentTime/volume 제어, 시간 표시
 
 검증
-- [ ] 네이티브 컨트롤 숨김 상태에서 모든 조작 가능
+- [ ] 네이티브 컨트롤 숨김 상태에서 모든 조작 가능(데모에선 유지, 라이브러리는 오버레이만 제공)
 - [ ] 전체화면 전환 시 자막이 영상 위에 유지되고 크기/좌표 정상
 - [ ] 자막 토글 시 즉시 반영, 성능 저하 없음
+ - [x] 오버레이를 영상 표시 영역(video content box)에 정렬(레터박스 구간 무시)
 
 3) 파서/검증 (M3)
 - [ ] `parseScenario(json)`: 스키마 유효성 + 기본값 채움 + 친절한 오류
