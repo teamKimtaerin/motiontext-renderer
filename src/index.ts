@@ -5,6 +5,9 @@ import { applyNormalizedPosition } from "./layout/LayoutEngine";
 import { TimelineController } from "./core/TimelineController";
 export { MotionTextController } from "./controller";
 import { isWithin } from "./utils/time";
+import { composeActive, type Channels } from "./composer/PluginChainComposer";
+import { evalBuiltin } from "./runtime/plugins/Builtin";
+import { applyChannels } from "./runtime/StyleApply";
 
 // (reserved) type helpers can be added later
 
@@ -13,7 +16,7 @@ export class MotionTextRenderer {
   private scenario: ScenarioFileV1_3 | null = null;
   private media: HTMLVideoElement | null = null;
   private timeline = new TimelineController();
-  private mountedTextEls: { node: TextNode; el: HTMLElement }[] = [];
+  private mountedTextEls: { node: TextNode; el: HTMLElement; baseT: string }[] = [];
   private unsub: (() => void) | null = null;
   private ro: ResizeObserver | null = null;
   private onLoadedMetaBound: (() => void) | null = null;
@@ -159,17 +162,23 @@ export class MotionTextRenderer {
       el.style.display = "none"; // hidden by default
       const defaultAnchor = trackType === "subtitle" ? "bc" : "cc";
       applyNormalizedPosition(el, tn.layout, defaultAnchor);
+      const baseT = el.style.transform || "";
       this.container.appendChild(el);
-      this.mountedTextEls.push({ node: tn, el });
+      this.mountedTextEls.push({ node: tn, el, baseT });
     }
   }
 
   private updateAt(t: number) {
-    for (const { node, el } of this.mountedTextEls) {
+    for (const { node, el, baseT } of this.mountedTextEls) {
       const t0 = node.absStart ?? -Infinity;
       const t1 = node.absEnd ?? Infinity;
       const active = isWithin(t, t0, t1);
       el.style.display = active ? "block" : "none";
+      if (active) {
+        const chain = (node as any).pluginChain as any[] | undefined;
+        const ch: Channels = composeActive(chain as any, t, t0, t1, (spec, p) => evalBuiltin(spec, p));
+        applyChannels(el, baseT, ch);
+      }
     }
   }
 

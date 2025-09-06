@@ -3,6 +3,9 @@
  */
 
 import { MotionTextRenderer, MotionTextController } from '../src/index';
+import animatedSubtitle from './samples/animated_subtitle.json';
+import animatedFreeMixed from './samples/animated_free_mixed.json';
+import tiltedBox from './samples/tilted_box.json';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -75,6 +78,9 @@ const sampleConfigs: Record<string, RendererConfig> = {
       },
     ],
   },
+  animated_subtitle: animatedSubtitle as RendererConfig,
+  animated_free_mixed: animatedFreeMixed as RendererConfig,
+  tilted_box: tiltedBox as RendererConfig,
 
   animated: {
     version: '1.3',

@@ -1,0 +1,68 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": { "baseAspect": "16:9" },
+  "tracks": [
+    { "id": "free", "type": "free", "layer": 200 }
+  ],
+  "cues": [
+    {
+      "id": "free-top-left",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "좌상단 pop",
+            "absStart": 0.5,
+            "absEnd": 4,
+            "layout": { "position": { "x": 0.12, "y": 0.12 }, "anchor": "tl" },
+            "pluginChain": [
+              { "name": "pop", "relStartPct": 0.0, "relEndPct": 0.35, "compose": "multiply", "params": { "maxScale": 1.3 } },
+              { "name": "fadeIn", "relStartPct": 0.0, "relEndPct": 0.2 }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "free-top-right",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "우상단 wave",
+            "absStart": 1,
+            "absEnd": 5,
+            "layout": { "position": { "x": 0.88, "y": 0.15 }, "anchor": "tr" },
+            "pluginChain": [
+              { "name": "waveY", "relStartPct": 0.0, "relEndPct": 1.0, "compose": "add", "params": { "amplitudePx": 8, "frequency": 2 } }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "free-center-shake",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "센터 shakeX",
+            "absStart": 2,
+            "absEnd": 6,
+            "layout": { "position": { "x": 0.50, "y": 0.35 }, "anchor": "cc" },
+            "pluginChain": [
+              { "name": "shakeX", "relStartPct": 0.0, "relEndPct": 1.0, "compose": "add", "params": { "amplitudePx": 6, "cycles": 8 } }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

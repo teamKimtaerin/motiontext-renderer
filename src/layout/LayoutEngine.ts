@@ -37,5 +37,21 @@ export function applyNormalizedPosition(el: HTMLElement, layout?: Layout, defaul
   el.style.top = `${Math.round(y * 10000) / 100}%`;
   const anchor = (layout.anchor as Anchor) || defaultAnchor;
   const { tx, ty } = anchorTranslate(anchor);
-  el.style.transform = `translate(${tx}%, ${ty}%)`;
+  // compose additional layout.transform (rotate/scale/skew minimal)
+  const parts: string[] = [`translate(${tx}%, ${ty}%)`];
+  const tr = layout.transform;
+  if (tr?.scale) {
+    const sx = tr.scale.x ?? 1;
+    const sy = tr.scale.y ?? 1;
+    if (sx !== 1 || sy !== 1) parts.push(`scale(${sx}, ${sy})`);
+  }
+  if (tr?.rotate?.deg != null) {
+    parts.push(`rotate(${tr.rotate.deg}deg)`);
+  }
+  if (tr?.skew) {
+    const xDeg = tr.skew.xDeg ?? 0;
+    const yDeg = tr.skew.yDeg ?? 0;
+    if (xDeg || yDeg) parts.push(`skew(${xDeg}deg, ${yDeg}deg)`);
+  }
+  el.style.transform = parts.join(" ");
 }

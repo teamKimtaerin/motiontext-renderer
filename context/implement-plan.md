@@ -111,15 +111,15 @@
 - [x] `pnpm typecheck`/`pnpm lint` 통과
 
 4) 합성(PluginChain) (M4)
-- [ ] 활성 플러그인 필터링(현재 시간 in 창)
-- [ ] 채널(accumulator) 합성: replace(기본)/add/multiply
-- [ ] last-wins 보장 및 채널 초기값 규칙 정의
+- [x] 활성 플러그인 필터링(현재 시간 in 창)
+- [x] 채널(accumulator) 합성: replace(기본)/add/multiply
+- [x] last-wins 보장 및 채널 초기값 규칙 정의
 
 검증
-- [ ] 시간 창이 겹치지 않는 두 플러그인 → 독립 반영 로그 확인
-- [ ] 겹칠 때 compose 미지정 → 뒤 플러그인이 교체(last-wins)
-- [ ] compose:"add"/"multiply" 각각에서 누적 결과가 기대와 일치
-- [ ] 데모용 임시 플러그인 스텁으로 시각적/로그 검증
+- [x] 시간 창이 겹치지 않는 두 플러그인 → 독립 반영(데모에서 확인)
+- [x] 겹칠 때 compose 미지정 → 뒤 플러그인이 교체(last-wins)
+- [x] compose:"add"/"multiply" 각각에서 누적 결과가 기대와 일치
+- [x] 데모용 내장 플러그인(fadeIn/pop/waveY/shakeX)로 시각적 확인
 
 5) 레이아웃/스테이지 (M5)
 - [ ] 정규화→픽셀 변환, anchor/transform/override 적용

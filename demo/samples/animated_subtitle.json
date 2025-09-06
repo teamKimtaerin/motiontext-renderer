@@ -1,0 +1,51 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": { "baseAspect": "16:9" },
+  "tracks": [
+    { "id": "subtitle", "type": "subtitle", "layer": 10 }
+  ],
+  "cues": [
+    {
+      "id": "sub-1",
+      "track": "subtitle",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "애니메이션 자막 – fadeIn + pop + wave",
+            "absStart": 1,
+            "absEnd": 5,
+            "layout": { "position": { "x": 0.5, "y": 0.86 }, "anchor": "bc" },
+            "pluginChain": [
+              { "name": "fadeIn",  "relStartPct": 0.0, "relEndPct": 0.25 },
+              { "name": "pop",     "relStartPct": 0.0, "relEndPct": 0.35, "compose": "multiply", "params": { "maxScale": 1.25 } },
+              { "name": "waveY",   "relStartPct": 0.10, "relEndPct": 0.90, "compose": "add",      "params": { "amplitudePx": 6, "frequency": 2 } }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sub-2",
+      "track": "subtitle",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "두 번째 자막 – 흔들림",
+            "absStart": 6,
+            "absEnd": 10,
+            "layout": { "position": { "x": 0.5, "y": 0.86 }, "anchor": "bc" },
+            "pluginChain": [
+              { "name": "fadeIn",  "relStartPct": 0.0, "relEndPct": 0.2 },
+              { "name": "shakeX", "relStartPct": 0.0, "relEndPct": 1.0, "compose": "add", "params": { "amplitudePx": 4, "cycles": 6 } }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
