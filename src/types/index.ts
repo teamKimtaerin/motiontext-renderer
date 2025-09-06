@@ -1,4 +1,9 @@
-// Aggregate types entry to re-export specific domains when implemented.
+// Aggregate types entry re-export
 
-export {};
+export * from "./layout";
+export * from "./plugin";
+export * from "./timeline";
+export * from "./scenario";
 
+// Dev/demo convenience: align demo's RendererConfig to our Scenario schema
+export type { ScenarioFileV1_3 as RendererConfig } from "./scenario";

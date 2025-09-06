@@ -30,7 +30,8 @@
     "prebuild": "pnpm clean",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && changeset publish",
+    "prepare": "husky"
   },
   "keywords": [
     "video",
@@ -59,6 +60,8 @@
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
     "terser": "^5.44.0",

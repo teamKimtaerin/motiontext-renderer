@@ -43,20 +43,15 @@ const sampleConfigs: Record<string, RendererConfig> = {
       {
         id: 'cue1',
         track: 'subtitle',
-        hintTime: 2,
         root: {
-          id: 'group1',
-          type: 'group',
+          e_type: 'group',
           children: [
             {
-              id: 'text1',
-              type: 'text',
+              e_type: 'text',
+              text: '안녕하세요! MotionText Renderer입니다.',
               absStart: 2,
               absEnd: 5,
-              content: '안녕하세요! MotionText Renderer입니다.',
-              layout: {
-                position: [0.5, 0.85],
-              },
+              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
             },
           ],
         },
@@ -64,20 +59,15 @@ const sampleConfigs: Record<string, RendererConfig> = {
       {
         id: 'cue2',
         track: 'subtitle',
-        hintTime: 6,
         root: {
-          id: 'group2',
-          type: 'group',
+          e_type: 'group',
           children: [
             {
-              id: 'text2',
-              type: 'text',
+              e_type: 'text',
+              text: '이것은 기본 자막 테스트입니다.',
               absStart: 6,
               absEnd: 9,
-              content: '이것은 기본 자막 테스트입니다.',
-              layout: {
-                position: [0.5, 0.85],
-              },
+              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
             },
           ],
         },
@@ -229,13 +219,15 @@ async function loadConfiguration(config: RendererConfig) {
     configEditor.value = JSON.stringify(config, null, 2);
     currentConfig = config;
 
-    // Initialize renderer if not exists
-    if (!renderer) {
-      renderer = new MotionTextRenderer(captionContainer);
-      updateStatus('렌더러 초기화됨');
+    // Reinitialize renderer to ensure clean state (handles Undo/Apply edge cases)
+    if (renderer) {
+      renderer.dispose();
     }
+    renderer = new MotionTextRenderer(captionContainer);
+    (window as any).demoApp.renderer = renderer;
+    updateStatus('렌더러 초기화됨');
 
-    // Load configuration
+    // Load configuration and attach media
     await renderer.loadConfig(config);
     renderer.attachMedia(video);
 
