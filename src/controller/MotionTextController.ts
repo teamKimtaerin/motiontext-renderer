@@ -19,6 +19,9 @@ export class MotionTextController {
   private volumeEl: HTMLInputElement | null = null;
   private cleanupFns: Array<() => void> = [];
   private prevVideoStyle: Partial<CSSStyleDeclaration> | null = null;
+  private idleTimer: number | null = null;
+  private idleMs = 2200;
+  // hovered flag reserved for future logic
 
   constructor(video: HTMLVideoElement, renderer: MotionTextRenderer, container: HTMLElement, opts: MotionTextControllerOptions = {}) {
     this.video = video;
@@ -176,6 +179,21 @@ export class MotionTextController {
     root.tabIndex = 0; // focusable for key events
     root.addEventListener("keydown", onKey);
     this.cleanupFns.push(() => root.removeEventListener("keydown", onKey));
+    // Focus root on enter/click so keys work also in non-fullscreen when interacting
+    const focusRoot = () => root.focus({ preventScroll: true });
+    const onEnter = () => { this.showControls(); focusRoot(); };
+    const onLeave = () => { this.scheduleHide(); };
+    const onMove = () => { this.showControls(); this.scheduleHide(); };
+    this.container.addEventListener("mouseenter", onEnter);
+    this.container.addEventListener("mouseleave", onLeave);
+    this.container.addEventListener("mousemove", onMove);
+    this.container.addEventListener("click", focusRoot);
+    this.cleanupFns.push(() => {
+      this.container.removeEventListener("mouseenter", onEnter);
+      this.container.removeEventListener("mouseleave", onLeave);
+      this.container.removeEventListener("mousemove", onMove);
+      this.container.removeEventListener("click", focusRoot);
+    });
 
     // reflect play/pause icon
     const onPlay = () => { (btnPlay.textContent = "❚❚"); };
@@ -218,6 +236,10 @@ export class MotionTextController {
     const onFs = () => applyFsFit();
     document.addEventListener("fullscreenchange", onFs);
     this.cleanupFns.push(() => document.removeEventListener("fullscreenchange", onFs));
+
+    // start with controls visible then schedule hide
+    this.showControls();
+    this.scheduleHide();
   }
 
   unmount() {
@@ -290,5 +312,26 @@ export class MotionTextController {
     const rect = this.root.getBoundingClientRect();
     // Pass the current controller height to renderer so it can shrink caption overlay
     this.renderer.setControlSafeBottom(rect.height);
+  }
+
+  private showControls() {
+    if (!this.root) return;
+    this.root.style.opacity = "1";
+    this.root.style.pointerEvents = "auto";
+    // Show mouse cursor again
+    this.container.style.cursor = "auto";
+  }
+
+  private scheduleHide() {
+    if (this.idleTimer != null) window.clearTimeout(this.idleTimer);
+    this.idleTimer = window.setTimeout(() => this.hideControls(), this.idleMs);
+  }
+
+  private hideControls() {
+    if (!this.root) return;
+    this.root.style.opacity = "0";
+    this.root.style.pointerEvents = "none";
+    // Hide cursor only in fullscreen
+    if (document.fullscreenElement) this.container.style.cursor = "none";
   }
 }

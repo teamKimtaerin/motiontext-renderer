@@ -190,10 +190,8 @@ function initDemo() {
     video.play();
     if (renderer) renderer.play();
   });
-  pauseBtn.addEventListener('click', () => {
-    video.pause();
-    if (renderer) renderer.pause();
-  });
+  // Hide demo's separate pause button; custom controller handles play/pause toggle
+  if (pauseBtn) pauseBtn.style.display = 'none';
   resetBtn.addEventListener('click', resetDemo);
   applyConfigBtn.addEventListener('click', applyConfig);
   resetConfigBtn.addEventListener('click', resetConfig);
