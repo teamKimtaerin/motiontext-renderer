@@ -27,7 +27,7 @@
 - M5 레이아웃 최소: LayoutEngine 정규화→px/% 변환, safeAreaClamp/flow/grid/override — 부분 완료(Stage 모듈 분리 대기)
 - M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 완료
 - M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 완료
-- M6 타임라인: TimelineController 시킹/배속/rVFC — 진행 중(rAF 기반 구현, rVFC 전환 예정)
+- M6 타임라인: TimelineController 시킹/배속/rVFC — 완료(rVFC 도입, snapToFrame 연동, 테스트 통과)
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
@@ -216,15 +216,15 @@
 - 소요: 0.2일 내외(1-2시간, 테스트 포함). 메모리 누수 방지 및 핵심 안정성 개선으로 리스크 매우 낮음.
 
 ## 6) 타임라인 컨트롤 (M6)
-- [ ] rVFC 루프, mediaTime 기반 진행(현재 rAF 기반 최소 구현 완료)
-- [x] pause/play/seek API — rate는 비디오에 위임
-- [ ] snapToFrame 옵션 적용(rVFC 전환 시 반영)
+- [x] rVFC 루프 + rAF 폴백, mediaTime 기반 진행
+- [x] pause/play/seek/rate API (rate는 video.playbackRate 위임), ended 이벤트 중지 처리
+- [x] snapToFrame 옵션 적용(Scenario.behavior.snapToFrame + timebase.fps 전달 → computeRelativeWindow)
 - [x] 플러그인에는 progress만 전달(합성기에서 상대 p 계산)
 
 ### 검증 (M6)
-- [ ] rVFC 기반으로 미디어 드리프트 없이 진행도 고정
-- [ ] pause/play/seek/rate가 Demo에서 즉시 반영
-- [ ] snapToFrame 켜고 끄기 시 경계 프레임 매칭 확인
+- [x] rVFC 기반으로 미디어 드리프트 없이 진행도 고정(단위 테스트 기반)
+- [x] pause/play/seek/rate 즉시 반영(테스트로 확인), ended 중지
+- [x] snapToFrame on/off 시 [t0,t1) 경계 판정 일관성 확인(테스트로 확인)
 
 ## 7) 보안 로더 (M7)
 - [ ] ManifestValidator: 필수 필드/버전/peer/minRenderer 체크
@@ -277,12 +277,12 @@
 - [x] M5 레이아웃 엔진 1차( position/anchor/size/transform/override/safeAreaClamp, flow/grid, overlap push/stack )(2025-09-07)
 - [x] M5.5 리팩토링: 핵심 모듈 분리 및 아키텍처 개선(2025-09-07)
 - [x] M5.6 품질 보완/최적화: Stage 안정성 강화 및 테스트 보강(2025-09-07)
+- [x] M6 타임라인: rVFC 전환 + snapToFrame 연동 + 테스트 통과(2025-09-07)
 
 다음 작업(Next Up)
-1) M6: rVFC 기반 타임라인 전환 + snapToFrame 연동
-2) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
-3) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
-4) Transform 순서 개선 (M6 또는 M7에서 처리)
+1) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
+2) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
+3) Transform 순서 개선 (M7 또는 M8에서 처리)
 
 ---
 

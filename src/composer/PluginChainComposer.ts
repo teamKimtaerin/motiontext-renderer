@@ -19,15 +19,20 @@ export interface PluginEval {
   t1: number;
 }
 
+export interface ComposeOptions {
+  fps?: number;
+  snapToFrame?: boolean;
+}
+
 export function windowEval(
   absStart: number,
   absEnd: number,
   spec: PluginSpec,
-  fps?: number
+  options?: ComposeOptions
 ): PluginEval {
   const { t0, t1 } = computeRelativeWindow(absStart, absEnd, spec, {
-    snapToFrame: false,
-    fps,
+    fps: options?.fps,
+    snapToFrame: options?.snapToFrame,
   });
   return { spec, t0, t1 };
 }
@@ -64,12 +69,15 @@ export function composeActive(
   absStart: number,
   absEnd: number,
   evalFn: (_spec: PluginSpec, _p: number) => Channels,
-  fps?: number
+  options?: ComposeOptions
 ): Channels {
   if (!chain || chain.length === 0) return {};
   let acc: Channels = {};
   for (const spec of chain) {
-    const { t0, t1 } = computeRelativeWindow(absStart, absEnd, spec, { fps });
+    const { t0, t1 } = computeRelativeWindow(absStart, absEnd, spec, {
+      fps: options?.fps,
+      snapToFrame: options?.snapToFrame,
+    });
     if (!isWithin(now, t0, t1)) continue;
     const p = progress(now, t0, t1);
     const ch = evalFn(spec, p);

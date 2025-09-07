@@ -29,7 +29,7 @@ describe('M4: PluginChainComposer', () => {
 
     it('should handle fps parameter for frame snapping', () => {
       const spec: PluginSpec = { name: 'test' };
-      const result = windowEval(10.04, 20.07, spec, 30);
+      const result = windowEval(10.04, 20.07, spec, { fps: 30 });
       
       // With snapToFrame: false, values should not be snapped
       expect(result.t0).toBe(10.04);
@@ -265,7 +265,7 @@ describe('M4: PluginChainComposer', () => {
       ];
       
       // fps parameter is passed through but doesn't affect snapToFrame=false
-      const result = composeActive(chain, 5.123, 0, 10, mockEval, 30);
+      const result = composeActive(chain, 5.123, 0, 10, mockEval, { fps: 30 });
       expect(result.opacity).toBeCloseTo(0.5123);
     });
   });

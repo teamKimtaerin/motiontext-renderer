@@ -36,7 +36,13 @@ export class MotionTextRenderer {
     this.trackManager.setScenario(this.scenario);
     this.renderer.setScenario(this.scenario);
     this.renderer.remount();
-    if (this.media) this.renderer.update(this.media.currentTime);
+    if (this.media) {
+      this.renderer.update(this.media.currentTime);
+      // If media is already playing, ensure timeline is running as well
+      if (!this.media.paused && !this.timeline.isRunning()) {
+        this.timeline.play();
+      }
+    }
   }
 
   attachMedia(video: HTMLVideoElement) {
@@ -46,6 +52,10 @@ export class MotionTextRenderer {
     if (this.unsub) this.unsub();
     this.unsub = this.timeline.onTick((t) => this.renderer.update(t));
     this.renderer.update(video.currentTime);
+    // If video is already playing at attach time, start timeline loop
+    if (!video.paused) {
+      this.timeline.play();
+    }
   }
 
   play() {
@@ -59,6 +69,10 @@ export class MotionTextRenderer {
   seek(timeSec: number) {
     this.timeline.seek(timeSec);
     this.renderer.update(timeSec);
+  }
+
+  setRate(rate: number) {
+    this.timeline.setRate(rate);
   }
 
   dispose() {

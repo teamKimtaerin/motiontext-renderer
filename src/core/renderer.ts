@@ -219,8 +219,15 @@ export class Renderer {
       el.style.display = active ? 'block' : 'none';
       if (active) {
         const chain = (node as any).pluginChain as any[] | undefined;
-        const ch: Channels = composeActive(chain as any, t, t0, t1, (spec, p) =>
-          evalBuiltin(spec, p)
+        const fps = this.scenario?.timebase?.fps;
+        const snap = this.scenario?.behavior?.snapToFrame ?? false;
+        const ch: Channels = composeActive(
+          chain as any,
+          t,
+          t0,
+          t1,
+          (spec, p) => evalBuiltin(spec, p),
+          { fps, snapToFrame: snap }
         );
         let base = baseT;
         const m = groupOffsets.get(parent);
