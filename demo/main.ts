@@ -3,6 +3,9 @@
  */
 
 import { MotionTextRenderer, MotionTextController } from '../src/index';
+import { preloadPluginsForScenario } from './devPlugins';
+import pluginLocal from './samples/plugin_local.json';
+import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
 import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
@@ -93,6 +96,8 @@ const sampleConfigs: Record<string, RendererConfig> = {
   animated_free_mixed: animatedFreeMixed as RendererConfig,
   tilted_box: tiltedBox as RendererConfig,
   m5_layout_features: m5Layout as RendererConfig,
+  plugin_local: pluginLocal as RendererConfig,
+  plugin_showcase: pluginShowcase as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -248,6 +253,9 @@ async function loadConfiguration(config: RendererConfig) {
     renderer = new MotionTextRenderer(captionContainer);
     (window as any).demoApp.renderer = renderer;
     updateStatus('렌더러 초기화됨');
+
+    // Preload plugins referenced by scenario (Dev loader)
+    await preloadPluginsForScenario(config);
 
     // Load configuration and attach media
     await renderer.loadConfig(config);

@@ -1,0 +1,15 @@
+{
+  "name": "bobY",
+  "version": "1.0.0",
+  "pluginApi": "2.1",
+  "minRenderer": "1.3.0",
+  "entry": "index.mjs",
+  "targets": ["text"],
+  "capabilities": ["channels-eval"],
+  "peer": { "gsap": "^3.12.0" },
+  "preload": [],
+  "schema": {
+    "amplitudePx": { "type": "number", "default": 8, "min": 0, "max": 50, "ui": { "control": "slider", "step": 1 } },
+    "cycles": { "type": "number", "default": 1, "min": 0, "max": 10, "ui": { "control": "slider", "step": 0.5 } }
+  }
+}

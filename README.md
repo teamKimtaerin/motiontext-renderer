@@ -27,7 +27,9 @@ npm install @teamkimtaerin/motiontext-renderer
 yarn add @teamkimtaerin/motiontext-renderer
 ```
 
-> **참고**: GSAP은 라이브러리에 포함되어 있어 별도 설치가 불필요합니다.
+> 참고: 이 라이브러리는 GSAP을 피어 의존성으로 요구합니다. 호스트 앱에 GSAP을 설치하세요.
+>
+> 설치: `pnpm add gsap` (또는 npm/yarn)
 
 ## 📖 기본 사용법
 

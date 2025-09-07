@@ -93,7 +93,8 @@ Thumbs.db
 __MACOSX/
 .AppleDouble
 .LSOverride
-Icon[]
+Icon[
+]
 
 # Thumbnails
 ._*
@@ -113,3 +114,5 @@ Icon[]
 Network Trash Folder
 Temporary Items
 .apdisk
+
+.tmp/

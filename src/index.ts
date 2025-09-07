@@ -5,6 +5,7 @@ import { TimelineController } from "./core/TimelineController";
 import { Stage } from "./core/Stage";
 import { TrackManager } from "./core/TrackManager";
 import { Renderer } from "./core/Renderer";
+import gsap from "gsap";
 export { MotionTextController } from "./controller";
 
 // (reserved) type helpers can be added later
@@ -23,6 +24,10 @@ export class MotionTextRenderer {
 
   constructor(container: HTMLElement) {
     this.container = container;
+    // Enforce GSAP presence (peer dependency)
+    if (!gsap) {
+      throw new Error("GSAP is required as a peer dependency. Install 'gsap' and ensure it is available to the host app.");
+    }
     this.stage.setContainer(container);
     this.renderer = new Renderer(container, this.stage, this.trackManager);
     this.stageBoundsUnsub = this.stage.onBoundsChange(() => this.renderer.recomputeMountedBases());

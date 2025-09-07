@@ -4,10 +4,10 @@
 상세한 스펙은 별도 문서를 참조하세요:
 
 - **시나리오 JSON 상세 스펙** → `context/scenario-json-spec-v-1-3.md`
-- **플러그인 시스템 상세 스펙** → `context/plugin-system-architecture-v-2.md`
+- **플러그인 시스템 상세 스펙** → `context/plugin-system-architecture-v-2-1.md`
 - **폴더/파일 구조 및 역할** → `context/folder-structure.md`
 
-⚠️ **주의**: 이 문서는 개요 요약이며, 시나리오 상세 스펙은 `context/scenario-json-spec-v-1-3.md`, 플러그인 상세 스펙은 `context/plugin-system-architecture-v-2.md` 를 반드시 참조해야 합니다.
+⚠️ **주의**: 이 문서는 개요 요약이며, 시나리오 상세 스펙은 `context/scenario-json-spec-v-1-3.md`, 플러그인 상세 스펙은 `context/plugin-system-architecture-v-2-1.md` 를 반드시 참조해야 합니다.
 
 이 파일은 CLI/AI 보조 도구에 전달되는 기본 컨텍스트 역할을 하며,  
 상세 동작이나 필드 정의는 반드시 위 참조 문서를 기준으로 확인해야 합니다.

@@ -1,5 +1,5 @@
 // Types for Plugin system (v2 design)
-// Reference: context/plugin-system-architecture-v-2.md
+// Reference: context/plugin-system-architecture-v-2-1.md
 // Includes PluginSpec, PluginChain, and runtime interfaces.
 
 export type ComposeMode = 'add' | 'multiply' | 'replace'; // default: replace (last-wins)

@@ -4,10 +4,13 @@ import {
   applyFlowContainer,
   applyGridContainer,
 } from '../layout/LayoutEngine';
-import { isWithin } from '../utils/time';
-import { composeActive, type Channels } from '../composer/PluginChainComposer';
+import { isWithin, computeRelativeWindow } from '../utils/time';
+import { composeActive, type Channels, progress as prog } from '../composer/PluginChainComposer';
 import { evalBuiltin } from '../runtime/plugins/Builtin';
 import { applyChannels, applyTextStyle } from '../runtime/StyleApply';
+import { ensureEffectsRoot } from '../runtime/DomMount';
+import { devRegistry } from '../loader/dev/DevPluginRegistry';
+import { createDevContext } from '../loader/SandboxContext';
 import type { Stage } from './Stage';
 import type { TrackManager, GroupItem } from './TrackManager';
 
@@ -19,6 +22,9 @@ interface MountedItem {
   groupMode: 'flow' | 'grid' | 'absolute';
   overlap?: string;
   rowGapPx?: number;
+  effectsRoot?: HTMLElement;
+  // map of pluginChain index -> seek applier
+  _appliers?: Map<number, (_p: number) => void>;
 }
 
 export class Renderer {
@@ -131,6 +137,7 @@ export class Renderer {
           }
         }
         const baseT = el.style.transform || '';
+        const effectsRoot = ensureEffectsRoot(el);
         groupEl.appendChild(el);
         this.mountedTextEls.push({
           node: ch,
@@ -140,6 +147,8 @@ export class Renderer {
           groupMode: flowIgnored ? 'absolute' : mode,
           overlap: trackObj?.overlapPolicy,
           rowGapPx: (groupEl as any).__rowGapPx,
+          effectsRoot,
+          _appliers: new Map(),
         });
       }
     }
@@ -221,18 +230,72 @@ export class Renderer {
         const chain = (node as any).pluginChain as any[] | undefined;
         const fps = this.scenario?.timebase?.fps;
         const snap = this.scenario?.behavior?.snapToFrame ?? false;
+        // EvalFn that prefers dev plugin evalChannels if present
         const ch: Channels = composeActive(
           chain as any,
           t,
           t0,
           t1,
-          (spec, p) => evalBuiltin(spec, p),
+          (spec, p) => {
+            const reg = devRegistry.resolve(spec.name);
+            if (reg && typeof reg.module?.evalChannels === 'function') {
+              const ctx = createDevContext(reg.baseUrl, (el as any).__effectsRoot || el);
+              try {
+                return reg.module.evalChannels(spec, p, ctx) || {};
+              } catch {
+                return {};
+              }
+            }
+            return evalBuiltin(spec, p);
+          },
           { fps, snapToFrame: snap }
         );
+        // Drive default interface plugins (SeekApplier/Timeline)
+        if (Array.isArray(chain) && chain.length) {
+          const item = this.mountedTextEls.find((it) => it.el === el)!;
+          const effectsRoot = item.effectsRoot || ensureEffectsRoot(el);
+          item.effectsRoot = effectsRoot;
+          const appliers = item._appliers || new Map<number, (_p: number) => void>();
+          item._appliers = appliers;
+          for (let i = 0; i < chain.length; i++) {
+            const spec: any = chain[i];
+            const reg = devRegistry.resolve(spec.name);
+            if (!reg || !reg.module?.default) continue;
+            // If dev path exposes evalChannels, prefer channel composition and skip default to avoid double applying
+            if (typeof reg.module?.evalChannels === 'function') continue;
+            const runtime = reg.module.default;
+            const { t0: w0, t1: w1 } = computeRelativeWindow(t0, t1, spec, { fps, snapToFrame: snap });
+            if (!isWithin(t, w0, w1)) continue;
+            // ensure applier
+            let ap = appliers.get(i);
+            if (!ap) {
+              // ctx per plugin (baseUrl-specific)
+              const ctx = createDevContext(reg.baseUrl, effectsRoot);
+              try {
+                if (typeof runtime.init === 'function') runtime.init(effectsRoot, spec.params, ctx);
+              } catch {}
+              let out: any = undefined;
+              try {
+                out = runtime.animate(effectsRoot, spec.params, ctx, Math.max(0, w1 - w0));
+              } catch {}
+              if (typeof out === 'function') {
+                ap = out as (_p: number) => void;
+              } else if (out && typeof out.progress === 'function') {
+                ap = (pp: number) => { try { out.pause().progress(pp); } catch {} };
+              } else {
+                ap = (_pp: number) => {};
+              }
+              appliers.set(i, ap);
+            }
+            const pnow = prog(t, w0, w1);
+            try { ap(pnow); } catch {}
+          }
+        }
         let base = baseT;
         const m = groupOffsets.get(parent);
         const extra = m?.get(el) ?? 0;
         if (extra) base = `${base} translate(0px, ${Math.round(extra)}px)`;
+        // Always apply channel-based composition to the element (default plugins act on effectsRoot)
         applyChannels(el, base, ch);
       }
     }

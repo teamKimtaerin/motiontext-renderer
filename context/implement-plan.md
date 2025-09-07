@@ -4,7 +4,7 @@
 
 참조 문서
 - 시나리오(JSON) 스펙 v1.3: `context/scenario-json-spec-v-1-3.md`
-- 플러그인 시스템 아키텍처(v2): `context/plugin-system-architecture-v-2.md`
+- 플러그인 시스템 아키텍처(v2.1): `context/plugin-system-architecture-v-2-1.md`
 - 개요 요약: `context/init-context.md`
 - 폴더/파일 역할: `context/folder-structure.md`
 
@@ -28,6 +28,7 @@
 - M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 완료
 - M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 완료
 - M6 타임라인: TimelineController 시킹/배속/rVFC — 완료(rVFC 도입, snapToFrame 연동, 테스트 통과)
+- M6.5 로컬 플러그인 서버/데모 통합: dev 전용 경량 서버 + 동적 로딩 연동 — 신규(보안 검증 제외)
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
@@ -225,6 +226,134 @@
 - [x] rVFC 기반으로 미디어 드리프트 없이 진행도 고정(단위 테스트 기반)
 - [x] pause/play/seek/rate 즉시 반영(테스트로 확인), ended 중지
 - [x] snapToFrame on/off 시 [t0,t1) 경계 판정 일관성 확인(테스트로 확인)
+
+## 6.5) 로컬 플러그인 서버 + 데모 통합 (M6.5)
+
+목표(스코프)
+- 데모 환경에서만 사용할 경량 플러그인 배포 서버를 `demo/plugin-server/`에 구현하고, 플러그인을 fetch→Blob import로 로드해 실행 확인.
+- v2.1 규약 준수: baseWrapper/effectsRoot 경계, targets/capabilities, Dev용 evalChannels 병행.
+- 보안 검증(M7의 무결성/서명)은 제외하고 빠른 반복/검증을 위한 개발 편의 단계 제공.
+
+설계/구조 (v2.1 기준)
+- 서버: Node 내장 `http` 정적 서빙 + CORS 허용. 루트 `demo/plugin-server/plugins/` 아래 버전 디렉토리.
+  - 예: `plugins/spin@1.0.0/{manifest.json,index.mjs,assets/...}`
+  - MIME: `.json=application/json`, `.mjs=text/javascript`, 나머지 기본값.
+  - CORS: `Access-Control-Allow-Origin:*`, `Cache-Control: public, max-age=0`(dev)
+- 매니페스트(예시 최소):
+  ```json
+  {
+    "name": "spin",
+    "version": "1.0.0",
+    "pluginApi": "2.1",
+    "entry": "index.mjs",
+    "targets": ["text"],
+    "capabilities": ["channels-eval"],
+    "preload": []
+  }
+  ```
+- 엔트리(Dev + v2.1 병행):
+  - 기본(default) v2.1: `{ name, version, init?, animate, cleanup?, schema? }` (animate는 GSAP Timeline 또는 SeekApplier)
+  - 보조(named) Dev: `export function evalChannels(spec, p, ctx): Channels` (tx,ty,sx,sy,rot,opacity)
+  - 우선순위: Dev 단계에서는 evalChannels가 있으면 채널 합성 경로 사용, 없으면 default 인터페이스를 mount하여 SeekApplier/Timeline로 구동
+- DOM 경계/합성 규칙:
+  - baseWrapper: 레이아웃/앵커/호스트 채널(transform/opacity) 전용
+  - effectsRoot: 플러그인 전용 루트(plugins mount). 플러그인은 baseWrapper transform/opacity 직접 수정 금지
+  - 선택: CSS 변수 채널(`--mtx-*`) 사용 시 style-vars 권한으로 합성과 충돌 최소화
+- 자산 규약:
+  - `ctx.assets.getUrl(relPath)`로 manifest 기준 절대 URL 제공
+  - font는 Dev 단계에서 `FontFace` 등록 허용(Prod는 M7에서 무결성/캐시)
+
+폴더 구조(제안/리팩토링)
+```text
+demo/                        # Vite dev root (변경 없음)
+  index.html
+  main.ts                   # 가볍게 유지, Dev 플러그인 연동은 별도 모듈로 분리 권장
+  style.css
+  samples/                  # 시나리오 JSON 보관 (현 구조 유지)
+    assets/                 # 샘플 전용 정적 리소스 (영상 등)
+    plugin_local.json       # (추가) 로컬 플러그인 활용 샘플
+  ui/                       # (신규, 선택) 데모 전용 UI 헬퍼
+    safeAreaDev.ts          # safe area 패널 로직 분리
+  devPlugins.ts             # (신규) Dev 로더 초기화/사전 로드 진입점
+
+demo/plugin-server/         # (신규) 로컬 플러그인 서버 루트
+  server.js                 # Node http 정적 서버 (ESM)
+  README.md                 # 사용법/주의사항(Dev 전용)
+  plugins/
+    spin@1.0.0/
+      manifest.json
+      index.mjs
+      assets/
+        ...
+    bobY@1.0.0/
+      manifest.json
+      index.mjs
+    pulse@1.0.0/
+      manifest.json
+      index.mjs
+
+src/loader/dev/             # (신규) Dev 전용 로더/레지스트리
+  DevPluginRegistry.ts
+  DevPluginLoader.ts
+
+src/runtime/                # (보완)
+  DomMount.ts               # baseWrapper/effectsRoot 생성 유틸(간소)
+  PortalManager.ts          # (M8에서 본격 구현, 본 단계에선 인터페이스만)
+```
+
+리팩토링 포인트(데모 프론트)
+- main.ts 부피 감소: Dev 플러그인 초기화(`devPlugins.ts`), SafeArea UI(`ui/safeAreaDev.ts`) 분리로 가독성/유지보수성 향상(선택 적용).
+- 샘플 자산 경로: 기존 `demo/samples/assets/` 유지. 플러그인 패키지 자산은 서버 쪽 `plugins/*/assets/`에만 둬서 책임 분리.
+- 플러그인 서버 접속 설정: `devPlugins.ts`에서 `const PLUGIN_ORIGIN = 'http://localhost:3300'` 상수로 중앙화(환경별 오버라이드 용이).
+
+리팩토링 포인트(데모 서버)
+- 플러그인 단위 디렉터리: `<name>@<version>` 고정 → 후속 M7 캐시/불변 버전 정책과 정렬.
+- 서버 ESM 일관화: 루트 `package.json`이 `type:"module"`이므로 `server.js`도 ESM import 사용.
+- 간단한 MIME 매핑과 404/디렉터리 인덱싱 차단(보안 최소 가드) 추가.
+
+구현 체크리스트
+1) 서버 스켈레톤
+   - [x] `demo/plugin-server/server.js`: 포트 `3300` 기본, `plugins/` 정적 서빙, CORS 헤더 추가
+   - [x] `package.json` 스크립트 추가: `"plugin:server": "node demo/plugin-server/server.js"`
+2) 샘플 플러그인 3종 (v2.1 + Dev 병행)
+   - [x] `spin@1.0.0`: 회전(채널 `rot`) — default 타임라인 + named evalChannels
+   - [x] `bobY@1.0.0`: 상하 바운스(채널 `ty`) — default 타임라인 + named evalChannels
+   - [x] `pulse@1.0.0`: 확대/축소(채널 `sx/sy`) — default 타임라인 + named evalChannels
+   - [x] (선택) `flames@1.0.0`: assets/flame.gif 오버레이(assets.getUrl 사용), targets:["text"], capabilities:["portal-breakout"]
+   - [x] (추가) `glow@1.0.0`: 발광(pulse) 오버레이 + text-shadow 보강
+3) Dev 로더/레지스트리(보안 제외)
+   - [x] `src/loader/DevPluginRegistry.ts`: 네임→모듈 매핑, `register/resolve/has` 제공
+   - [x] `src/loader/DevPluginLoader.ts`: `loadFrom(manifestUrl)` → manifest fetch → entry fetch→Blob→dynamic import → 레지스트리 등록 (+ peer gsap 범위 경고)
+   - [x] `src/loader/SandboxContext.ts`(Dev): `{ container(effectsRoot), assets.getUrl, gsap? }` 주입
+   - [x] `src/loader/dev/PreloadFromScenario.ts`: 시나리오 기반 필요 플러그인 자동 프리로드
+4) Renderer 연동(선택 플래그, v2.1 경계 반영)
+   - [x] Text 노드 mount 시 `effectsRoot` 생성(간소), baseWrapper는 현 텍스트 엘리먼트 유지
+   - [x] 플러그인 평가 시 순서: 레지스트리 조회 → evalChannels 존재 시 채널 합성 사용 → 없으면 default 인터페이스 mount/구동
+   - [x] default 인터페이스(SeekApplier/Timeline): 창(window)별 p 계산해 인스턴스별 applier/timeline 주행(호스트 강제)
+   - [x] 채널(transform/opacity)은 baseWrapper에 적용, 타임라인은 effectsRoot만 조작(충돌 방지)
+   - [x] 채널 합성과 타임라인 동시 사용 시 transform 충돌 방지 로직 반영
+5) 데모 통합
+   - [x] `demo/devPlugins.ts`: 시나리오 스캔 기반 프리로드(`preloadPluginsForScenario`)
+   - [x] 샘플 JSON: `plugin_local.json`/`plugin_showcase.json` 추가 및 강화(순차/콤보/멀티 영역)
+   - [x] 데모 셀렉터 옵션 추가 및 정상 동작 확인
+6) 문서/가드
+   - [x] `README.md` GSAP 피어 의존 안내
+   - [x] `context/*` 문서에서 v2 → v2.1 링크 갱신 및 보강
+
+수용 기준
+- `pnpm dev` + `pnpm plugin:server` 동시 실행 시 데모에서 `plugin_local.json` 선택 → 외부 플러그인이 적용되어 눈에 띄는 애니메이션이 재생됨.
+- 네트워크 오류/플러그인 미등록 시에도 빌트인/무효 처리로 안전 폴백(에러 토스트/콘솔 경고).
+- default(v2.1)와 evalChannels(Dev) 경로 모두 동작 검증(한 개 이상 샘플 플러그인).
+- assets.getUrl로 불러온 이미지/폰트 자산 사용 케이스 1건 이상 검증(Dev 환경)
+- 코드베이스 타입/빌드 무오류(`pnpm typecheck`/`pnpm build`).
+
+선행 필요 여부(후속 마일스톤 의존성)
+- M7(무결성/서명) 선행 불필요. 본 단계는 보안 검증 제외 Dev 전용 로더/서버로 동작.
+- v2.1 런타임 계약(default export)과 Dev `evalChannels` 모두 지원하되, PortalManager 본격 동작은 M8에서 완료.
+
+소요/리스크
+- 소요: 0.5일 내외(서버/샘플/로더/연동/데모 반영).
+- 리스크: Dev 인터페이스(`evalChannels`)와 default 인터페이스 간 차이 → M7~M8에서 마이그레이션/경계 테스트 필요. 보안 미적용 상태를 반드시 문서화.
 
 ## 7) 보안 로더 (M7)
 - [ ] ManifestValidator: 필수 필드/버전/peer/minRenderer 체크

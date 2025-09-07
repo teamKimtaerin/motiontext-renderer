@@ -3,7 +3,7 @@
 이 문서는 현재 리포지토리의 폴더/파일 구조와 각 파일의 책임을 정리합니다. 동작의 세부 규칙은 다음 문서를 기준으로 합니다.
 
 - 시나리오(JSON) 상세 스펙: `context/scenario-json-spec-v-1-3.md`
-- 플러그인 시스템 상세 스펙: `context/plugin-system-architecture-v-2.md`
+- 플러그인 시스템 상세 스펙: `context/plugin-system-architecture-v-2-1.md`
 - 개요 요약: `context/init-context.md`
 
 핵심 원칙 요약:
@@ -22,13 +22,16 @@
 ├─ context/
 │  ├─ init-context.md
 │  ├─ scenario-json-spec-v-1-3.md
-│  ├─ plugin-system-architecture-v-2.md
+│  ├─ plugin-system-architecture-v-2-1.md
 │  ├─ ai-bootstrap-prompt.md
 │  └─ folder-structure.md  ← (본 문서)
 ├─ demo/
 │  ├─ index.html
 │  ├─ main.ts
 │  ├─ style.css
+│  ├─ devPlugins.ts                 # (M6.5) Dev 플러그인 초기화/사전 로드 진입점
+│  ├─ ui/                           # (M6.5, 선택) 데모 전용 UI 헬퍼
+│  │  └─ safeAreaDev.ts
 │  └─ samples/
 │     ├─ basic.json
 │     ├─ animated.json
@@ -37,6 +40,19 @@
 │     ├─ tilted_box.json
 │     ├─ m5_layout_features.json
 │     └─ plugin.json
+│
+│  └─ plugin-server/                # (M6.5) 로컬 플러그인 서버 루트 (Dev 전용)
+│     ├─ server.js                  # Node http 정적 서버(ESM), CORS 허용
+│     └─ plugins/
+│        ├─ spin@1.0.0/
+│        │  ├─ manifest.json
+│        │  └─ index.mjs
+│        ├─ bobY@1.0.0/
+│        │  ├─ manifest.json
+│        │  └─ index.mjs
+│        └─ pulse@1.0.0/
+│           ├─ manifest.json
+│           └─ index.mjs
 ├─ dist/                     # 빌드 산출물(자동 생성)
 ├─ sample/
 │  └─ scenario/scenario.json5
@@ -66,6 +82,9 @@
 │  │  ├─ ManifestValidator.ts
 │  │  ├─ PluginLoader.ts
 │  │  └─ SandboxContext.ts
+│  │  └─ dev/                      # (M6.5) Dev 전용 로더/레지스트리
+│  │     ├─ DevPluginLoader.ts
+│  │     └─ DevPluginRegistry.ts
 │  ├─ parser/
 │  │  └─ ScenarioParser.ts
 │  ├─ runtime/
@@ -143,6 +162,10 @@
 - CacheStore.ts: 메모리+localStorage 기반 캐시. 키는 `plugin@version` 불변 전략.
 - SandboxContext.ts: 플러그인에 제공되는 샌드박스 컨텍스트(gsap, container, assets.getUrl, portal, onSeek, timeScale 등) 구성. 컨테이너 DOM 범위로 접근 제한.
 
+#### loader/dev (M6.5 Dev 전용)
+- DevPluginRegistry.ts: 네임→모듈 매핑/조회/등록. 데모 환경에서 외부 플러그인 모듈을 레지스트리에 보관.
+- DevPluginLoader.ts: 보안 검증 없이 manifest→entry를 fetch 후 Blob URL로 동적 import, 레지스트리에 등록. 향후 M7 정식 로더로 대체.
+
 ### parser
 - ScenarioParser.ts: 시나리오(JSON v1.3) 파싱/스키마 검증 및 내부 구조로의 변환. 타입은 `src/types/scenario.ts` 참조.
 
@@ -167,6 +190,20 @@
 
 ### entry
 - index.ts: 라이브러리 퍼블릭 엔트리(배럴/팩토리 노출 예정).
+
+---
+
+## 데모 전용(Dev) 플러그인 서버와 프론트 분리 (M6.5)
+
+### plugin-server (Dev Only)
+- 위치: `demo/plugin-server/`
+- 역할: `plugins/<name>@<version>/` 디렉터리를 정적으로 서빙하는 경량 Node http 서버(ESM). CORS 허용, 간단 MIME 매핑.
+- 실행(제안): `pnpm plugin:server` 스크립트로 `node demo/plugin-server/server.js` 실행.
+- 보안: M7 무결성/서명 검증 미포함(개발용). 프로덕션 사용 금지.
+
+### 데모 프론트 분리 포인트
+- `demo/devPlugins.ts`: Dev 로더 초기화 및 사전 로드 진입점. `PLUGIN_ORIGIN` 상수로 서버 주소 중앙화.
+- `demo/ui/safeAreaDev.ts`(선택): Safe Area 데모 패널 로직 분리로 `main.ts` 슬림화.
 
 ---
 
