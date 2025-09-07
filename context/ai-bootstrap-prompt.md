@@ -11,10 +11,9 @@
   - 최근 변경 로그: 가장 최신 `context/change_log/*.md`
 
 ## 1) 현재 상태(요약 가이드)
-- 완료: 타입셋(M1), 시간 유틸(M2), 데모 최소구동(M2.5), 컨트롤러(M2.6), 파서(M3), 합성(M4), 리팩토링(M5.5), 품질 보완(M5.6: Stage 안정화/테스트/메모리 누수 개선)
+- 완료: 타입셋(M1), 시간 유틸(M2), 데모 최소구동(M2.5), 컨트롤러(M2.6), 파서(M3), 합성(M4), 리팩토링(M5.5), 품질 보완(M5.6: Stage 안정화/테스트/메모리 누수 개선), 타임라인(M6: rVFC 전환/attach-only/ensurePlaying/세대 토큰/snapToFrame 연동)
 - 부분: 레이아웃(M5 일부 — anchor/size/transform/override/safeAreaClamp, flow/grid, overlap push/stack)
-- 진행 중: 타임라인(M6 — 현재 rAF, rVFC로 전환 예정)
-- Next Up: M6 rVFC → M7 보안 로더 → M8 포털
+- Next Up: M7 보안 로더 → M8 포털
 
 핵심 원칙(요약)
 - 타임라인 소유권은 렌더러에 있음. 플러그인은 상대 Timeline/seek만 제공.
@@ -22,26 +21,26 @@
 - breakout 기본 transfer:"move".
 - 보안 로딩 순서: fetch → 해시/서명 검증 → Blob import.
 
-## 2) 오늘의 목표 — M6 타임라인(rVFC) 전환
-타임라인 정확도/드리프트 내성을 강화하고, 프레임 스냅 옵션을 준비합니다.
+## 2) 오늘의 목표 — M7 보안 로더
+무결성·서명 검증을 거친 안전한 플러그인 로딩 파이프라인을 구현합니다.
 
-1) rVFC 루프 도입
-   - `TimelineController`: rAF → `requestVideoFrameCallback` 기반 루프로 전환(폴백 rAF 유지)
-   - mediaTime 기반 tick, pause/seek 호환성 유지
-2) snapToFrame 옵션 연동
-   - 시나리오 `behavior.snapToFrame`/`fps`를 전달해 `computeRelativeWindow`의 스냅 옵션과 접속
-   - 경계 프레임에서 활성 판정/진행도 일관성 확인
-3) 합성 파이프라인 검증
-   - 플러그인은 여전히 progress만 전달; 합성기는 기존 규칙 유지(last‑wins/add/multiply)
-4) 테스트/계측
-   - rVFC tick 정확성(정지/시킹/배속) 단위 테스트
-   - snapToFrame on/off 경계 프레임 스냅 샘플 케이스
-   - 간단 로깅/Performance 계측으로 드리프트 확인
+1) Manifest/Integrity
+   - `ManifestValidator`: 필수 필드/버전/peer/minRenderer 검증
+   - `Integrity`: SHA-384, 선택 ed25519 서명 검증
+2) 자산/엔트리 로딩
+   - `AssetFetcher`: preload 자산 fetch + 무결성 검증
+   - 엔트리 fetch → 해시/서명 검증 → Blob URL import
+3) 샌드박스 컨텍스트
+   - 제한된 DOM 컨테이너/Portal 핸들, `onSeek`, `timeScale` 등 안전 API 주입
+4) 캐싱/폴백
+   - 메모리/로컬 캐시, 실패 시 기본 애니메이션 폴백
+5) 테스트
+   - 정상/무결성 실패/서명 실패/버전 불일치 케이스 단위 테스트
 
 수용 기준
-- `pnpm typecheck`/`pnpm build` 무오류, 데모 샘플 시각 동작 동일
-- rVFC에서 일시정지/시킹/배속 시 진행도 즉시 반영(눈에 띄는 드리프트 없음)
-- snapToFrame on/off 시 경계 프레임 매칭 확인
+- `pnpm typecheck`/`pnpm build` 무오류, 관련 테스트 통과
+- 무결성/서명 실패 시 import 차단 및 폴백 동작
+- 정상 manifest는 로딩·초기화 성공
 
 ## 3) 작업 절차(운영)
 - 계획 수립: update_plan을 사용해 위 항목(1→7)을 체크박스로 등록하고 진행 상태 갱신
@@ -57,12 +56,12 @@
 
 ## 5) 커밋 메시지 가이드(예시)
 ```
-feat(timeline): migrate to rVFC loop; add snapToFrame support
+feat(loader): add secure plugin loader with integrity verification
 
-- Timeline: replace rAF with requestVideoFrameCallback (fallback rAF); mediaTime-driven tick; pause/seek/rate compatible
-- Behavior: wire behavior.snapToFrame/fps into window computation
-- Tests: rVFC tick accuracy; snap boundary cases; no visual regressions in demos
-- Docs: update implement-plan(M6) and ai-bootstrap-prompt
+- Manifest/Integrity: validate schema; verify SHA-384 and optional ed25519
+- Fetch: preload assets; verify; entry fetch→verify→Blob import
+- Sandbox: inject restricted context; add tests for failure/compat cases
+- Docs: update implement-plan(M7) and ai-bootstrap-prompt
 ```
 
 ## 6) 참고 자료
@@ -70,5 +69,5 @@ feat(timeline): migrate to rVFC loop; add snapToFrame support
 
 ## 7) 시작 멘트(복사해서 첫 대화로 쓰세요)
 ```
-이 프롬프트를 읽고 프로젝트 컨텍스트를 로드한 뒤, implement-plan의 M6 타임라인 전환 스프린트를 계획(update_plan)하고 1) rVFC 루프 도입부터 착수해 주세요. snapToFrame 연동/경계 테스트까지 포함하고, 데모 회귀를 수시로 확인해 주세요.
+이 프롬프트를 읽고 프로젝트 컨텍스트를 로드한 뒤, implement-plan의 M7 보안 로더 스프린트를 계획(update_plan)하고 1) Manifest/Integrity부터 착수해 주세요. 실패 케이스 테스트까지 포함하고, 데모 회귀를 수시로 확인해 주세요.
 ```

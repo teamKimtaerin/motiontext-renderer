@@ -246,14 +246,16 @@ describe('M6+: TimelineController rVFC edge cases', () => {
     video.__listeners.get('seeked')?.forEach((fn: any) => fn());
     const cb2 = video.__scheduled.at(-1)!.cb;
 
-    // Fire old callback (stale) → should be ignored
+    // Fire old callback (stale) → should be ignored (no change from baseline)
+    const base = ticks.length; // seek handler may have notified once
     cb1(0, { mediaTime: 1.0 });
-    expect(ticks.length).toBe(0);
+    expect(ticks.length).toBe(base);
 
-    // Fire current callback → should publish
+    // Fire current callback → should publish exactly one new tick
+    const before2 = ticks.length;
     cb2(0, { mediaTime: 2.5 });
-    expect(ticks.length).toBe(1);
-    expect(ticks[0]).toBeCloseTo(2.5, 6);
+    expect(ticks.length).toBe(before2 + 1);
+    expect(ticks.at(-1)).toBeCloseTo(2.5, 6);
   });
 
   it('does not schedule vFC when seeking while paused', () => {
