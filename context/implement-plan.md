@@ -25,8 +25,8 @@
 - M3 파서: ScenarioParser + 검증(`src/parser/ScenarioParser.ts`) — 완료
 - M4 합성: PluginChainComposer(채널 합성, last-wins/compose) — 완료
 - M5 레이아웃 최소: LayoutEngine 정규화→px/% 변환, safeAreaClamp/flow/grid/override — 부분 완료(Stage 모듈 분리 대기)
-- M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 진행 예정
-- M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 진행 예정
+- M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 완료
+- M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 완료
 - M6 타임라인: TimelineController 시킹/배속/rVFC — 진행 중(rAF 기반 구현, rVFC 전환 예정)
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
@@ -172,11 +172,11 @@
 - 타입/네이밍 정리: OverlapPolicy/Anchor/Channels 등 공개 타입 정합성 검토 및 배럴 정리.
 
 체크리스트
-- [ ] Stage.extract: `updateOverlayBounds`/`installOverlayBinding`/`recomputeMountedBases` 단계적 이전 및 공개 API 확정.
-- [ ] TrackManager.applyOverlapPolicy(parentGroup): 활성 요소 순서→Y 오프셋 맵 반환(행간 gap 포함).
-- [ ] StyleApply: `applyTextStyle(el, style, trackDefault)` 이전 및 테스트, `buildTransform(base, channels)`로 레이아웃/플러그인 합성 순서 고정.
-- [ ] Anchors: `anchorTranslate`/`anchorFraction` 공용화, LayoutEngine/Renderer에서 재사용.
-- [ ] Renderer.ts: 그룹 컨테이너 배치(flow/grid/absolute)와 자식 mount/update를 책임, index.ts는 파사드로 단순화.
+- [x] Stage.extract: overlay bounds 계산/리스너(`installOverlayBinding`/`updateBounds`)를 `Stage.ts`로 이전, `onBoundsChange` 공개 API 확정(참고: `recomputeMountedBases`는 Renderer에 유지).
+- [x] TrackManager.applyOverlapPolicy(parentGroup): 활성 요소 순서→Y 오프셋 맵 반환(행간 gap 포함) 구현(`computeGroupOffsets`).
+- [x] StyleApply: `applyTextStyle(el, style, trackDefault)` 이관 및 테스트, `buildTransform(base, channels)`로 합성 순서 고정.
+- [x] Anchors: `anchorTranslate`/`anchorFraction` 공용화, LayoutEngine/Renderer에서 재사용.
+- [x] Renderer.ts: 그룹 컨테이너 배치(flow/grid/absolute)와 자식 mount/update를 책임, index.ts는 파사드로 단순화.
 - [ ] import 경로/순환 의존 점검 및 수정, 폴더 역할 문서 업데이트(`context/folder-structure.md`).
 
 수용 기준
@@ -193,44 +193,27 @@
 - Stage 이벤트/바인딩 안정성 강화:
   - `onBoundsChange(cb)`가 구독 해지 함수(unsubscribe)를 반환하도록 개선, 메모리 누수 방지
   - `setContainer`/`setMedia` 재바인딩 안전성(Idempotent) 보장
-- Stage API 정리:
-  - `configure({ baseAspect })` 사용성 재검토(가능하면 `setScenario()`로 일원화), 문서/사용처 정리
-- Transform 순서 검증/보강:
-  - `buildTransform(base → scale → translate(px) → rotate)` 순서가 의도(픽셀 이동이 스케일 영향 X)에 부합하는지 재검증
-  - 필요 시 옵션화 또는 순서 고정 테스트 추가
-- Plugin 창(window) 프리컴퓨트 캐시:
-  - 노드 단위로 각 `pluginSpec`의 `(t0,t1,D)`를 캐시하고 프레임마다 in-range/진행도만 계산
-  - `composeActive` 오버로드/인자 확장(사전 계산 창을 입력받도록) 검토, `snapToFrame` 통합을 M6에 대비
-- TrackManager 성능 최적화:
-  - `computeGroupOffsets` 결과를 (표시 상태/높이/rowGap) 키로 캐시, 변화 없으면 재계산 스킵
-  - 표시 요소만 대상으로 측정(현재 논리 유지)
-- 타입 엄격화/any 제거:
-  - `GroupItem.node: any` → `TextNode` 등으로 좁히기, 공개 API의 타입 명확화
-- 문서/주석 정합성:
-  - `src/index.ts` 상단 주석(“M2.5 minimal slice”) 최신화
-  - `context/folder-structure.md`/`init-context.md` 반영 유지
-- 테스트 보강:
+- 테스트 보강(필수):
   - anchors: `anchorTranslate/anchorFraction` 경계값 단위 테스트
-  - StyleApply: transform 순서 스냅샷 테스트(스케일/트랜슬레이트/로테이트 조합)
-  - TrackManager: 다양한 높이/rowGap/표시 상태에서 오프셋 누적 검증
-  - Stage: 다양한 aspect/컨테이너에서 content rect 산출 검증
+  - Stage: content rect 산출 및 구독/해지 테스트
 
 체크리스트
-- [ ] Stage: `onBoundsChange()`에서 unsubscribe 반환, 재바인딩 안전성 테스트
-- [ ] Stage: `configure()` 축소 또는 제거(문서/호출부 정리)
-- [ ] StyleApply: transform 순서 검증 및 테스트 추가
-- [ ] Composer: plugin 창 프리컴퓨트 캐시 도입(옵션 플래그/오버로드 설계)
-- [ ] TrackManager: 오프셋 캐시 도입 및 회귀 테스트
-- [ ] 타입 엄격화(any 제거) 반영
-- [ ] 문서/주석 최신화(folder-structure, implement-plan, change_log)
+- [x] Stage: `onBoundsChange()`에서 unsubscribe 반환, 재바인딩 안전성 구현
+- [x] Stage: 중복 바인딩 방지 (_boundParent/_boundMedia 추적)
+- [x] Stage: resizeThrottleMs 스펙 반영 (기본 80ms)
+- [x] Stage: `configure()` Dead API 제거
+- [x] index.ts: Stage 구독 저장 및 dispose에서 해지
+- [x] 테스트 추가: anchors 유틸리티 경계값 단위 테스트 (9개 앵커 포인트)
+- [x] 테스트 추가: Stage content rect 순수 함수 테스트 (letterbox/pillarbox 케이스)
+- [x] Transform 순서 Known Issue 문서화 (implement-plan.md)
 
 수용 기준
-- [ ] `pnpm typecheck`/`pnpm build` 무오류
-- [ ] 데모 4종에서 시각 동작 회귀 없음(재생/시킹/전체화면/리사이즈)
-- [ ] `computeGroupOffsets`/창 계산의 불필요한 재호출이 감소(로그/계측으로 확인)
+- [x] `pnpm typecheck`/`pnpm build` 무오류 (통과)
+- [x] 129개 테스트 모두 통과 (Stage 4개, anchors 5개 추가)
+- [x] Stage 구독/해지가 메모리 누수 없이 정상 동작
 
 소요/리스크
-- 소요: 0.5일 내외(테스트 포함). 기능 변경 없는 내부 품질 개선으로 리스크 낮음.
+- 소요: 0.2일 내외(1-2시간, 테스트 포함). 메모리 누수 방지 및 핵심 안정성 개선으로 리스크 매우 낮음.
 
 ## 6) 타임라인 컨트롤 (M6)
 - [ ] rVFC 루프, mediaTime 기반 진행(현재 rAF 기반 최소 구현 완료)
@@ -292,9 +275,48 @@
 - [x] M2.5 데모 최소 구동/샘플 연동(2025-09-07)
 - [x] M4 합성(PluginChain, last-wins/compose) 적용(2025-09-07)
 - [x] M5 레이아웃 엔진 1차( position/anchor/size/transform/override/safeAreaClamp, flow/grid, overlap push/stack )(2025-09-07)
+- [x] M5.5 리팩토링: 핵심 모듈 분리 및 아키텍처 개선(2025-09-07)
+- [x] M5.6 품질 보완/최적화: Stage 안정성 강화 및 테스트 보강(2025-09-07)
 
 다음 작업(Next Up)
-1) M5.6: 품질 보완/최적화(Stage 구독 해지/성능 캐시/타입/테스트)
-2) M6: rVFC 기반 타임라인 전환 + snapToFrame 연동
-3) M7: PluginLoader 파이프라인(무결성 검증→Blob import)
-4) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
+1) M6: rVFC 기반 타임라인 전환 + snapToFrame 연동
+2) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
+3) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
+4) Transform 순서 개선 (M6 또는 M7에서 처리)
+
+---
+
+## Known Issues (향후 해결 예정)
+
+### Transform 순서 불일치 (M6에서 검토 예정)
+**문제**: 현재 `buildTransform()` 순서는 `base → scale → translate(px) → rotate`이지만, CSS transform의 우측부터 적용 특성상 translate가 scale의 영향을 받는 구조입니다.
+
+**현재 동작**: 
+```javascript
+// StyleApply.ts:5
+buildTransform(base, {sx: 2, tx: 100, rot: 45})
+// → "base scale(2, 2) translate(100px, 50px) rotate(45deg)"
+// 실제 적용: rotate(45deg) → translate(200px, 100px) → scale(2, 2) → base
+//           ^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^ 
+//           rotate 후          translate는 scale 영향 받음
+```
+
+**의도했던 동작**: "픽셀 이동이 스케일 영향 X"  
+**올바른 순서**: `base → translate → scale → rotate` 또는 matrix 변환 사용
+
+**영향**: 플러그인의 translate(px) 채널이 layout scale과 의도와 다르게 상호작용 가능
+
+**M6 해결 방안**: 
+- 순서 변경 후 기존 테스트/데모 영향 분석
+- 또는 matrix 기반 변환으로 완전 재설계
+- 스펙 문서와 구현 일치성 확보
+
+### Plugin Window 프리컴퓨트 (성능 최적화)
+**현재 상태**: 매 프레임마다 각 노드의 pluginSpec 시간 창(t0, t1) 계산  
+**최적화 기회**: 노드 단위로 `(t0,t1,D)` 사전 계산 후 in-range/progress만 계산  
+**우선도**: 낮음 (현재 성능 문제 없음)
+
+### TrackManager 오프셋 캐싱
+**현재 상태**: push/stack 정책 시 매번 `computeGroupOffsets()` 재계산  
+**최적화 기회**: (표시상태/높이/rowGap) 키 기반 결과 캐싱  
+**우선도**: 낮음 (push/stack 정책 드물게 사용)

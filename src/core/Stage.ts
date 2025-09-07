@@ -7,8 +7,27 @@ export interface ContentRect {
   height: number;
 }
 
-export interface StageConfig {
-  baseAspect?: string;
+// Pure function for content rect calculation (testable)
+export function computeContentRect(containerWidth: number, containerHeight: number, videoAspect: number): ContentRect {
+  const ca = containerWidth / containerHeight;
+  let width = containerWidth,
+    height = containerHeight,
+    left = 0,
+    top = 0;
+  
+  if (ca > videoAspect) {
+    height = containerHeight;
+    width = Math.round(containerHeight * videoAspect);
+    left = Math.round((containerWidth - width) / 2);
+    top = 0;
+  } else {
+    width = containerWidth;
+    height = Math.round(containerWidth / videoAspect);
+    left = 0;
+    top = Math.round((containerHeight - height) / 2);
+  }
+
+  return { left, top, width, height };
 }
 
 export class Stage {
@@ -21,13 +40,8 @@ export class Stage {
   private _updateTimer: number | null = null;
   private _lastBox: string | null = null;
   private _boundsChangeListeners: ((_rect: ContentRect) => void)[] = [];
-
-  configure(config: StageConfig) {
-    this.scenario = {
-      ...this.scenario,
-      stage: { ...this.scenario?.stage, baseAspect: config.baseAspect },
-    } as ScenarioFileV1_3;
-  }
+  private _boundParent: HTMLElement | null = null;
+  private _boundMedia: HTMLVideoElement | null = null;
 
   setContainer(container: HTMLElement) {
     this.container = container;
@@ -43,8 +57,12 @@ export class Stage {
     this.scenario = scenario;
   }
 
-  onBoundsChange(listener: (_rect: ContentRect) => void) {
+  onBoundsChange(listener: (_rect: ContentRect) => void): () => void {
     this._boundsChangeListeners.push(listener);
+    return () => {
+      const idx = this._boundsChangeListeners.indexOf(listener);
+      if (idx >= 0) this._boundsChangeListeners.splice(idx, 1);
+    };
   }
 
   getContentRect(): ContentRect | null {
@@ -61,24 +79,7 @@ export class Stage {
       va = this.parseAspectFromStage() ?? 16 / 9;
     }
 
-    const ca = cw / ch;
-    let width = cw,
-      height = ch,
-      left = 0,
-      top = 0;
-    if (ca > (va ?? ca)) {
-      height = ch;
-      width = Math.round(ch * (va ?? ca));
-      left = Math.round((cw - width) / 2);
-      top = 0;
-    } else {
-      width = cw;
-      height = Math.round(cw / (va ?? ca));
-      left = 0;
-      top = Math.round((ch - height) / 2);
-    }
-
-    return { left, top, width, height };
+    return computeContentRect(cw, ch, va);
   }
 
   dispose() {
@@ -94,7 +95,19 @@ export class Stage {
     const parent = this.container?.parentElement;
     if (!parent) return;
 
-    if (this.ro) this.ro.disconnect();
+    // Prevent duplicate binding - only rebind if target changed
+    if (parent === this._boundParent && this.media === this._boundMedia) {
+      return;
+    }
+
+    // Clean up previous bindings completely
+    this.teardownOverlayBinding();
+
+    // Track new binding targets
+    this._boundParent = parent;
+    this._boundMedia = this.media;
+
+    // Set up new bindings
     this.ro = new ResizeObserver(() => this.scheduleBoundsUpdate());
     this.ro.observe(parent);
 
@@ -114,22 +127,27 @@ export class Stage {
       this.ro.disconnect();
       this.ro = null;
     }
-    if (this.media && this.onLoadedMetaBound) {
-      this.media.removeEventListener('loadedmetadata', this.onLoadedMetaBound);
+    if (this._boundMedia && this.onLoadedMetaBound) {
+      this._boundMedia.removeEventListener('loadedmetadata', this.onLoadedMetaBound);
     }
     this.onLoadedMetaBound = null;
     if (this.onFullscreenBound) {
       document.removeEventListener('fullscreenchange', this.onFullscreenBound);
     }
     this.onFullscreenBound = null;
+    
+    // Reset tracking
+    this._boundParent = null;
+    this._boundMedia = null;
   }
 
   private scheduleBoundsUpdate() {
     if (this._updateTimer != null) return;
+    const throttleMs = this.scenario?.behavior?.resizeThrottleMs ?? 80;
     this._updateTimer = window.setTimeout(() => {
       this._updateTimer = null;
       this.updateBounds();
-    }, 50);
+    }, throttleMs);
   }
 
   private updateBounds() {

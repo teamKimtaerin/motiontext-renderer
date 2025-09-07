@@ -18,13 +18,14 @@ export class MotionTextRenderer {
   private trackManager = new TrackManager();
   private renderer: Renderer;
   private unsub: (() => void) | null = null;
+  private stageBoundsUnsub: (() => void) | null = null;
   private controlSafeBottomPx = 0;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.stage.setContainer(container);
     this.renderer = new Renderer(container, this.stage, this.trackManager);
-    this.stage.onBoundsChange(() => this.renderer.recomputeMountedBases());
+    this.stageBoundsUnsub = this.stage.onBoundsChange(() => this.renderer.recomputeMountedBases());
     // Do not override container positioning; demo CSS positions it absolutely.
   }
 
@@ -64,6 +65,8 @@ export class MotionTextRenderer {
     this.pause();
     if (this.unsub) this.unsub();
     this.unsub = null;
+    if (this.stageBoundsUnsub) this.stageBoundsUnsub();
+    this.stageBoundsUnsub = null;
     this.renderer.dispose();
     this.scenario = null;
     this.stage.dispose();
