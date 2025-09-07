@@ -1,7 +1,7 @@
 // Time helpers: snapping to frame, relative window calculations (t0, t1).
 // Spec reference: context/명령파일(JSON) 스펙 v1 3.md
 
-import type { PluginSpec } from "../types/plugin";
+import type { PluginSpec } from '../types/plugin';
 
 export interface ComputeWindowOptions {
   // Clamp resulting window to [absStart, absEnd]. Default: true (element inactive outside anyway)
@@ -25,14 +25,20 @@ export function snapToFrame(t: number, fps?: number): number {
   return Math.round(t * fps) / fps;
 }
 
-export function clampRange(range: [number, number], min: number, max: number): [number, number] {
+export function clampRange(
+  range: [number, number],
+  min: number,
+  max: number
+): [number, number] {
   const [a, b] = range;
   const t0 = Math.min(Math.max(a, min), max);
   const t1 = Math.min(Math.max(b, min), max);
   return [t0, t1];
 }
 
-function validatePercents(spec: Pick<PluginSpec, "relStartPct" | "relEndPct">): void {
+function validatePercents(
+  spec: Pick<PluginSpec, 'relStartPct' | 'relEndPct'>
+): void {
   const { relStartPct, relEndPct } = spec;
   if (relStartPct != null && (relStartPct < 0 || relStartPct > 1)) {
     throw new RangeError(`relStartPct must be within 0..1, got ${relStartPct}`);
@@ -45,19 +51,22 @@ function validatePercents(spec: Pick<PluginSpec, "relStartPct" | "relEndPct">): 
 function computeOffsets(
   absStart: number,
   absEnd: number,
-  spec: Pick<PluginSpec, "relStart" | "relEnd" | "relStartPct" | "relEndPct">
+  spec: Pick<PluginSpec, 'relStart' | 'relEnd' | 'relStartPct' | 'relEndPct'>
 ): { rawT0: number; rawT1: number; D: number } {
   if (!Number.isFinite(absStart) || !Number.isFinite(absEnd)) {
-    throw new TypeError("absStart/absEnd must be finite numbers");
+    throw new TypeError('absStart/absEnd must be finite numbers');
   }
   const D = absEnd - absStart;
   if (!(D > 0)) {
-    throw new RangeError(`Invalid element duration D=${D}. Requires absEnd > absStart.`);
+    throw new RangeError(
+      `Invalid element duration D=${D}. Requires absEnd > absStart.`
+    );
   }
 
   validatePercents(spec);
 
-  const s = spec.relStart ?? (spec.relStartPct != null ? D * spec.relStartPct : 0);
+  const s =
+    spec.relStart ?? (spec.relStartPct != null ? D * spec.relStartPct : 0);
   const e = spec.relEnd ?? (spec.relEndPct != null ? D * spec.relEndPct : 0);
   const rawT0 = absStart + s;
   const rawT1 = absEnd + e;
@@ -74,7 +83,7 @@ function computeOffsets(
 export function computeRelativeWindow(
   absStart: number,
   absEnd: number,
-  spec: Pick<PluginSpec, "relStart" | "relEnd" | "relStartPct" | "relEndPct">,
+  spec: Pick<PluginSpec, 'relStart' | 'relEnd' | 'relStartPct' | 'relEndPct'>,
   opts: ComputeWindowOptions = {}
 ): ComputedWindow {
   const { rawT0, rawT1, D } = computeOffsets(absStart, absEnd, spec);
@@ -82,7 +91,9 @@ export function computeRelativeWindow(
   if (rawT0 > rawT1) {
     // Allow zero-length after clamp/snap; but before any processing, enforce non-decreasing order.
     // This likely indicates a bad spec (e.g., relStartPct>relEndPct on short spans).
-    throw new RangeError(`Computed window is inverted (t0=${rawT0} > t1=${rawT1}). Check relStart/relEnd or pct.`);
+    throw new RangeError(
+      `Computed window is inverted (t0=${rawT0} > t1=${rawT1}). Check relStart/relEnd or pct.`
+    );
   }
 
   const clamp = opts.clampToElement ?? true;
@@ -109,4 +120,3 @@ export function computeRelativeWindow(
 export function isWithin(t: number, t0: number, t1: number): boolean {
   return t >= t0 && t < t1;
 }
-

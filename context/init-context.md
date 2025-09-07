@@ -28,6 +28,7 @@
 * **무결성 검증**: SHA-384 해시, 선택적으로 ed25519 서명
 * **샌드박스**: 플러그인은 컨테이너 DOM 안에서만 동작, Portal API로만 탈출 가능
 * **싱크 기준**: 전부 `mediaTime` (requestVideoFrameCallback 사용)
+* **변환 순서**: 레이아웃(base) → 플러그인(channels) 순으로 합성(일관성 유지)
 * **프리롤**: `preloadMs` 전에 DOM/폰트/에셋 준비
 * **폴백**: 자산 미로드 시 기본 효과로 graceful degrade
 

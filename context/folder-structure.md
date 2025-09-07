@@ -11,6 +11,7 @@
 - pluginChain은 각 항목별 relStart/relEnd 또는 relStartPct/relEndPct로 실행 창(window)을 정의. 충돌 시 기본 last-wins, 필요시 compose: "add"/"multiply" 지정.
 - breakout 기본 transfer는 "move".
 - 보안 로딩 순서: fetch → 무결성(해시/서명) 검증 → Blob URL import.
+ - 변환 순서: 레이아웃(base) → 플러그인(channels) 합성 순서 고정.
 
 ---
 
@@ -22,6 +23,7 @@
 │  ├─ init-context.md
 │  ├─ scenario-json-spec-v-1-3.md
 │  ├─ plugin-system-architecture-v-2.md
+│  ├─ ai-bootstrap-prompt.md
 │  └─ folder-structure.md  ← (본 문서)
 ├─ demo/
 │  ├─ index.html
@@ -29,8 +31,12 @@
 │  ├─ style.css
 │  └─ samples/
 │     ├─ basic.json
-│     ├─ plugin.json
-│     └─ animated.json
+│     ├─ animated.json
+│     ├─ animated_subtitle.json
+│     ├─ animated_free_mixed.json
+│     ├─ tilted_box.json
+│     ├─ m5_layout_features.json
+│     └─ plugin.json
 ├─ dist/                     # 빌드 산출물(자동 생성)
 ├─ sample/
 │  └─ scenario/scenario.json5
@@ -43,10 +49,13 @@
 │  │  ├─ NodeRuntime.ts
 │  │  ├─ Renderer.ts
 │  │  ├─ SeekSync.ts
+│  │  ├─ TrackManager.ts
 │  │  ├─ Stage.ts
 │  │  └─ TimelineController.ts
 │  ├─ layout/
-│  │  └─ LayoutEngine.ts
+│  │  ├─ LayoutEngine.ts
+│  │  └─ utils/
+│  │     └─ anchors.ts
 │  ├─ controller/
 │  │  ├─ index.ts
 │  │  └─ MotionTextController.ts
@@ -63,7 +72,19 @@
 │  │  ├─ CssVars.ts
 │  │  ├─ DomMount.ts
 │  │  ├─ PortalManager.ts
-│  │  └─ StyleApply.ts
+│  │  ├─ StyleApply.ts
+│  │  └─ plugins/
+│  │     └─ __tests__/
+│  │        └─ Builtin.test.ts
+│  ├─ composer/
+│  │  └─ __tests__/
+│  │     └─ PluginChainComposer.test.ts
+│  ├─ parser/
+│  │  └─ __tests__/
+│  │     └─ ScenarioParser.test.ts
+│  ├─ runtime/
+│  │  └─ __tests__/
+│  │     └─ StyleApply.test.ts
 │  ├─ types/
 │  │  ├─ scenario.ts
 │  │  ├─ index.ts
@@ -97,17 +118,18 @@
 - PluginChainComposer.ts: pluginChain의 시간상 활성 플러그인 집합을 평가하고, 채널별 합성 규칙을 적용하여 최종 값(accumulator)을 계산. 기본은 last-wins, 플러그인별 compose: add/multiply로 덮어씀.
 
 ### core
-- Renderer.ts: 렌더링 오케스트레이션의 진입점. 파싱→스테이지/트랙 구성→큐 활성화→타임라인 동기화→플러그인 체인 적용→DOM 반영까지 전체 흐름을 관리.
+- Renderer.ts: 렌더링 오케스트레이션(마운트/업데이트). 파싱 결과와 Stage/TrackManager/Timeline을 조합해 그룹 컨테이너 배치, 자식 마운트, 프레임별 업데이트를 수행. `MotionTextRenderer`는 파사드로 위임.
 - TimelineController.ts: 마스터 클락(mediaTime)과 requestVideoFrameCallback 루프를 관리. 시킹/배속/snapToFrame을 제어하며, 플러그인에는 상대 진행도만 전달.
 - Composition.ts: 합성 규칙과 채널 정의의 공통 유틸. add/multiply/replace 및 last-wins의 기준 로직을 중앙화.
 - SeekSync.ts: 절대 시간(absStart/absEnd)과 상대 진행도(progress) 간 매핑, 구간 창(window) 계산 보조.
-- Stage.ts: baseAspect, safeArea, 리사이즈에 따른 정규화↔픽셀 변환 행렬 계산. overflow/safeAreaClamp 정책과 연동.
-- TrackManager.ts: 트랙 레이어링(track.layer)과 overlapPolicy(ignore/push/stack) 적용. 트랙 기본 스타일 상속 관리.
+- Stage.ts: 오버레이 콘텐츠 박스(bounds) 계산과 이벤트 발행(ResizeObserver/loadedmetadata/fullscreen). baseAspect 파싱과 컨텐트 rect 제공. 레이아웃 변환/클램프는 LayoutEngine에서 수행.
+- TrackManager.ts: 겹침 정책(overlapPolicy: push/stack) 오프셋 계산 및 트랙 기본 스타일 조회. 표시 요소만 대상으로 Y 오프셋 누적을 계산하고 맵으로 반환.
 - CueGraph.ts: Cue 루트 그룹 트리의 활성 창 결정(요소 absStart/absEnd 우선, hintTime 보조) 및 노드 순회.
 - NodeRuntime.ts: Group/Text/Image/Video 등의 노드 mount/update/dispose 수명주기와 effectScope, layout.override 처리.
 
 ### layout
-- LayoutEngine.ts: 레이아웃 모드(flow/grid/absolute/path), anchor, position/size/transform/override를 적용하여 최종 픽셀 레이아웃을 계산. 안전 영역(safeArea)과 클램프 처리 포함.
+- LayoutEngine.ts: 레이아웃 모드(flow/grid/absolute/path), anchor, position/size/transform/override를 적용하여 최종 픽셀 레이아웃을 계산. 안전 영역(safeArea) 클램프 포함.
+- utils/anchors.ts: 앵커 관련 공용 유틸(anchorTranslate/anchorFraction). LayoutEngine/Renderer 등에서 재사용.
 
 ### controller
 - MotionTextController.ts: 비디오 컨테이너 위 오버레이 컨트롤(UI) 생성/마운트. 재생/일시정지, 자막 토글, 전체화면 요청 등 렌더러/플레이어 연동 진입점.
@@ -127,7 +149,7 @@
 ### runtime
 - PortalManager.ts: effectScope.breakout 구현. 기본 transfer: "move"로 재부모화, 필요 시 clone 처리. coordSpace 변환 처리.
 - DomMount.ts: 노드/플러그인 컨테이너의 DOM 생성/마운트/정리 헬퍼.
-- StyleApply.ts: 합성 결과 및 레이아웃을 실제 DOM/CSS 변수/transform으로 반영.
+- StyleApply.ts: 레이아웃(baseTransform)과 플러그인 합성(channels)을 일관된 순서로 반영. 텍스트 스타일 적용(applyTextStyle)과 변환 빌더(buildTransform) 제공.
 - CssVars.ts: 공통 CSS 변수 명세와 조합 유틸.
 
 ### types

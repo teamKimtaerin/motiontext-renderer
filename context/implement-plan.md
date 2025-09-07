@@ -26,6 +26,7 @@
 - M4 합성: PluginChainComposer(채널 합성, last-wins/compose) — 완료
 - M5 레이아웃 최소: LayoutEngine 정규화→px/% 변환, safeAreaClamp/flow/grid/override — 부분 완료(Stage 모듈 분리 대기)
 - M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 진행 예정
+- M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 진행 예정
 - M6 타임라인: TimelineController 시킹/배속/rVFC — 진행 중(rAF 기반 구현, rVFC 전환 예정)
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
@@ -185,6 +186,51 @@
 
 소요/리스크
 - 예상 0.5~1일. 동작 동일성을 유지하는 내부 구조 리팩토링으로 리스크 낮음(수동 데모 검증 포함).
+ 
+## 5.6) 품질 보완/최적화 (M5.6)
+
+목표(스코프)
+- Stage 이벤트/바인딩 안정성 강화:
+  - `onBoundsChange(cb)`가 구독 해지 함수(unsubscribe)를 반환하도록 개선, 메모리 누수 방지
+  - `setContainer`/`setMedia` 재바인딩 안전성(Idempotent) 보장
+- Stage API 정리:
+  - `configure({ baseAspect })` 사용성 재검토(가능하면 `setScenario()`로 일원화), 문서/사용처 정리
+- Transform 순서 검증/보강:
+  - `buildTransform(base → scale → translate(px) → rotate)` 순서가 의도(픽셀 이동이 스케일 영향 X)에 부합하는지 재검증
+  - 필요 시 옵션화 또는 순서 고정 테스트 추가
+- Plugin 창(window) 프리컴퓨트 캐시:
+  - 노드 단위로 각 `pluginSpec`의 `(t0,t1,D)`를 캐시하고 프레임마다 in-range/진행도만 계산
+  - `composeActive` 오버로드/인자 확장(사전 계산 창을 입력받도록) 검토, `snapToFrame` 통합을 M6에 대비
+- TrackManager 성능 최적화:
+  - `computeGroupOffsets` 결과를 (표시 상태/높이/rowGap) 키로 캐시, 변화 없으면 재계산 스킵
+  - 표시 요소만 대상으로 측정(현재 논리 유지)
+- 타입 엄격화/any 제거:
+  - `GroupItem.node: any` → `TextNode` 등으로 좁히기, 공개 API의 타입 명확화
+- 문서/주석 정합성:
+  - `src/index.ts` 상단 주석(“M2.5 minimal slice”) 최신화
+  - `context/folder-structure.md`/`init-context.md` 반영 유지
+- 테스트 보강:
+  - anchors: `anchorTranslate/anchorFraction` 경계값 단위 테스트
+  - StyleApply: transform 순서 스냅샷 테스트(스케일/트랜슬레이트/로테이트 조합)
+  - TrackManager: 다양한 높이/rowGap/표시 상태에서 오프셋 누적 검증
+  - Stage: 다양한 aspect/컨테이너에서 content rect 산출 검증
+
+체크리스트
+- [ ] Stage: `onBoundsChange()`에서 unsubscribe 반환, 재바인딩 안전성 테스트
+- [ ] Stage: `configure()` 축소 또는 제거(문서/호출부 정리)
+- [ ] StyleApply: transform 순서 검증 및 테스트 추가
+- [ ] Composer: plugin 창 프리컴퓨트 캐시 도입(옵션 플래그/오버로드 설계)
+- [ ] TrackManager: 오프셋 캐시 도입 및 회귀 테스트
+- [ ] 타입 엄격화(any 제거) 반영
+- [ ] 문서/주석 최신화(folder-structure, implement-plan, change_log)
+
+수용 기준
+- [ ] `pnpm typecheck`/`pnpm build` 무오류
+- [ ] 데모 4종에서 시각 동작 회귀 없음(재생/시킹/전체화면/리사이즈)
+- [ ] `computeGroupOffsets`/창 계산의 불필요한 재호출이 감소(로그/계측으로 확인)
+
+소요/리스크
+- 소요: 0.5일 내외(테스트 포함). 기능 변경 없는 내부 품질 개선으로 리스크 낮음.
 
 ## 6) 타임라인 컨트롤 (M6)
 - [ ] rVFC 루프, mediaTime 기반 진행(현재 rAF 기반 최소 구현 완료)
@@ -248,7 +294,7 @@
 - [x] M5 레이아웃 엔진 1차( position/anchor/size/transform/override/safeAreaClamp, flow/grid, overlap push/stack )(2025-09-07)
 
 다음 작업(Next Up)
-1) M5.5: 리팩토링 스프린트(Stage/TrackManager/Renderer/Style 유틸 분리, 앵커 유틸 공용화)
+1) M5.6: 품질 보완/최적화(Stage 구독 해지/성능 캐시/타입/테스트)
 2) M6: rVFC 기반 타임라인 전환 + snapToFrame 연동
 3) M7: PluginLoader 파이프라인(무결성 검증→Blob import)
 4) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)

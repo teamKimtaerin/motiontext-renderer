@@ -1,3 +1,2 @@
-export { MotionTextController } from "./MotionTextController";
-export type { MotionTextControllerOptions } from "./MotionTextController";
-
+export { MotionTextController } from './MotionTextController';
+export type { MotionTextControllerOptions } from './MotionTextController';

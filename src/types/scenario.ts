@@ -1,22 +1,22 @@
 // Types for Scenario JSON v1.3
 // Reference: context/명령파일(JSON) 스펙 v1 3.md
 
-import type { Layout, Style, EffectScope } from "./layout";
-import type { PluginSpec } from "./plugin";
+import type { Layout, Style, EffectScope } from './layout';
+import type { PluginSpec } from './plugin';
 
 // Scenario-file schema version is independent from package.json version.
 // Keep it explicit so loaders can validate incoming files reliably.
-export const SUPPORTED_SCENARIO_VERSIONS = ["1.3"] as const;
-export type ScenarioVersion = typeof SUPPORTED_SCENARIO_VERSIONS[number];
-export const CURRENT_SCENARIO_VERSION: ScenarioVersion = "1.3";
+export const SUPPORTED_SCENARIO_VERSIONS = ['1.3'] as const;
+export type ScenarioVersion = (typeof SUPPORTED_SCENARIO_VERSIONS)[number];
+export const CURRENT_SCENARIO_VERSION: ScenarioVersion = '1.3';
 
 export interface Timebase {
-  unit: "seconds" | "tc"; // default seconds
+  unit: 'seconds' | 'tc'; // default seconds
   fps?: number;
 }
 
 export interface StageSpec {
-  baseAspect: "16:9" | "9:16" | "auto";
+  baseAspect: '16:9' | '9:16' | 'auto';
   safeArea?: { top?: number; bottom?: number; left?: number; right?: number };
 }
 
@@ -26,11 +26,11 @@ export interface BehaviorSpec {
   snapToFrame?: boolean; // default false
 }
 
-export type TrackType = "subtitle" | "free";
+export type TrackType = 'subtitle' | 'free';
 
-export type ScaleMode = "scaleWithVideo" | "fixedPoint" | "cap";
+export type ScaleMode = 'scaleWithVideo' | 'fixedPoint' | 'cap';
 
-export type OverlapPolicy = "ignore" | "push" | "stack";
+export type OverlapPolicy = 'ignore' | 'push' | 'stack';
 
 export interface Track {
   id: string;
@@ -65,11 +65,11 @@ export interface BaseNode {
 }
 
 export interface GroupNode extends BaseNode {
-  e_type: "group";
+  e_type: 'group';
 }
 
 export interface TextNode extends BaseNode {
-  e_type: "text";
+  e_type: 'text';
   text: string;
   absStart?: number;
   absEnd?: number;
@@ -77,7 +77,7 @@ export interface TextNode extends BaseNode {
 }
 
 export interface ImageNode extends BaseNode {
-  e_type: "image";
+  e_type: 'image';
   src: string;
   absStart?: number;
   absEnd?: number;
@@ -85,7 +85,7 @@ export interface ImageNode extends BaseNode {
 }
 
 export interface VideoNode extends BaseNode {
-  e_type: "video";
+  e_type: 'video';
   src: string;
   absStart?: number;
   absEnd?: number;

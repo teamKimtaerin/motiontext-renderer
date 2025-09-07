@@ -1,9 +1,12 @@
 // Minimal layout helpers for M2.5: apply normalized position to absolute element.
 // Future: handle flow/grid/override/transform/safeArea.
 
-import type { Layout, Anchor } from "../types/layout";
+import type { Layout, Anchor } from '../types/layout';
+import { anchorTranslate, anchorFraction } from './utils/anchors';
 
-type SafeArea = { top?: number; bottom?: number; left?: number; right?: number } | undefined;
+type SafeArea =
+  | { top?: number; bottom?: number; left?: number; right?: number }
+  | undefined;
 
 export interface ApplyLayoutOptions {
   stageSafe?: SafeArea;
@@ -11,59 +14,20 @@ export interface ApplyLayoutOptions {
 }
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
-const maxN = (a?: number, b?: number) => (
-  a == null ? (b ?? 0) : (b == null ? a : Math.max(a, b))
-);
+const maxN = (a?: number, b?: number) =>
+  a == null ? (b ?? 0) : b == null ? a : Math.max(a, b);
 
-function anchorTranslate(anchor: Anchor): { tx: number; ty: number } {
-  switch (anchor) {
-    case "tl":
-      return { tx: 0, ty: 0 };
-    case "tc":
-      return { tx: -50, ty: 0 };
-    case "tr":
-      return { tx: -100, ty: 0 };
-    case "cl":
-      return { tx: 0, ty: -50 };
-    case "cc":
-      return { tx: -50, ty: -50 };
-    case "cr":
-      return { tx: -100, ty: -50 };
-    case "bl":
-      return { tx: 0, ty: -100 };
-    case "bc":
-      return { tx: -50, ty: -100 };
-    case "br":
-      return { tx: -100, ty: -100 };
-    default:
-      return { tx: -50, ty: -50 };
-  }
-}
-
-function anchorFraction(anchor: Anchor): { ax: number; ay: number } {
-  switch (anchor) {
-    case 'tl': return { ax: 0, ay: 0 };
-    case 'tc': return { ax: 0.5, ay: 0 };
-    case 'tr': return { ax: 1, ay: 0 };
-    case 'cl': return { ax: 0, ay: 0.5 };
-    case 'cc': return { ax: 0.5, ay: 0.5 };
-    case 'cr': return { ax: 1, ay: 0.5 };
-    case 'bl': return { ax: 0, ay: 1 };
-    case 'bc': return { ax: 0.5, ay: 1 };
-    case 'br': return { ax: 1, ay: 1 };
-    default:   return { ax: 0.5, ay: 0.5 };
-  }
-}
+// (anchorTranslate and anchorFraction moved to utils/anchors.ts)
 
 export function applyNormalizedPosition(
   el: HTMLElement,
   layout?: Layout,
-  defaultAnchor: Anchor = "cc",
+  defaultAnchor: Anchor = 'cc',
   opts: ApplyLayoutOptions = {}
 ) {
   if (!layout || !layout.position) return;
   let { x, y } = layout.position;
-  if (typeof x !== "number" || typeof y !== "number") return;
+  if (typeof x !== 'number' || typeof y !== 'number') return;
 
   // safeAreaClamp: clamp anchor point within effective safe rectangle
   if (layout.safeAreaClamp) {
@@ -90,7 +54,9 @@ export function applyNormalizedPosition(
       if (!wN && bw > 0) wN = bw / pw;
       if (!hN && bh > 0) hN = bh / ph;
     }
-    const { ax, ay } = anchorFraction((layout.anchor as Anchor) || defaultAnchor);
+    const { ax, ay } = anchorFraction(
+      (layout.anchor as Anchor) || defaultAnchor
+    );
     // Horizontal clamp
     if (wN > 0) {
       const xmin2 = xmin + ax * wN;
@@ -109,17 +75,23 @@ export function applyNormalizedPosition(
     }
   }
 
-  el.style.position = "absolute";
+  el.style.position = 'absolute';
   el.style.left = `${Math.round(x * 10000) / 100}%`;
   el.style.top = `${Math.round(y * 10000) / 100}%`;
 
   // size (normalized percent) or auto
   if (layout.size) {
     if (layout.size.width != null) {
-      el.style.width = typeof layout.size.width === "number" ? `${layout.size.width * 100}%` : "auto";
+      el.style.width =
+        typeof layout.size.width === 'number'
+          ? `${layout.size.width * 100}%`
+          : 'auto';
     }
     if (layout.size.height != null) {
-      el.style.height = typeof layout.size.height === "number" ? `${layout.size.height * 100}%` : "auto";
+      el.style.height =
+        typeof layout.size.height === 'number'
+          ? `${layout.size.height * 100}%`
+          : 'auto';
     }
   }
 
@@ -151,36 +123,40 @@ export function applyNormalizedPosition(
 
   // override support (absolute offset/transform applied after group rules)
   const ov = layout.override;
-  if (ov?.mode === "absolute") {
+  if (ov?.mode === 'absolute') {
     if (ov.offset) {
-      const ox = ov.offset.x ?? 0; const oy = ov.offset.y ?? 0;
+      const ox = ov.offset.x ?? 0;
+      const oy = ov.offset.y ?? 0;
       if (ox || oy) parts.push(`translate(${ox * 100}%, ${oy * 100}%)`);
     }
     if (ov.transform) {
       const ot = ov.transform;
       if (ot.translate) {
-        const dx = ot.translate.x ?? 0; const dy = ot.translate.y ?? 0;
+        const dx = ot.translate.x ?? 0;
+        const dy = ot.translate.y ?? 0;
         if (dx || dy) parts.push(`translate(${dx * 100}%, ${dy * 100}%)`);
       }
       if (ot.scale) {
-        const sx = ot.scale.x ?? 1; const sy = ot.scale.y ?? 1;
+        const sx = ot.scale.x ?? 1;
+        const sy = ot.scale.y ?? 1;
         if (sx !== 1 || sy !== 1) parts.push(`scale(${sx}, ${sy})`);
       }
       if (ot.rotate?.deg != null) parts.push(`rotate(${ot.rotate.deg}deg)`);
       if (ot.skew) {
-        const sx = ot.skew.xDeg ?? 0, sy = ot.skew.yDeg ?? 0;
+        const sx = ot.skew.xDeg ?? 0,
+          sy = ot.skew.yDeg ?? 0;
         if (sx || sy) parts.push(`skew(${sx}deg, ${sy}deg)`);
       }
     }
   }
-  el.style.transform = parts.join(" ");
+  el.style.transform = parts.join(' ');
 }
 
 // Apply flow container: absolute place the group, then stack children vertically
 export function applyFlowContainer(
   el: HTMLElement,
   layout?: Layout,
-  defaultAnchor: Anchor = "cc",
+  defaultAnchor: Anchor = 'cc',
   opts: ApplyLayoutOptions = {}
 ) {
   // Position the container itself like absolute element
@@ -190,7 +166,17 @@ export function applyFlowContainer(
   el.style.flexDirection = 'column';
   const anchor = (layout?.anchor as Anchor) || defaultAnchor;
   // alignItems based on horizontal anchor
-  const alignMap: Record<string,string> = { tl:'flex-start', tc:'center', tr:'flex-end', cl:'flex-start', cc:'center', cr:'flex-end', bl:'flex-start', bc:'center', br:'flex-end' };
+  const alignMap: Record<string, string> = {
+    tl: 'flex-start',
+    tc: 'center',
+    tr: 'flex-end',
+    cl: 'flex-start',
+    cc: 'center',
+    cr: 'flex-end',
+    bl: 'flex-start',
+    bc: 'center',
+    br: 'flex-end',
+  };
   el.style.alignItems = alignMap[anchor] || 'center';
   // gapRel to px using container parent height
   const gapRel = layout?.gapRel ?? 0;
@@ -225,6 +211,16 @@ export function applyGridContainer(
   }
   // anchor에 따라 그리드 정렬
   const anchor = (layout?.anchor as Anchor) || defaultAnchor;
-  const hmap: Record<string,string> = { tl:'start', tc:'center', tr:'end', cl:'start', cc:'center', cr:'end', bl:'start', bc:'center', br:'end' };
+  const hmap: Record<string, string> = {
+    tl: 'start',
+    tc: 'center',
+    tr: 'end',
+    cl: 'start',
+    cc: 'center',
+    cr: 'end',
+    bl: 'start',
+    bc: 'center',
+    br: 'end',
+  };
   (el.style as any).justifyItems = hmap[anchor] || 'center';
 }

@@ -1,12 +1,18 @@
 // Types for layout, style, effect scope (breakout), per spec v1.3
 // Reference: context/명령파일(JSON) 스펙 v1 3.md
 
-export type LayoutMode = "flow" | "grid" | "absolute" | "path" | "polar";
+export type LayoutMode = 'flow' | 'grid' | 'absolute' | 'path' | 'polar';
 
 export type Anchor =
-  | "tl" | "tc" | "tr"
-  | "cl" | "cc" | "cr"
-  | "bl" | "bc" | "br";
+  | 'tl'
+  | 'tc'
+  | 'tr'
+  | 'cl'
+  | 'cc'
+  | 'cr'
+  | 'bl'
+  | 'bc'
+  | 'br';
 
 export interface Vec2Rel {
   x?: number; // normalized 0..1 unless otherwise noted
@@ -14,8 +20,8 @@ export interface Vec2Rel {
 }
 
 export interface SizeRel {
-  width?: number | "auto";
-  height?: number | "auto";
+  width?: number | 'auto';
+  height?: number | 'auto';
 }
 
 export interface TransformSpec {
@@ -27,7 +33,7 @@ export interface TransformSpec {
 
 export interface LayoutOverrideSpec {
   // When child escapes group rules
-  mode: "absolute";
+  mode: 'absolute';
   offset?: Vec2Rel;
   transform?: TransformSpec;
   keepUpright?: boolean; // text: keep upright relative to world axis
@@ -43,7 +49,7 @@ export interface Layout {
   transform?: TransformSpec;
   transformOrigin?: string; // e.g., "50% 50%"
   zIndex?: number;
-  overflow?: "clip" | "visible"; // default clip (subtitle)
+  overflow?: 'clip' | 'visible'; // default clip (subtitle)
   safeAreaClamp?: boolean;
   override?: LayoutOverrideSpec;
 }
@@ -69,21 +75,20 @@ export interface Style {
   boxBg?: string;
   stroke?: StyleStroke;
   border?: StyleBorder;
-  align?: "left" | "center" | "right";
-  whiteSpace?: "wrap" | "nowrap";
+  align?: 'left' | 'center' | 'right';
+  whiteSpace?: 'wrap' | 'nowrap';
 }
 
 export interface EffectScopeBreakout {
-  mode: "portal" | "lift"; // preferred: portal (temporary reparent)
+  mode: 'portal' | 'lift'; // preferred: portal (temporary reparent)
   toLayer?: number; // portal destination layer (z)
-  coordSpace?: "group" | "stage"; // transform basis
+  coordSpace?: 'group' | 'stage'; // transform basis
   zLift?: number; // for lift mode
   clampStage?: boolean; // clamp to stage bounds
-  return?: "end" | "manual"; // auto return at absEnd or manual
-  transfer?: "move" | "clone"; // default move, clone = duplicate then effect
+  return?: 'end' | 'manual'; // auto return at absEnd or manual
+  transfer?: 'move' | 'clone'; // default move, clone = duplicate then effect
 }
 
 export interface EffectScope {
   breakout?: EffectScopeBreakout;
 }
-

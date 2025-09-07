@@ -20,12 +20,12 @@ export class TimelineController {
     if (this.video) this.detachMedia();
     this.video = video;
     // subscribe to media events so UI scrubbing while paused still updates
-    video.addEventListener("timeupdate", this.onTimeUpdateBound);
-    video.addEventListener("seeked", this.onSeekedBound);
-    video.addEventListener("loadedmetadata", this.onLoadedMetaBound);
-    video.addEventListener("ratechange", this.onRateChangeBound);
-    video.addEventListener("play", this.onPlayBound);
-    video.addEventListener("pause", this.onPauseBound);
+    video.addEventListener('timeupdate', this.onTimeUpdateBound);
+    video.addEventListener('seeked', this.onSeekedBound);
+    video.addEventListener('loadedmetadata', this.onLoadedMetaBound);
+    video.addEventListener('ratechange', this.onRateChangeBound);
+    video.addEventListener('play', this.onPlayBound);
+    video.addEventListener('pause', this.onPauseBound);
     // initial notify
     this.notify(true);
   }
@@ -33,12 +33,12 @@ export class TimelineController {
   detachMedia() {
     const v = this.video;
     if (!v) return;
-    v.removeEventListener("timeupdate", this.onTimeUpdateBound);
-    v.removeEventListener("seeked", this.onSeekedBound);
-    v.removeEventListener("loadedmetadata", this.onLoadedMetaBound);
-    v.removeEventListener("ratechange", this.onRateChangeBound);
-    v.removeEventListener("play", this.onPlayBound);
-    v.removeEventListener("pause", this.onPauseBound);
+    v.removeEventListener('timeupdate', this.onTimeUpdateBound);
+    v.removeEventListener('seeked', this.onSeekedBound);
+    v.removeEventListener('loadedmetadata', this.onLoadedMetaBound);
+    v.removeEventListener('ratechange', this.onRateChangeBound);
+    v.removeEventListener('play', this.onPlayBound);
+    v.removeEventListener('pause', this.onPauseBound);
     this.video = null;
     this.pause();
   }

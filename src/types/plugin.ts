@@ -2,7 +2,7 @@
 // Reference: context/plugin-system-architecture-v-2.md
 // Includes PluginSpec, PluginChain, and runtime interfaces.
 
-export type ComposeMode = "add" | "multiply" | "replace"; // default: replace (last-wins)
+export type ComposeMode = 'add' | 'multiply' | 'replace'; // default: replace (last-wins)
 
 export interface PluginSpec {
   name: string; // plugin identifier
@@ -45,7 +45,11 @@ export interface PluginContext {
 export interface PluginRuntimeModule {
   name: string;
   version: string;
-  init?: (_element: HTMLElement, _options: Record<string, unknown> | undefined, _ctx: PluginContext) => void;
+  init?: (
+    _element: HTMLElement,
+    _options: Record<string, unknown> | undefined,
+    _ctx: PluginContext
+  ) => void;
   animate: (
     _element: HTMLElement,
     _options: Record<string, unknown> | undefined,
