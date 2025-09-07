@@ -20,17 +20,18 @@
 - M0 Scaffold: src 구조 정리 및 문서 링크 정비 — 완료
 - M1 타입 정의: v1.3 타입셋 정식화(`src/types/*`) — 완료
 - M2 시간 유틸: 창(t0/t1)·pct·snap helpers(`src/utils/time.ts`) — 완료
-- M2.5 데모 최소구동: MotionTextRenderer 스켈레톤 + Text 노드 렌더 — 진행 예정
-- M2.6 커스텀 컨트롤러(Controller UI): 플레이어|렌더러|컨트롤러 3층 구조, 전체화면/자막 토글/시킹 연동 — 진행 예정
-- M3 파서: ScenarioParser + 검증(`src/parser/ScenarioParser.ts`) — 진행 예정
-- M4 합성: PluginChainComposer(채널 합성, last-wins/compose) — 진행 예정
-- M5 레이아웃 최소: Stage/LayoutEngine 정규화→px 변환 — 진행 예정
-- M6 타임라인: TimelineController 시킹/배속/rvfc — 진행 예정
-- M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 진행 예정
-- M8 런타임: PortalManager/DomMount/StyleApply/CssVars — 진행 예정
-- M9 렌더러: Renderer 오케스트레이션(트랙/큐/노드/플러그인 통합) — 진행 예정
-- M10 데모 연동: demo/main.ts에 기본 구동/샘플 시나리오 — 진행 예정
-- M11 문서/예제: README 사용 가이드, 간단 예제 — 진행 예정
+- M2.5 데모 최소구동: MotionTextRenderer 스켈레톤 + Text 노드 렌더 — 완료(핵심 기능 동작)
+- M2.6 커스텀 컨트롤러(Controller UI): 플레이어|렌더러|컨트롤러 3층 구조, 전체화면/자막 토글/시킹 연동 — 완료
+- M3 파서: ScenarioParser + 검증(`src/parser/ScenarioParser.ts`) — 완료
+- M4 합성: PluginChainComposer(채널 합성, last-wins/compose) — 완료
+- M5 레이아웃 최소: LayoutEngine 정규화→px/% 변환, safeAreaClamp/flow/grid/override — 부분 완료(Stage 모듈 분리 대기)
+- M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 진행 예정
+- M6 타임라인: TimelineController 시킹/배속/rVFC — 진행 중(rAF 기반 구현, rVFC 전환 예정)
+- M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
+- M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
+- M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
+- M10 데모 연동: demo/main.ts 샘플/컨트롤러/세이프에어리어 — 부분 완료
+- M11 문서/예제: README 사용 가이드 — 예정
 
 ---
 
@@ -64,19 +65,18 @@
 
 ## 2.5) 데모 최소구동 (M2.5)
 - [x] `src/index.ts`: `MotionTextRenderer` 스켈레톤 내보내기(API: `loadConfig`, `attachMedia`, `play`, `pause`, `seek`, `dispose`)
-- [ ] `src/core/Renderer.ts`: 최소 오케스트레이션(텍스트 노드만 지원, 플러그인/브레이크아웃 제외)
-- [x] `src/parser/ScenarioParser.ts`: v1.3 일부 필수 필드만 검증/정규화(version/timebase/stage/tracks/cues)
-- [x] `src/layout/LayoutEngine.ts`: `position{x,y}`만 픽셀로 매핑(앵커 기본값, 오버플로우 clip)
-- [x] `src/core/TimelineController.ts`: rVFC 루프에서 `mediaTime` 구독 및 텍스트 활성/비활성 토글
-- [x] `demo/main.ts`: 샘플 JSON을 v1.3 스펙 키(e_type/text/layout.position{x,y})로 정렬 또는 dev-only 어댑터로 변환
-      (ScenarioParser가 dev-only 어댑터 역할 수행)
-- [ ] 수용 기준: 비디오 재생 시 지정 구간에 텍스트가 나타나고/사라짐(플러그인 없이)
+- [ ] `src/core/Renderer.ts`: 최소 오케스트레이션(텍스트 전용) — 현재 `MotionTextRenderer`에 통합, 별도 파일 보류
+- [x] `src/parser/ScenarioParser.ts`: v1.3 필수 필드 검증/정규화(version/timebase/stage/tracks/cues)
+- [x] `src/layout/LayoutEngine.ts`: M2.5 범위의 position/anchor 중심(실제 구현은 M5 기능 일부 포함)
+- [x] `src/core/TimelineController.ts`: rAF 루프에서 `mediaTime` 구독 및 텍스트 활성/비활성 토글(rVFC 전환 예정)
+- [x] `demo/main.ts`: 샘플 JSON 선택/적용, 컨트롤러 마운트(ScenarioParser가 dev-only 어댑터 역할 수행)
+- [x] 수용 기준: absStart~absEnd 구간에 텍스트 표시/비표시(기본 플러그인 없이)
 
 검증
-- [x] `pnpm dev`로 데브 서버 실행, 콘솔 에러 0
-- [x] Demo에서 basic 샘플 로드 → absStart~absEnd 동안만 텍스트 표시
-- [x] 일시정지/재생/시킹 시 텍스트 표시 상태가 정확히 동기화
-- [ ] 창 크기 변경 시 텍스트 위치가 스테이지 정규화 좌표에 맞게 유지
+- [x] 샘플 로드/적용 플로우 동작(코드 상 구현)
+- [x] 일시정지/재생/시킹 시 표시 상태 동기화(코드 상 구현)
+- [x] 전체화면/리사이즈 시 오버레이 박스 동기 재배치(`updateOverlayBounds`)
+- [ ] 브라우저 수동 검증(네트워크/환경 의존) 추가 확인
 
 ## 2.6) 커스텀 컨트롤러(Controller UI) (M2.6)
 - [x] 폴더 생성: `src/controller/` (`MotionTextController.ts`, `index.ts`)
@@ -122,24 +122,31 @@
 - [x] 데모용 내장 플러그인(fadeIn/pop/waveY/shakeX)로 시각적 확인
 
 ## 5) 레이아웃/스테이지 (M5)
- - [ ] 정규화→픽셀 변환, anchor/transform 파이프라인 정비
- - [ ] translate/size/overflow/transformOrigin 지원
- - [ ] override(mode:"absolute") 오프셋/변환 적용, keepUpright(텍스트) 설계
- - [ ] safeAreaClamp 처리(stage/track.safeArea 통합), subtitle 기본 overflow:"clip"
- - [ ] flow/grid 모드 1차 구현(간단 스택/갭), overlapPolicy(push/stack) 연동
+ - [x] 정규화→픽셀 변환, anchor/transform 파이프라인 정비
+ - [x] translate/size/overflow/transformOrigin 지원
+ - [x] override(mode:"absolute") 오프셋/변환 적용(기본), keepUpright(텍스트) 설계 예정
+ - [x] safeAreaClamp 처리(stage/track.safeArea 병합) — position 기준 클램프
+ - [x] safeAreaClamp에 size 클램프(일반 anchor/측정 포함)
+ - [x] flow/grid 모드 1차 구현(세로 스택/간단 2열 + gapRel)
+ - [x] overlapPolicy(push/stack) 최소 연동(비-flow 그룹에서 활성 요소 translateY 누적)
+ - [x] overlapPolicy(ignore) 기초 지원(flow 그룹은 absolute 전환 + child layout 미지정 시 중심 겹치기)
 
 ### 세부 TODO (M5)
-  - [ ] 파이프라인: anchor → translate(%) → scale → rotate → skew → override(translate/scale/rotate/skew) → pluginChain
-  - [ ] translate: 정규화(0..1) → % 변환, 누적 순서 보장
-  - [ ] size: width/height 정규화(0..1)/auto 지원, 기준(track/stage) 정의
-  - [ ] overflow: clip|visible 처리; subtitle 기본 clip, free는 기본 visible
-  - [ ] transformOrigin: 문자열(예: "50% 50%") 파싱/반영, anchor와 상호작용 정리
-  - [ ] override(mode:"absolute"): offset{x,y}(%) + transform 누적; Text `keepUpright`(M5.1)
-  - [ ] safeAreaClamp: stage.safeArea ∧ track.safeArea 병합 후 position/size 클램프
-  - [ ] flow(1차): 세로 스택+gapRel, anchor 기준 정렬, overlapPolicy(push/stack) 최소 연동
-  - [ ] grid(1차): 간단 2D 배치(행 우선), gapRel 적용(선택)
-  - [ ] 스테이지 메트릭: baseAspect auto→ 비디오/컨테이너 비율 사용, 리사이즈/전체화면 시 Reflow
-  - [ ] Reflow: ResizeObserver + throttle, 레이아웃 재계산 경로 고정
+  - [x] 파이프라인: anchor → translate(%) → scale → rotate → skew → override(translate/scale/rotate/skew) → pluginChain
+  - [x] translate: 정규화(0..1) → % 변환, 누적 순서 보장
+  - [x] size: width/height 정규화(0..1)/auto 지원, 기준(track/stage) 정의
+  - [x] overflow: clip|visible 처리; subtitle 기본 clip, free는 기본 visible
+  - [x] transformOrigin: 문자열(예: "50% 50%") 반영, anchor와 상호작용 정리(기본)
+  - [x] override(mode:"absolute"): offset{x,y}(%) + transform 누적; Text `keepUpright`(M5.1)
+  - [x] safeAreaClamp: stage.safeArea ∧ track.safeArea 병합 후 position/size 클램프(일반)
+  - [x] flow(1차): 세로 스택+gapRel, anchor 기준 정렬
+  - [x] grid(1차): 간단 2D 배치(행 우선), gapRel 적용
+  - [x] 스테이지 메트릭/리플로우: fullscreen/리사이즈 시 Overlay bounds 반영 후 base transform 재계산
+  - [x] Reflow 최적화(1차): ResizeObserver throttle(50ms)
+  - [x] Reflow 최적화(2차-1): overlay 박스 무변화 시 스킵
+  - [x] Reflow 최적화(2차-2): 요소 레이아웃 키(pw/ph/anchor/layout/safeArea) 캐시로 base transform 재계산 스킵
+  - [x] overlapPolicy(push/stack): 동일 그룹/트랙 내 시간상 겹침 시 아래 요소 밀어내기(비-flow)
+  - [x] overlapPolicy(ignore): flow 무시 모드 지원(겹침 허용, child layout 미지정 시 중심 배치)
 
 ### 검증 (M5)
 - 위치/크기/변환이 파이프라인 순서대로 누적 적용되는지 확인(시각 검증 샘플)
@@ -153,10 +160,37 @@
 - [ ] safeArea 지정 시 텍스트가 스테이지 경계 내로 클램프
 - [ ] 창 리사이즈 시 비율 유지 및 좌표 재계산 검증
 
+## 5.5) 코드 리팩토링/경계 정리 (M5.5)
+
+목표(스코프)
+- Stage 경계 책임 분리: 오버레이 bounds 계산/리스너(rz/fullscreen/metadata) → `src/core/Stage.ts`로 이동.
+- Track 겹침 정책 분리: push/stack 오프셋 누적 로직 → `src/core/TrackManager.ts`로 이동(비-flow 그룹 대상).
+- 스타일/변환 일원화: 텍스트 스타일 적용(`applyTextStyle`)을 `src/runtime/StyleApply.ts`(또는 `CssVars.ts`)로 이관, 변환 합성 규칙을 단일 빌더로 통일.
+- 앵커 유틸 재사용: `anchorTranslate`/`anchorFraction`을 공용 유틸로 분리(`src/layout/anchors.ts` 등) 후 중복 제거.
+- 오케스트레이션 분리: 마운트/업데이트 루프를 `src/core/Renderer.ts`로 추출, `MotionTextRenderer`는 파사드(타임라인/Stage/Renderer 조립)로 축소.
+- 타입/네이밍 정리: OverlapPolicy/Anchor/Channels 등 공개 타입 정합성 검토 및 배럴 정리.
+
+체크리스트
+- [ ] Stage.extract: `updateOverlayBounds`/`installOverlayBinding`/`recomputeMountedBases` 단계적 이전 및 공개 API 확정.
+- [ ] TrackManager.applyOverlapPolicy(parentGroup): 활성 요소 순서→Y 오프셋 맵 반환(행간 gap 포함).
+- [ ] StyleApply: `applyTextStyle(el, style, trackDefault)` 이전 및 테스트, `buildTransform(base, channels)`로 레이아웃/플러그인 합성 순서 고정.
+- [ ] Anchors: `anchorTranslate`/`anchorFraction` 공용화, LayoutEngine/Renderer에서 재사용.
+- [ ] Renderer.ts: 그룹 컨테이너 배치(flow/grid/absolute)와 자식 mount/update를 책임, index.ts는 파사드로 단순화.
+- [ ] import 경로/순환 의존 점검 및 수정, 폴더 역할 문서 업데이트(`context/folder-structure.md`).
+
+수용 기준
+- [ ] `pnpm typecheck`/`pnpm build` 무오류, 데모 샘플(basic/animated/tilted_box/m5_layout_features) 동작 동일.
+- [ ] 전체화면/리사이즈 시 오버레이 정렬/세이프에어리어 동작 회귀 없음.
+- [ ] `src/index.ts` 코드량/책임 축소, `core/Stage.ts`/`core/TrackManager.ts`/`core/Renderer.ts`에 역할이 명확히 분리.
+
+소요/리스크
+- 예상 0.5~1일. 동작 동일성을 유지하는 내부 구조 리팩토링으로 리스크 낮음(수동 데모 검증 포함).
+
 ## 6) 타임라인 컨트롤 (M6)
-- [ ] rVFC 루프, mediaTime 기반 진행
-- [ ] seek(rate)/pause/play/snapToFrame API
-- [ ] 플러그인에는 progress만 전달(타이머 금지)
+- [ ] rVFC 루프, mediaTime 기반 진행(현재 rAF 기반 최소 구현 완료)
+- [x] pause/play/seek API — rate는 비디오에 위임
+- [ ] snapToFrame 옵션 적용(rVFC 전환 시 반영)
+- [x] 플러그인에는 progress만 전달(합성기에서 상대 p 계산)
 
 ### 검증 (M6)
 - [ ] rVFC 기반으로 미디어 드리프트 없이 진행도 고정
@@ -176,7 +210,7 @@
 
 ## 8) 런타임 (M8)
 - [ ] PortalManager: breakout(mode/coordSpace/return/transfer)
-- [ ] DomMount/StyleApply/CssVars: DOM/스타일 반영
+- [ ] DomMount/CssVars: DOM/스타일 반영(StyleApply 일부 사용 중)
 
 ### 검증 (M8)
 - [ ] breakout transfer 기본값이 move로 동작(clone 지정 시 복제 확인)
@@ -184,8 +218,8 @@
 - [ ] unmount/dispose에서 DOM/리스너 누수 없음
 
 ## 9) 렌더러 통합 (M9)
-- [ ] Track/Cue/Node 런타임 연결, 활성 창 계산
-- [ ] PluginLoader/Composer/Layout/Timeline 연동
+- [x] Track/Cue/Node 기본 연결, 활성 창 계산(`MotionTextRenderer` 내)
+- [ ] PluginLoader/Timeline(rVFC)/Stage 모듈 정식 연동
 
 ### 검증 (M9)
 - [ ] 복합 샘플 시나리오에서 전 구간 오류/경고 없이 재생
@@ -193,7 +227,7 @@
 - [ ] 시킹/배속/리사이즈 복합 상호작용에서도 동기 정확성 유지
 
 ## 10) 데모/문서 (M10~M11)
-- [ ] demo/main.ts 연동, 샘플 JSON 구동 확인
+- [x] demo/main.ts 연동, 샘플(JSON) 구동/선택 UI
 - [ ] README에 사용법/주의사항/보안 흐름 추가
 
 ### 검증 (M10~M11)
@@ -207,7 +241,14 @@
 - [x] M0 Scaffold: src 구조 및 문서 정리(2025-09-06)
 - [x] M1 타입 정의 완료(2025-09-06)
 - [x] M2 시간 유틸 완료(2025-09-06)
+- [x] M2.6 커스텀 컨트롤러 1차 완료(2025-09-06)
+- [x] M3 ScenarioParser 정식 도입(2025-09-06)
+- [x] M2.5 데모 최소 구동/샘플 연동(2025-09-07)
+- [x] M4 합성(PluginChain, last-wins/compose) 적용(2025-09-07)
+- [x] M5 레이아웃 엔진 1차( position/anchor/size/transform/override/safeAreaClamp, flow/grid, overlap push/stack )(2025-09-07)
 
 다음 작업(Next Up)
-1) M2.5 최소 구동 구현 후 `pnpm dev`로 데모 확인
-2) 이어서 M3 ScenarioParser 기본 파싱/검증
+1) M5.5: 리팩토링 스프린트(Stage/TrackManager/Renderer/Style 유틸 분리, 앵커 유틸 공용화)
+2) M6: rVFC 기반 타임라인 전환 + snapToFrame 연동
+3) M7: PluginLoader 파이프라인(무결성 검증→Blob import)
+4) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)

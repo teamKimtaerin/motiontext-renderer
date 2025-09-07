@@ -3,7 +3,8 @@
   "timebase": { "unit": "seconds" },
   "stage": { "baseAspect": "16:9" },
   "tracks": [
-    { "id": "subtitle", "type": "subtitle", "layer": 10 }
+    { "id": "subtitle", "type": "subtitle", "layer": 10,
+      "defaultStyle": { "color": "#ffffff", "stroke": { "widthRel": 0.002, "color": "#000000" } } }
   ],
   "cues": [
     {

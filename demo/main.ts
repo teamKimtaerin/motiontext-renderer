@@ -6,6 +6,7 @@ import { MotionTextRenderer, MotionTextController } from '../src/index';
 import animatedSubtitle from './samples/animated_subtitle.json';
 import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
+import m5Layout from './samples/m5_layout_features.json';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -19,6 +20,16 @@ const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 const configEditor = document.getElementById('config-editor') as HTMLTextAreaElement;
 const applyConfigBtn = document.getElementById('apply-config') as HTMLButtonElement;
 const resetConfigBtn = document.getElementById('reset-config') as HTMLButtonElement;
+// SafeArea dev controls
+const safeTop = document.getElementById('safe-top') as HTMLInputElement | null;
+const safeBottom = document.getElementById('safe-bottom') as HTMLInputElement | null;
+const safeLeft = document.getElementById('safe-left') as HTMLInputElement | null;
+const safeRight = document.getElementById('safe-right') as HTMLInputElement | null;
+const safeApplyStage = document.getElementById('safe-apply-stage') as HTMLInputElement | null;
+const safeApplySubtitle = document.getElementById('safe-apply-subtitle') as HTMLInputElement | null;
+const safeApplyFree = document.getElementById('safe-apply-free') as HTMLInputElement | null;
+const safeForceClamp = document.getElementById('safe-force-clamp') as HTMLInputElement | null;
+const applySafeBtn = document.getElementById('apply-safearea') as HTMLButtonElement | null;
 
 // Status displays
 const rendererStatus = document.getElementById('renderer-status') as HTMLSpanElement;
@@ -81,6 +92,7 @@ const sampleConfigs: Record<string, RendererConfig> = {
   animated_subtitle: animatedSubtitle as RendererConfig,
   animated_free_mixed: animatedFreeMixed as RendererConfig,
   tilted_box: tiltedBox as RendererConfig,
+  m5_layout_features: m5Layout as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -201,6 +213,7 @@ function initDemo() {
   resetBtn.addEventListener('click', resetDemo);
   applyConfigBtn.addEventListener('click', applyConfig);
   resetConfigBtn.addEventListener('click', resetConfig);
+  if (applySafeBtn) applySafeBtn.addEventListener('click', applySafeAreaFromUI);
 
   console.log('✅ MotionText Renderer Demo 초기화 완료');
 }
@@ -324,4 +337,52 @@ document.addEventListener('DOMContentLoaded', initDemo);
   video,
   loadConfiguration,
   sampleConfigs,
+  applySafeAreaFromUI,
 };
+
+// Helper: apply safe area controls to current config and reload
+function applySafeAreaFromUI() {
+  try {
+    if (!currentConfig) {
+      alert('먼저 샘플을 로드하세요.');
+      return;
+    }
+    const t = clamp01(parseFloat(safeTop?.value || '0'));
+    const b = clamp01(parseFloat(safeBottom?.value || '0'));
+    const l = clamp01(parseFloat(safeLeft?.value || '0'));
+    const r = clamp01(parseFloat(safeRight?.value || '0'));
+    const safe = { top: t, bottom: b, left: l, right: r } as any;
+    // clone config minimally
+    const cfg: any = JSON.parse(JSON.stringify(currentConfig));
+    if (safeApplyStage?.checked) {
+      cfg.stage = cfg.stage || {}; cfg.stage.safeArea = safe;
+    }
+    if (safeApplySubtitle?.checked) {
+      const tr = cfg.tracks.find((x: any) => x.type === 'subtitle');
+      if (tr) tr.safeArea = safe;
+    }
+    if (safeApplyFree?.checked) {
+      const tr = cfg.tracks.find((x: any) => x.type === 'free');
+      if (tr) tr.safeArea = safe;
+    }
+    if (safeForceClamp?.checked) {
+      // set layout.safeAreaClamp = true for all nodes
+      const visit = (n: any) => {
+        if (n && typeof n === 'object') {
+          n.layout = n.layout || {}; n.layout.safeAreaClamp = true;
+          const children = Array.isArray(n.children) ? n.children : [];
+          children.forEach(visit);
+        }
+      };
+      (cfg.cues || []).forEach((c: any) => c.root && visit(c.root));
+    }
+    // reflect in editor and reload
+    configEditor.value = JSON.stringify(cfg, null, 2);
+    loadConfiguration(cfg);
+  } catch (e) {
+    console.error('safe-area 적용 실패', e);
+    alert('safe-area 적용 실패: ' + e);
+  }
+}
+
+function clamp01(v: number) { return isFinite(v) ? Math.min(1, Math.max(0, v)) : 0; }

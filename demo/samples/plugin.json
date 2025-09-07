@@ -17,6 +17,7 @@
         "fontWeight": "bold",
         "color": "#00ff00",
         "textShadow": "0 0 10px rgba(0,255,0,0.5)",
+        "stroke": { "widthRel": 0.002, "color": "#000000" },
         "textAlign": "center"
       }
     },
@@ -29,6 +30,7 @@
         "fontFamily": "Arial, sans-serif",
         "color": "#ffffff",
         "textShadow": "2px 2px 4px rgba(0,0,0,0.8)",
+        "stroke": { "widthRel": 0.002, "color": "#000000" },
         "textAlign": "center"
       }
     }
