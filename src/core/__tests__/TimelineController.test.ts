@@ -195,3 +195,93 @@ describe('M6: TimelineController rVFC loop', () => {
     timeline.detachMedia();
   });
 });
+
+describe('M6+: TimelineController rVFC edge cases', () => {
+  function createMockVideo() {
+    const listeners = new Map<string, Function[]>();
+    let nextId = 1;
+    const scheduled: { id: number; cb: any }[] = [];
+    const canceled: number[] = [];
+    const mock: any = {
+      currentTime: 0,
+      playbackRate: 1,
+      addEventListener: (event: string, fn: Function) => {
+        const arr = listeners.get(event) || [];
+        arr.push(fn);
+        listeners.set(event, arr);
+      },
+      removeEventListener: (event: string, fn: Function) => {
+        const arr = listeners.get(event) || [];
+        const i = arr.indexOf(fn as any);
+        if (i >= 0) arr.splice(i, 1);
+        listeners.set(event, arr);
+      },
+      requestVideoFrameCallback: (cb: any) => {
+        const id = nextId++;
+        scheduled.push({ id, cb });
+        return id;
+      },
+      cancelVideoFrameCallback: (id: number) => {
+        canceled.push(id);
+      },
+      __listeners: listeners,
+      __scheduled: scheduled,
+      __canceled: canceled,
+    };
+    return mock;
+  }
+
+  it('ignores stale vFC callbacks using generation token', () => {
+    const tl = new TimelineController();
+    const video = createMockVideo();
+    tl.attachMedia(video as any);
+    const ticks: number[] = [];
+    tl.onTick((t) => ticks.push(t));
+
+    // Start playback → initial schedule (cb1)
+    tl.play();
+    const cb1 = video.__scheduled.at(-1)!.cb;
+
+    // Seek while running → reschedule (cb2), cancel previous
+    video.__listeners.get('seeked')?.forEach((fn: any) => fn());
+    const cb2 = video.__scheduled.at(-1)!.cb;
+
+    // Fire old callback (stale) → should be ignored
+    cb1(0, { mediaTime: 1.0 });
+    expect(ticks.length).toBe(0);
+
+    // Fire current callback → should publish
+    cb2(0, { mediaTime: 2.5 });
+    expect(ticks.length).toBe(1);
+    expect(ticks[0]).toBeCloseTo(2.5, 6);
+  });
+
+  it('does not schedule vFC when seeking while paused', () => {
+    const tl = new TimelineController();
+    const video = createMockVideo();
+    tl.attachMedia(video as any);
+    tl.play();
+    tl.pause();
+    const before = video.__scheduled.length;
+
+    // While paused, seeked should not schedule (running=false)
+    video.__listeners.get('seeked')?.forEach((fn: any) => fn());
+    expect(video.__scheduled.length).toBe(before);
+  });
+
+  it('cancels prior vFC reservation when rescheduling on seek', () => {
+    const tl = new TimelineController();
+    const video = createMockVideo();
+    tl.attachMedia(video as any);
+    tl.play();
+    const firstId = video.__scheduled.at(-1)!.id;
+
+    // Trigger reschedule
+    video.__listeners.get('seeked')?.forEach((fn: any) => fn());
+
+    // Expect cancel called with previous id
+    expect(video.__canceled).toContain(firstId);
+    // And a new schedule exists
+    expect(video.__scheduled.at(-1)!.id).not.toBe(firstId);
+  });
+});

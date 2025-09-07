@@ -6,6 +6,7 @@
 export class TimelineController {
   private rafId: number | null = null;
   private vfcId: number | null = null;
+  private vfcGen: number = 0; // generation token to avoid stale callbacks
   private subscribers = new Set<(_timeSec: number) => void>();
   private video: HTMLVideoElement | null = null;
   private running = false;
@@ -14,11 +15,11 @@ export class TimelineController {
   private onTimeUpdateBound = () => this.notify();
   private onSeekedBound = () => {
     this.notify(true);
-    this.scheduleVfcIfNeeded();
+    if (this.running) this.scheduleVfc();
   };
   private onLoadedMetaBound = () => {
     this.notify(true);
-    this.scheduleVfcIfNeeded();
+    if (this.running) this.scheduleVfc();
   };
   private onRateChangeBound = () => this.notify();
   private onPlayBound = () => this.play();
@@ -71,28 +72,40 @@ export class TimelineController {
     this.rafId = requestAnimationFrame(this.loopRaf);
   };
 
-  private loopVfc: VideoFrameRequestCallback = (_now, metadata: any) => {
-    if (!this.running) return;
+  private cancelVfc() {
     const v = this.video as any;
-    const mediaTime: number | undefined = metadata?.mediaTime;
-    const t = typeof mediaTime === 'number' && Number.isFinite(mediaTime)
-      ? mediaTime
-      : (this.video ? this.video.currentTime : 0);
-    this.publish(t);
-    // schedule next
-    if (v && typeof v.requestVideoFrameCallback === 'function') {
-      this.vfcId = v.requestVideoFrameCallback(this.loopVfc);
+    if (this.vfcId != null && v && typeof v.cancelVideoFrameCallback === 'function') {
+      v.cancelVideoFrameCallback(this.vfcId);
     }
-  };
+    this.vfcId = null;
+  }
 
-  private scheduleVfcIfNeeded() {
+  private scheduleVfc() {
     if (!this.running) return;
     const v = this.video as any;
     if (!v || typeof v.requestVideoFrameCallback !== 'function') return;
-    // If no vfc is currently queued, queue one to recover from driver flushes (seek, load, etc.)
-    if (this.vfcId == null) {
-      this.vfcId = v.requestVideoFrameCallback(this.loopVfc);
-    }
+    // Always cancel any prior reservation then request a fresh callback with new generation
+    this.cancelVfc();
+    const gen = ++this.vfcGen;
+    const cb: VideoFrameRequestCallback = (_now, metadata: any) => {
+      if (!this.running || gen !== this.vfcGen) return; // stale or stopped
+      const mediaTime: number | undefined = metadata?.mediaTime;
+      const t = typeof mediaTime === 'number' && Number.isFinite(mediaTime)
+        ? mediaTime
+        : (this.video ? this.video.currentTime : 0);
+      this.publish(t);
+      // schedule next only if still same generation and running
+      const vv = this.video as any;
+      if (
+        vv &&
+        typeof vv.requestVideoFrameCallback === 'function' &&
+        this.running &&
+        gen === this.vfcGen
+      ) {
+        this.vfcId = vv.requestVideoFrameCallback(cb);
+      }
+    };
+    this.vfcId = v.requestVideoFrameCallback(cb);
   }
 
   isRunning(): boolean {
@@ -112,7 +125,7 @@ export class TimelineController {
     const v = this.video as any;
     const hasVfc = !!(v && typeof v.requestVideoFrameCallback === 'function');
     if (hasVfc) {
-      this.vfcId = v.requestVideoFrameCallback(this.loopVfc);
+      this.scheduleVfc();
     } else {
       this.rafId = requestAnimationFrame(this.loopRaf);
     }
@@ -150,5 +163,14 @@ export class TimelineController {
       this.video.playbackRate = _rate;
       this.notify();
     }
+  }
+
+  // Idempotent helpers for Tell-Don't-Ask style API
+  ensurePlaying() {
+    if (!this.running) this.play();
+  }
+
+  ensureStopped() {
+    if (this.running) this.pause();
   }
 }

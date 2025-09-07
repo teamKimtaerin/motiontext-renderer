@@ -38,10 +38,7 @@ export class MotionTextRenderer {
     this.renderer.remount();
     if (this.media) {
       this.renderer.update(this.media.currentTime);
-      // If media is already playing, ensure timeline is running as well
-      if (!this.media.paused && !this.timeline.isRunning()) {
-        this.timeline.play();
-      }
+      // Attach-only start policy: do not auto-start timeline here
     }
   }
 
@@ -49,12 +46,14 @@ export class MotionTextRenderer {
     this.media = video;
     this.timeline.attachMedia(video);
     this.stage.setMedia(video);
-    if (this.unsub) this.unsub();
+    if (this.unsub) {
+      try { this.unsub(); } finally { this.unsub = null; }
+    }
     this.unsub = this.timeline.onTick((t) => this.renderer.update(t));
     this.renderer.update(video.currentTime);
     // If video is already playing at attach time, start timeline loop
     if (!video.paused) {
-      this.timeline.play();
+      this.timeline.ensurePlaying();
     }
   }
 
