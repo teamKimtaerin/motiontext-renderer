@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Stage, computeContentRect } from '../Stage';
 
 describe('M5.6: Stage', () => {
@@ -79,6 +79,114 @@ describe('M5.6: Stage', () => {
       
       // 7. Verify listener was NOT called after unsubscribe
       expect(listener).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('Idempotent binding prevention', () => {
+    beforeEach(() => {
+      // Mock window and ResizeObserver
+      const mockRO = {
+        observe: vi.fn(),
+        disconnect: vi.fn(),
+        unobserve: vi.fn()
+      };
+      Object.defineProperty(global, 'window', {
+        value: {
+          ResizeObserver: vi.fn(() => mockRO)
+        },
+        writable: true,
+        configurable: true
+      });
+      global.ResizeObserver = (global.window as any).ResizeObserver;
+      
+      // Mock document
+      Object.defineProperty(global, 'document', {
+        value: {
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn()
+        },
+        writable: true,
+        configurable: true
+      });
+    });
+
+    afterEach(() => {
+      // Clean up mocks
+      delete (global as any).window;
+      delete (global as any).document;
+    });
+
+    it('should prevent duplicate binding tracking', () => {
+      const stage = new Stage();
+      const stageInternal = stage as any;
+      
+      // Mock container with parentElement (required for binding)
+      const mockParent = { addEventListener: vi.fn(), removeEventListener: vi.fn() };
+      const mockContainer = { 
+        clientWidth: 1600, 
+        clientHeight: 900,
+        parentElement: mockParent
+      } as any;
+      
+      // First setContainer - should set bound tracking
+      stage.setContainer(mockContainer);
+      expect(stageInternal._boundParent).toBe(mockParent);
+      
+      // Second setContainer with same container - tracking should remain
+      stage.setContainer(mockContainer);
+      expect(stageInternal._boundParent).toBe(mockParent);
+      
+      stage.dispose();
+    });
+
+    it('should reset bound tracking on teardown', () => {
+      const stage = new Stage();
+      const stageInternal = stage as any;
+      
+      // Mock container with parentElement and media
+      const mockParent = { addEventListener: vi.fn(), removeEventListener: vi.fn() };
+      const mockContainer = { 
+        clientWidth: 1600, 
+        clientHeight: 900,
+        parentElement: mockParent
+      } as any;
+      const mockMedia = { 
+        videoWidth: 1920, 
+        videoHeight: 1080,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn()
+      } as any;
+      
+      // Set both
+      stage.setContainer(mockContainer);
+      stage.setMedia(mockMedia);
+      
+      // Verify tracking
+      expect(stageInternal._boundParent).toBe(mockParent);
+      expect(stageInternal._boundMedia).toBe(mockMedia);
+      
+      // Dispose should reset tracking
+      stage.dispose();
+      expect(stageInternal._boundParent).toBeNull();
+      expect(stageInternal._boundMedia).toBeNull();
+    });
+
+    it('should clear update timer on teardownOverlayBinding', () => {
+      const stage = new Stage();
+      const stageInternal = stage as any;
+      
+      // Mock timer
+      stageInternal._updateTimer = 123;
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+      
+      // Call teardownOverlayBinding indirectly via dispose
+      stage.dispose();
+      
+      // Verify timer was cleared
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(123);
+      expect(stageInternal._updateTimer).toBeNull();
+      
+      clearTimeoutSpy.mockRestore();
     });
   });
 });

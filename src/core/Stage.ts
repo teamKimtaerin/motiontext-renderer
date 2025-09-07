@@ -83,6 +83,11 @@ export class Stage {
   }
 
   dispose() {
+    // 방어적 타이머 정리
+    if (this._updateTimer != null) {
+      clearTimeout(this._updateTimer);
+      this._updateTimer = null;
+    }
     this.teardownOverlayBinding();
     this._boundsChangeListeners = [];
     this.container = null;
@@ -123,6 +128,11 @@ export class Stage {
   }
 
   private teardownOverlayBinding() {
+    // 타이머 정리
+    if (this._updateTimer != null) {
+      clearTimeout(this._updateTimer);
+      this._updateTimer = null;
+    }
     if (this.ro) {
       this.ro.disconnect();
       this.ro = null;

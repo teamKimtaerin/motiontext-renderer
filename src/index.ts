@@ -63,6 +63,11 @@ export class MotionTextRenderer {
 
   dispose() {
     this.pause();
+    // Timeline 분리를 Stage/Renderer 이전에 처리 (관례상 안전)
+    if (this.media) {
+      this.timeline.detachMedia();
+      this.media = null;
+    }
     if (this.unsub) this.unsub();
     this.unsub = null;
     if (this.stageBoundsUnsub) this.stageBoundsUnsub();
