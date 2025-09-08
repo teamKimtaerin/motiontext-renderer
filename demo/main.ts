@@ -5,13 +5,12 @@
 import { MotionTextRenderer, MotionTextController } from '../src/index';
 import { preloadPluginsForScenario } from './devPlugins';
 import pluginLocal from './samples/plugin_local.json';
-import cwiDemo from './samples/cwi_demo.json';
-import cwiDemoFull from './samples/cwi_demo_full.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
 import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
+import cwiDemoFull from './samples/cwi_demo_full.json';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -100,7 +99,7 @@ const sampleConfigs: Record<string, RendererConfig> = {
   m5_layout_features: m5Layout as RendererConfig,
   plugin_local: pluginLocal as RendererConfig,
   plugin_showcase: pluginShowcase as RendererConfig,
-  cwi_demo: cwiDemo as RendererConfig,
+  // CwI full demo (statically imported to avoid top-level await delay)
   cwi_demo_full: cwiDemoFull as RendererConfig,
 
   animated: {
@@ -339,8 +338,12 @@ window.addEventListener('error', (event) => {
   updateStatus('오류 발생');
 });
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initDemo);
+// Initialize when page loads (robust against late module evaluation)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDemo);
+} else {
+  initDemo();
+}
 
 // Export for debugging
 (window as any).demoApp = {

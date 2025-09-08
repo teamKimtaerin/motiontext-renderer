@@ -1,6 +1,6 @@
 // Applies composed style/layout transforms and CSS variables into DOM elements.
 import type { Channels } from '../composer/PluginChainComposer';
-import type { Style } from '../types/layout';
+import type { Style, Layout } from '../types/layout';
 
 export function buildTransform(base: string | undefined, ch: Channels): string {
   const parts: string[] = [];
@@ -56,5 +56,34 @@ export function applyTextStyle(
   } else if (!s.textShadow) {
     // Default readable outline if none specified
     el.style.textShadow = '0 0 2px #000, 0 0 4px #000, 0 0 8px #000';
+  }
+}
+
+// Apply minimal group-level visual styles (box background, border, padding).
+export function applyGroupStyle(
+  el: HTMLElement,
+  containerHeight: number,
+  style?: Style,
+  layout?: Layout
+) {
+  const s = style || {};
+  // Background fill
+  if (s.boxBg) (el.style as any).background = String(s.boxBg);
+  // Border
+  if (s.border) {
+    const wpx = Math.max(0, Math.round(containerHeight * (s.border.widthRel || 0)));
+    (el.style as any).borderStyle = 'solid';
+    (el.style as any).borderWidth = `${wpx}px`;
+    (el.style as any).borderColor = String(s.border.color || '#000');
+    if (s.border.radiusRel != null) {
+      const rpx = Math.max(0, Math.round(containerHeight * s.border.radiusRel));
+      (el.style as any).borderRadius = `${rpx}px`;
+    }
+  }
+  // Padding from layout (normalized relative to stage height)
+  if (layout?.padding) {
+    const px = Math.max(0, Math.round(containerHeight * (layout.padding.x || 0)));
+    const py = Math.max(0, Math.round(containerHeight * (layout.padding.y || 0)));
+    el.style.padding = `${py}px ${px}px`;
   }
 }

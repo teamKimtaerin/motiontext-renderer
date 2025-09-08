@@ -30,7 +30,8 @@
 - M6 타임라인: TimelineController 시킹/배속/rVFC — 완료(rVFC 도입, snapToFrame 연동, 테스트 통과)
 - M6.5 로컬 플러그인 서버/데모 통합: dev 전용 경량 서버 + 동적 로딩 연동 — 완료(보안 검증 제외)
 - M6.7 Caption with Intention 데모: 전용 영상 교체, CwI 3대 애니메이션 플러그인(pop/wave, loud, whisper), 캡션 박스 + 박스 탈출 구현 — 진행중
-- M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
+- M6.7.hotfix CwI 구조 개편: word-per-node(단어=Text 노드, 각 노드에 cwi 애니메이션) — 신규(즉시)
+- M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정(핫픽스 이후)
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
 - M10 데모 연동: demo/main.ts 샘플/컨트롤러/세이프에어리어 — 부분 완료
@@ -372,6 +373,48 @@
 
 ---
 
+## 6.7.hotfix) CwI 구조 개편 (word-per-node)
+
+목표(스코프)
+- 현재: 캡션 Text 노드 1개 + cwi 플러그인 파라미터로 tokens 배열을 전달해 내부에서 span을 생성·구동.
+- 변경: 캡션 그룹 아래에 단어 단위 Text 자식 노드를 생성하고, 각 단어 Text 노드에 cwi 애니메이션(whisper/loud/pop 등)을 개별 플러그인으로 부착.
+- 이유: 특정 단어만 다른 애니메이션/색상/속성 적용을 사용자가 손쉽게 조작 가능(구조적 가시성·조작성 향상).
+
+설계
+- 시나리오(JSON) v1.3 표현(신규 구조만 사용):
+  - 기존 단일 text + tokens 방식은 폐기. children에 word 텍스트 노드를 순서대로 배치.
+  - 각 단어 노드는 `absStart/absEnd`를 해당 토큰 타이밍으로 지정.
+  - 각 단어 노드의 `pluginChain`에 `cwi@1.0.0`을 부착하고, `params: { kind: 'whisper'|'loud'|'pop', speaker?: string, palette?: Record<Speaker,string> }` 최소화.
+  - 캡션 박스 스타일/패딩은 부모 그룹 레벨에서 관리(플러그인은 단어의 모션/색만 담당).
+- 플러그인(cwi) 변경:
+  - tokens 기반 span 생성 로직 제거. `params.kind`만 받아 단일 텍스트에 애니메이션 적용.
+  - 색상은 `params.speaker`와 상위 palette(Track.defaultStyle 또는 Group-level palette)로 결정. 기본값 노랑 유지.
+- 렌더러: 현 구조는 노드별 pluginChain 구동을 지원하므로 변경 없음. effectsRoot in-flow 유지.
+
+체크리스트
+- [x] 플러그인: `cwi@1.0.0`에 `kind: 'color'` 추가(WHITE→speakerColor 점진 전환), 기존 whisper/loud/pop은 3%/5%/12% 스케일 준수
+- [x] 샘플 재생성: `tmp/real.json` 기반으로 `cwi_demo_full.json` 재구성(단어=Text 노드, cue‑wide 윈도우)
+- [x] 체인 구성: 각 단어에 `pluginChain`: [ cwi(kind: pop|whisper|loud, t0,t1), cwi(kind: color, t0,t1) ] 순서로 중첩(색상 last‑wins)
+- [x] cwi 플러그인: `params.kind` 단일 단어 애니메이션(pop/whisper/loud)
+- [x] Demo JSON 변환: `cwi_demo_full.json`/`cwi_demo.json`을 word-per-node 구조로 마이그레이션(구형 JSON 폐기)
+- [x] Group 레벨 캡션 박스 스타일 유지(패딩/배경/라운딩), 단어 노드는 배경 없음
+- [x] 색상 규칙: palette + speaker 매핑 반영, 기본 WHITE90/강조 컬러 유지
+- [ ] 데모 검증: `pnpm dev` + `pnpm plugin:server`에서 CwI 데모 로드/재생(선행 흰색→타이밍에 맞춰 색/크기 변화)
+- [ ] 안정성 확인: 리사이즈/전체화면/세이프에어리어에서 클리핑/줄바꿈 회귀 없음
+- [ ] 문서 반영: `context/ai-bootstrap-prompt.md`/본 문서 상태 갱신 및 변경 로그 추가
+
+수용 기준
+- [ ] 동일 구간 재생 시 기존 데모와 동일한 리듬으로 단어 모션 재생(시각적으로 근접)
+- [ ] 특정 단어 한정 애니메이션 변경이 JSON 수정만으로 가능(플러그인 코드 수정 불필요)
+- [ ] 모든 샘플이 신 구조(JSON)만 사용하고 정상 동작
+- [ ] `pnpm typecheck`/`pnpm build` 무오류, 데모 정상 동작
+
+소요/리스크
+- 소요: 0.5~1일(플러그인 단순화 + 샘플 변환 + 어댑터)
+- 리스크: 단어 수가 많은 구간에서 DOM 수 증가 → 성능 확인 필요(필요 시 가상화/가벼운 텍스트 결합 고려)
+
+---
+
 ## 7) 보안 로더 (M7)
 - [ ] ManifestValidator: 필수 필드/버전/peer/minRenderer 체크
 - [ ] Integrity: SHA-384, 선택 ed25519 서명
@@ -426,9 +469,10 @@
 - [x] M6 타임라인: rVFC 전환 + snapToFrame 연동 + 테스트 통과(2025-09-07)
 
 다음 작업(Next Up)
-1) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
-2) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
-3) Transform 순서 개선 (M7 또는 M8에서 처리)
+1) M6.7.hotfix: CwI word-per-node 구조 이행  
+2) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
+3) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
+4) Transform 순서 개선 (M8 인접)
 
 ---
 

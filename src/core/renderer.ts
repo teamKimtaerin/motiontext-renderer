@@ -7,7 +7,7 @@ import {
 import { isWithin, computeRelativeWindow } from '../utils/time';
 import { composeActive, type Channels, progress as prog } from '../composer/PluginChainComposer';
 import { evalBuiltin } from '../runtime/plugins/Builtin';
-import { applyChannels, applyTextStyle } from '../runtime/StyleApply';
+import { applyChannels, applyTextStyle, applyGroupStyle } from '../runtime/StyleApply';
 import { ensureEffectsRoot } from '../runtime/DomMount';
 import { devRegistry } from '../loader/dev/DevPluginRegistry';
 import { createDevContext } from '../loader/SandboxContext';
@@ -33,6 +33,7 @@ export class Renderer {
   private stage: Stage;
   private trackManager: TrackManager;
   private mountedTextEls: MountedItem[] = [];
+  private mountedGroups: { el: HTMLElement; node: any }[] = [];
   private nodeTrackMap = new Map<TextNode, string>(); // O(1) lookup optimization
 
   constructor(
@@ -75,6 +76,7 @@ export class Renderer {
   remount() {
     this.container.innerHTML = '';
     this.mountedTextEls = [];
+    this.mountedGroups = [];
     if (!this.scenario) return;
 
     // Group-aware mounting: iterate cues and mount group containers, then children
@@ -112,14 +114,20 @@ export class Renderer {
         });
       }
       this.container.appendChild(groupEl);
+      // Apply group visual style (box/padding/border) using stage height scale
+      const containerHeight = this.container.clientHeight || 720;
+      applyGroupStyle(groupEl, containerHeight, root.style, root.layout);
+      this.mountedGroups.push({ el: groupEl, node: root });
       const children: any[] = Array.isArray(root.children) ? root.children : [];
       for (const ch of children) {
         if (ch.e_type !== 'text') continue;
         const el = document.createElement('div');
         el.textContent = ch.text ?? '';
         el.style.pointerEvents = 'none';
-        el.style.whiteSpace = 'pre-wrap';
+        // word-per-node: render inline and allow wrapping at group level
+        el.style.whiteSpace = 'normal';
         el.style.display = 'none';
+        (el.style as any).marginRight = '.33em';
         const containerHeight = this.container.clientHeight || 720;
         applyTextStyle(el, containerHeight, ch.style, trackObj?.defaultStyle);
         // If container is flow and policy is not ignore, child follows flex stack.
@@ -165,6 +173,10 @@ export class Renderer {
     const stageSafe = this.scenario.stage?.safeArea;
     const pw = contentRect.width,
       ph = contentRect.height;
+    // Update group-level styles that depend on stage height (padding/border radius)
+    for (const g of this.mountedGroups) {
+      try { applyGroupStyle(g.el, ph, (g.node as any).style, (g.node as any).layout); } catch {}
+    }
     for (const item of this.mountedTextEls) {
       const tn = item.node;
       const cueTrackId = this.findCueTrackIdForNode(tn);
@@ -194,6 +206,7 @@ export class Renderer {
   update(t: number) {
     // compute push offsets per non-flow group if overlapPolicy is push/stack
     const groupOffsets = new Map<HTMLElement, Map<HTMLElement, number>>();
+    const groupHasActive = new Map<HTMLElement, boolean>();
     const groups = new Map<
       HTMLElement,
       { items: GroupItem[]; mode: string; policy?: string; rowGapPx?: number }
@@ -225,8 +238,9 @@ export class Renderer {
       const t0 = node.absStart ?? -Infinity;
       const t1 = node.absEnd ?? Infinity;
       const active = isWithin(t, t0, t1);
-      el.style.display = active ? 'block' : 'none';
+      el.style.display = active ? 'inline-block' : 'none';
       if (active) {
+        groupHasActive.set(parent, true);
         const chain = (node as any).pluginChain as any[] | undefined;
         const fps = this.scenario?.timebase?.fps;
         const snap = this.scenario?.behavior?.snapToFrame ?? false;
@@ -299,6 +313,11 @@ export class Renderer {
         applyChannels(el, base, ch);
       }
     }
+    // Toggle group container visibility based on child activity
+    groups.forEach((_g, parent) => {
+      const active = !!groupHasActive.get(parent);
+      parent.style.display = active ? '' : 'none';
+    });
   }
 
   dispose() {
