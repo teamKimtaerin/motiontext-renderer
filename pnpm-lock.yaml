@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  gsap:
-    specifier: ^3.12.0
-    version: 3.13.0
   react-icons:
     specifier: ^5.5.0
     version: 5.5.0(react@19.1.1)
@@ -34,6 +31,9 @@ devDependencies:
   eslint-config-prettier:
     specifier: ^9.1.0
     version: 9.1.2(eslint@8.57.1)
+  gsap:
+    specifier: ^3.12.0
+    version: 3.13.0
   husky:
     specifier: ^9.1.7
     version: 9.1.7
@@ -1909,7 +1909,7 @@ packages:
 
   /gsap@3.13.0:
     resolution: {integrity: sha512-QL7MJ2WMjm1PHWsoFrAQH/J8wUeqZvMtHO58qdekHpCfhvhSL4gSiz6vJf5EeMP0LOn3ZCprL2ki/gjED8ghVw==}
-    dev: false
+    dev: true
 
   /has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
