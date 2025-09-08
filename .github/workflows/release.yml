@@ -38,7 +38,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://registry.npmjs.org/'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -54,27 +54,13 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Assert NPM_TOKEN present
-        run: |
-          if [ -z "${NPM_TOKEN:-}" ]; then
-            echo "::error::NPM_TOKEN is not set or empty"; exit 1;
-          fi
-
-      - name: Configure npm token (fresh .npmrc)
-        run: |
-          rm -f "$HOME/.npmrc"
-          cat > "$HOME/.npmrc" << EOF
-          registry=https://registry.npmjs.org/
-          //registry.npmjs.org/:_authToken=${NPM_TOKEN}
-          @kimtaerin:registry=https://registry.npmjs.org/
-          //registry.npmjs.org/:always-auth=true
-          EOF
-
       - name: Verify npm authentication
         run: |
           echo "Registry: $(npm config get registry)"
-          echo "npm whoami:" && npm whoami || (echo "::error::Invalid NPM_TOKEN or npm auth failed" && exit 1)
+          echo "npm whoami:" && npm whoami
           echo "Intended scope: @kimtaerin"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -90,6 +76,7 @@ jobs:
           # Prefer a PAT to bypass org/repo restriction on the Actions bot creating PRs
           # Create a repo-scoped PAT (classic) with repo + pull_request write, save as RELEASE_PAT or GH_PAT
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Ensure scoped packages are published publicly
           NPM_CONFIG_ACCESS: public
