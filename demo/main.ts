@@ -4,6 +4,7 @@
 
 import { MotionTextRenderer, MotionTextController } from '../src/index';
 import { preloadPluginsForScenario } from './devPlugins';
+import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -34,6 +35,10 @@ const safeApplySubtitle = document.getElementById('safe-apply-subtitle') as HTML
 const safeApplyFree = document.getElementById('safe-apply-free') as HTMLInputElement | null;
 const safeForceClamp = document.getElementById('safe-force-clamp') as HTMLInputElement | null;
 const applySafeBtn = document.getElementById('apply-safearea') as HTMLButtonElement | null;
+// Optional plugin mode buttons (if present in DOM)
+const modeServerBtn = document.getElementById('plugin-mode-server') as HTMLButtonElement | null;
+const modeLocalBtn = document.getElementById('plugin-mode-local') as HTMLButtonElement | null;
+const modeAutoBtn = document.getElementById('plugin-mode-auto') as HTMLButtonElement | null;
 
 // Status displays
 const rendererStatus = document.getElementById('renderer-status') as HTMLSpanElement;
@@ -222,6 +227,20 @@ function initDemo() {
   applyConfigBtn.addEventListener('click', applyConfig);
   resetConfigBtn.addEventListener('click', resetConfig);
   if (applySafeBtn) applySafeBtn.addEventListener('click', applySafeAreaFromUI);
+  // Optional: plugin mode switchers
+  if (modeServerBtn) modeServerBtn.addEventListener('click', async () => {
+    const origin = prompt('Plugin server origin (e.g., http://localhost:3300):', 'http://localhost:3300') || 'http://localhost:3300';
+    await setPluginModeServer(origin);
+  });
+  if (modeLocalBtn) modeLocalBtn.addEventListener('click', async () => {
+    const base = prompt('Local plugin folder base (e.g., ./plugin-server/plugins/):', './plugin-server/plugins/') || './plugin-server/plugins/';
+    await setPluginModeLocal(base);
+  });
+  if (modeAutoBtn) modeAutoBtn.addEventListener('click', async () => {
+    const origin = prompt('Preferred server origin (optional):', 'http://localhost:3300') || 'http://localhost:3300';
+    const base = prompt('Local plugin folder base (optional):', './plugin-server/plugins/') || './plugin-server/plugins/';
+    await setPluginModeAuto(origin, base);
+  });
 
   console.log('✅ MotionText Renderer Demo 초기화 완료');
 }
@@ -353,6 +372,9 @@ if (document.readyState === 'loading') {
   loadConfiguration,
   sampleConfigs,
   applySafeAreaFromUI,
+  setPluginModeServer,
+  setPluginModeLocal,
+  setPluginModeAuto,
 };
 
 // Helper: apply safe area controls to current config and reload
@@ -401,3 +423,29 @@ function applySafeAreaFromUI() {
 }
 
 function clamp01(v: number) { return isFinite(v) ? Math.min(1, Math.max(0, v)) : 0; }
+
+// ===== Plugin mode switching (example for other projects) =====
+async function setPluginModeServer(origin: string) {
+  configureDevPlugins({ mode: 'server', serverBase: origin });
+  await reloadCurrentConfig();
+}
+
+async function setPluginModeLocal(localBase: string) {
+  configureDevPlugins({ mode: 'local', localBase });
+  await reloadCurrentConfig();
+}
+
+async function setPluginModeAuto(origin?: string, localBase?: string) {
+  const conf: any = { mode: 'auto' as const };
+  if (origin) conf.serverBase = origin;
+  if (localBase) conf.localBase = localBase;
+  configureDevPlugins(conf);
+  await reloadCurrentConfig();
+}
+
+async function reloadCurrentConfig() {
+  if (!currentConfig) return;
+  // Reuse existing flow to ensure plugins preload under new config
+  await preloadPluginsForScenario(currentConfig);
+  await loadConfiguration(currentConfig);
+}

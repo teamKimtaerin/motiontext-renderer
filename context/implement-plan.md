@@ -31,6 +31,7 @@
 - M6.5 로컬 플러그인 서버/데모 통합: dev 전용 경량 서버 + 동적 로딩 연동 — 완료(보안 검증 제외)
 - M6.7 Caption with Intention 데모: 전용 영상 교체, CwI 3대 애니메이션 플러그인(pop/wave, loud, whisper), 캡션 박스 + 박스 탈출 구현 — 진행중
 - M6.7.hotfix CwI 구조 개편: word-per-node(단어=Text 노드, 각 노드에 cwi 애니메이션) — 신규(즉시)
+- M6.8 Dev 플러그인 원점 init: 서버/로컬/자동 설정 API 추가 — 예정
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정(핫픽스 이후)
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
@@ -414,6 +415,48 @@
 - 리스크: 단어 수가 많은 구간에서 DOM 수 증가 → 성능 확인 필요(필요 시 가상화/가벼운 텍스트 결합 고려)
 
 ---
+
+
+## 6.8) Dev 플러그인 원점 init (M6.8)
+
+목표(스코프)
+- 데모/Dev 환경에서 플러그인 원점(서버/로컬)을 하드코딩 대신 init 함수로 설정.
+- 시나리오 기반 프리로드 경로가 이 설정을 따르도록 중앙화(서버, 로컬, 자동 폴백).
+
+설계/구조
+- 설정 모듈(싱글톤): `src/loader/dev/DevPluginConfig.ts`
+  - API: `configureDevPlugins({ mode, base })`, `getDevPluginConfig()`
+  - `mode`: `'server' | 'local' | 'auto'`
+  - `base`:
+    - server: 예) `http://localhost:3300`
+    - local: 예) `./demo/plugin-server/plugins/` (vite 상대 경로)
+- 로더 경로 선택:
+  - server: 기존 `DevPluginLoader.loadFrom(manifestUrl)` 사용 (manifest → entry → Blob import)
+  - local: 새 `LocalPluginLoader.importFrom(base, name@version)`로 직접 import 후 `devRegistry.register()`
+  - auto: server 시도 후 실패 시 local 폴백
+- 변경 파일
+  - `src/loader/dev/PreloadFromScenario.ts`: 설정 조회해 server/local/auto 분기
+  - `src/loader/dev/LocalPluginLoader.ts`: 로컬 경로 동적 import 유틸 (vite `@vite-ignore`)
+  - `demo/devPlugins.ts`: 하드코딩 origin 제거 → `configureDevPlugins(...)` 호출 후 `preloadPluginsForScenario(...)`
+  - (선택) 환경변수 반영: `VITE_PLUGIN_MODE`, `VITE_PLUGIN_ORIGIN`, `VITE_PLUGIN_LOCAL_BASE`
+
+구현 체크리스트
+- [x] `DevPluginConfig.ts` 도입 (타입/기본값 포함: mode='auto', base server='http://localhost:3300', local='./demo/plugin-server/plugins/')
+- [x] `LocalPluginLoader.ts` 구현: `import(/* @vite-ignore */ `${base}/${key}/index.mjs`)` → 레지스트리 등록
+- [x] `PreloadFromScenario` 수정: server/local/auto 분기 및 실패시 폴백 처리, 경고 로그 정리
+- [x] `demo/devPlugins.ts` 갱신: `configureDevPlugins` 사용, 기존 PLUGIN_ORIGIN 상수 제거
+- [x] CwI 전용 임시 폴백 제거(또는 유지 시 설정 기반으로만 동작하도록 축소)
+- [ ] 문서 반영: 본 계획 문단, `context/folder-structure.md` devPlugins 설명 보강, README 사용 예 추가
+
+수용 기준
+- server 모드: `pnpm plugin:server` 실행 상태에서 `plugin_local.json`/`plugin_showcase.json` 정상 로드
+- local 모드: 서버 미실행이어도 `cwi_demo_full.json` 포함 모든 데모 플러그인이 로컬 경로에서 로드되어 동작
+- auto 모드: 서버 다운 시 자동으로 로컬로 폴백, 서버 재가동 시 서버 경로 사용
+- 기존 데모/샘플 동작 회귀 없음, `pnpm typecheck`/`pnpm build` 무오류
+
+소요/리스크
+- 소요: 0.3~0.5일 (유틸 2개 + 경로 분기 + 데모 반영)
+- 리스크: 번들러의 상대 경로 해석 이슈(개발 모드에서만 사용), vite 환경에서 `@vite-ignore`로 회피 가능
 
 ## 7) 보안 로더 (M7)
 - [ ] ManifestValidator: 필수 필드/버전/peer/minRenderer 체크

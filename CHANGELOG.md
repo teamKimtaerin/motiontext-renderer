@@ -1,5 +1,20 @@
 # @teamkimtaerin/motiontext-renderer
 
+## 0.3.0
+
+### Minor Changes
+
+- feat(dev): add plugin origin init (M6.8), server/local/auto modes, and local file import path
+  - configureDevPlugins({ mode, serverBase, localBase }) to configure plugin source
+  - server mode: fetch manifest/entry from serverBase
+  - local mode: import project‑bundled plugins via import.meta.glob (no dev plugin server required)
+  - auto mode: server first, fallback to local on failure
+  - preloadFromScenario updated to honor strict mode ordering
+  - demo adds runtime mode switch example and UI buttons
+
+  Notes:
+  - This is a dev‑only improvement for plugin loading convenience; production secure loader remains planned (M7).
+
 ## 0.2.0
 
 ### Minor Changes

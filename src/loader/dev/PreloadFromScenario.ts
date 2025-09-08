@@ -1,6 +1,8 @@
 import type { ScenarioFileV1_3 } from '../../types/scenario';
 import { devRegistry } from './DevPluginRegistry';
 import { loadFrom } from './DevPluginLoader';
+import { getDevPluginConfig } from './DevPluginConfig';
+import { importFrom as importLocal } from './LocalPluginLoader';
 
 function eachNode(n: any, visit: (_node: any) => void) {
   if (!n || typeof n !== 'object') return;
@@ -19,9 +21,10 @@ function parseName(name: string): { id: string; version?: string } {
 
 export async function preloadFromScenario(
   scenario: ScenarioFileV1_3,
-  origin: string,
+  origin?: string,
   defaultVersion = '1.0.0'
 ): Promise<void> {
+  const cfg = getDevPluginConfig();
   const want = new Map<string, { id: string; version: string }>();
   for (const cue of scenario.cues || []) {
     eachNode((cue as any).root, (node) => {
@@ -76,14 +79,38 @@ export async function preloadFromScenario(
 
   for (const { id, version } of want.values()) {
     const key = `${id}@${version}`;
-    // Skip if already registered
-    if (devRegistry.has(key) || devRegistry.has(id)) continue;
-    const url = `${origin.replace(/\/$/, '')}/plugins/${key}/manifest.json`;
-    try {
-      await loadFrom(url);
-    } catch (e) {
-      /* eslint-disable-next-line no-console */
-      console.warn('[preloadFromScenario] failed', key, e);
+    const mode = cfg.mode;
+    const serverBase = (origin ? origin : cfg.serverBase).replace(/\/$/, '');
+
+    let loaded = false;
+    // Server-preferred path for 'server' and 'auto'
+    if (mode === 'server' || mode === 'auto') {
+      const manifestUrl = `${serverBase}/plugins/${key}/manifest.json`;
+      try {
+        await loadFrom(manifestUrl);
+        loaded = true;
+      } catch (_e) {
+        if (mode === 'server') {
+          // eslint-disable-next-line no-console
+          console.warn('[preloadFromScenario] server load failed:', key);
+        }
+      }
     }
+    // Local path for 'local' or when 'auto' server failed
+    if (!loaded && (mode === 'local' || mode === 'auto')) {
+      // If already present (e.g., registered earlier), skip import
+      if (devRegistry.has(key) || devRegistry.has(id)) {
+        loaded = true;
+      } else {
+        try {
+          await importLocal(cfg.localBase, key);
+          loaded = true;
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn('[preloadFromScenario] local import failed:', key, e);
+        }
+      }
+    }
+    // If neither path succeeded, leave it unresolved; renderer will degrade gracefully
   }
 }

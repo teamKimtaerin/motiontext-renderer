@@ -131,6 +131,33 @@ pnpm typecheck     # TypeScript 타입 체크
 pnpm clean         # dist 폴더 삭제
 ```
 
+### Dev 플러그인 원점 설정 (M6.8)
+
+데모/개발 환경에서 플러그인 소스(서버/로컬)를 init으로 설정합니다.
+
+- 환경변수로 설정(권장):
+```bash
+# 서버 우선, 실패 시 로컬 폴백(auto)
+pnpm dev
+
+# 서버만 사용
+VITE_PLUGIN_MODE=server VITE_PLUGIN_ORIGIN=http://localhost:3300 pnpm dev
+
+# 로컬 폴더만 사용
+VITE_PLUGIN_MODE=local VITE_PLUGIN_LOCAL_BASE=./demo/plugin-server/plugins/ pnpm dev
+```
+
+- 코드에서 설정(`demo/devPlugins.ts`):
+```ts
+import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
+
+configureDevPlugins({
+  mode: 'auto',
+  serverBase: 'http://localhost:3300',
+  localBase: './demo/plugin-server/plugins/',
+});
+```
+
 ---
 
 ## 📦 버전 관리 및 배포 가이드

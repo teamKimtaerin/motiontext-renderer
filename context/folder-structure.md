@@ -202,7 +202,9 @@
 - 보안: M7 무결성/서명 검증 미포함(개발용). 프로덕션 사용 금지.
 
 ### 데모 프론트 분리 포인트
-- `demo/devPlugins.ts`: Dev 로더 초기화 및 사전 로드 진입점. `PLUGIN_ORIGIN` 상수로 서버 주소 중앙화.
+- `demo/devPlugins.ts`: Dev 로더 초기화 및 사전 로드 진입점. `configureDevPlugins({ mode, serverBase, localBase })`로 원점 설정.
+  - 환경변수(선택): `VITE_PLUGIN_MODE`(`server|local|auto`), `VITE_PLUGIN_ORIGIN`, `VITE_PLUGIN_LOCAL_BASE`
+  - 기본값: `auto` 모드에서 서버 우선 시도 후 실패 시 로컬 폴더에서 직접 import 폴백
 - `demo/ui/safeAreaDev.ts`(선택): Safe Area 데모 패널 로직 분리로 `main.ts` 슬림화.
 
 ---
