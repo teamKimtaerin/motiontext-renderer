@@ -67,7 +67,8 @@ jobs:
           publish: pnpm release
           title: 'Version Packages'
           commit: 'Version Packages'
-          version: pnpm version
+          # Run the changesets versioning step (use npm script or direct cli)
+          version: pnpm run version
         env:
           # Prefer a PAT to bypass org/repo restriction on the Actions bot creating PRs
           # Create a repo-scoped PAT (classic) with repo + pull_request write, save as RELEASE_PAT or GH_PAT
