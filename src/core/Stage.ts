@@ -8,13 +8,17 @@ export interface ContentRect {
 }
 
 // Pure function for content rect calculation (testable)
-export function computeContentRect(containerWidth: number, containerHeight: number, videoAspect: number): ContentRect {
+export function computeContentRect(
+  containerWidth: number,
+  containerHeight: number,
+  videoAspect: number
+): ContentRect {
   const ca = containerWidth / containerHeight;
   let width = containerWidth,
     height = containerHeight,
     left = 0,
     top = 0;
-  
+
   if (ca > videoAspect) {
     height = containerHeight;
     width = Math.round(containerHeight * videoAspect);
@@ -142,14 +146,17 @@ export class Stage {
       this.ro = null;
     }
     if (this._boundMedia && this.onLoadedMetaBound) {
-      this._boundMedia.removeEventListener('loadedmetadata', this.onLoadedMetaBound);
+      this._boundMedia.removeEventListener(
+        'loadedmetadata',
+        this.onLoadedMetaBound
+      );
     }
     this.onLoadedMetaBound = null;
     if (this.onFullscreenBound) {
       document.removeEventListener('fullscreenchange', this.onFullscreenBound);
     }
     this.onFullscreenBound = null;
-    
+
     // Reset tracking
     this._boundParent = null;
     this._boundMedia = null;

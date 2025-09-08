@@ -74,7 +74,11 @@ export class TimelineController {
 
   private cancelVfc() {
     const v = this.video as any;
-    if (this.vfcId != null && v && typeof v.cancelVideoFrameCallback === 'function') {
+    if (
+      this.vfcId != null &&
+      v &&
+      typeof v.cancelVideoFrameCallback === 'function'
+    ) {
       v.cancelVideoFrameCallback(this.vfcId);
     }
     this.vfcId = null;
@@ -87,12 +91,15 @@ export class TimelineController {
     // Always cancel any prior reservation then request a fresh callback with new generation
     this.cancelVfc();
     const gen = ++this.vfcGen;
-    const cb: VideoFrameRequestCallback = (_now, metadata: any) => {
+    const cb = (_now: number, metadata: any) => {
       if (!this.running || gen !== this.vfcGen) return; // stale or stopped
       const mediaTime: number | undefined = metadata?.mediaTime;
-      const t = typeof mediaTime === 'number' && Number.isFinite(mediaTime)
-        ? mediaTime
-        : (this.video ? this.video.currentTime : 0);
+      const t =
+        typeof mediaTime === 'number' && Number.isFinite(mediaTime)
+          ? mediaTime
+          : this.video
+            ? this.video.currentTime
+            : 0;
       this.publish(t);
       // schedule next only if still same generation and running
       const vv = this.video as any;
@@ -136,7 +143,11 @@ export class TimelineController {
     if (this.rafId != null) cancelAnimationFrame(this.rafId);
     this.rafId = null;
     const v = this.video as any;
-    if (this.vfcId != null && v && typeof v.cancelVideoFrameCallback === 'function') {
+    if (
+      this.vfcId != null &&
+      v &&
+      typeof v.cancelVideoFrameCallback === 'function'
+    ) {
       v.cancelVideoFrameCallback(this.vfcId);
     }
     this.vfcId = null;

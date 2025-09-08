@@ -2,7 +2,7 @@ import type { ScenarioFileV1_3 } from '../../types/scenario';
 import { devRegistry } from './DevPluginRegistry';
 import { loadFrom } from './DevPluginLoader';
 
-function eachNode(n: any, visit: (node: any) => void) {
+function eachNode(n: any, visit: (_node: any) => void) {
   if (!n || typeof n !== 'object') return;
   visit(n);
   const children: any[] = Array.isArray(n.children) ? n.children : [];
@@ -82,6 +82,7 @@ export async function preloadFromScenario(
     try {
       await loadFrom(url);
     } catch (e) {
+      /* eslint-disable-next-line no-console */
       console.warn('[preloadFromScenario] failed', key, e);
     }
   }

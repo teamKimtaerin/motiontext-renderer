@@ -5,9 +5,17 @@ import {
   applyGridContainer,
 } from '../layout/LayoutEngine';
 import { isWithin, computeRelativeWindow } from '../utils/time';
-import { composeActive, type Channels, progress as prog } from '../composer/PluginChainComposer';
+import {
+  composeActive,
+  type Channels,
+  progress as prog,
+} from '../composer/PluginChainComposer';
 import { evalBuiltin } from '../runtime/plugins/Builtin';
-import { applyChannels, applyTextStyle, applyGroupStyle } from '../runtime/StyleApply';
+import {
+  applyChannels,
+  applyTextStyle,
+  applyGroupStyle,
+} from '../runtime/StyleApply';
 import { ensureEffectsRoot } from '../runtime/DomMount';
 import { devRegistry } from '../loader/dev/DevPluginRegistry';
 import { createDevContext } from '../loader/SandboxContext';
@@ -175,7 +183,14 @@ export class Renderer {
       ph = contentRect.height;
     // Update group-level styles that depend on stage height (padding/border radius)
     for (const g of this.mountedGroups) {
-      try { applyGroupStyle(g.el, ph, (g.node as any).style, (g.node as any).layout); } catch {}
+      try {
+        applyGroupStyle(
+          g.el,
+          ph,
+          (g.node as any).style,
+          (g.node as any).layout
+        );
+      } catch (_err) { /* noop */ }
     }
     for (const item of this.mountedTextEls) {
       const tn = item.node;
@@ -253,7 +268,10 @@ export class Renderer {
           (spec, p) => {
             const reg = devRegistry.resolve(spec.name);
             if (reg && typeof reg.module?.evalChannels === 'function') {
-              const ctx = createDevContext(reg.baseUrl, (el as any).__effectsRoot || el);
+              const ctx = createDevContext(
+                reg.baseUrl,
+                (el as any).__effectsRoot || el
+              );
               try {
                 return reg.module.evalChannels(spec, p, ctx) || {};
               } catch {
@@ -269,7 +287,8 @@ export class Renderer {
           const item = this.mountedTextEls.find((it) => it.el === el)!;
           const effectsRoot = item.effectsRoot || ensureEffectsRoot(el);
           item.effectsRoot = effectsRoot;
-          const appliers = item._appliers || new Map<number, (_p: number) => void>();
+          const appliers =
+            item._appliers || new Map<number, (_p: number) => void>();
           item._appliers = appliers;
           for (let i = 0; i < chain.length; i++) {
             const spec: any = chain[i];
@@ -278,7 +297,10 @@ export class Renderer {
             // If dev path exposes evalChannels, prefer channel composition and skip default to avoid double applying
             if (typeof reg.module?.evalChannels === 'function') continue;
             const runtime = reg.module.default;
-            const { t0: w0, t1: w1 } = computeRelativeWindow(t0, t1, spec, { fps, snapToFrame: snap });
+            const { t0: w0, t1: w1 } = computeRelativeWindow(t0, t1, spec, {
+              fps,
+              snapToFrame: snap,
+            });
             if (!isWithin(t, w0, w1)) continue;
             // ensure applier
             let ap = appliers.get(i);
@@ -286,23 +308,35 @@ export class Renderer {
               // ctx per plugin (baseUrl-specific)
               const ctx = createDevContext(reg.baseUrl, effectsRoot);
               try {
-                if (typeof runtime.init === 'function') runtime.init(effectsRoot, spec.params, ctx);
-              } catch {}
+                if (typeof runtime.init === 'function')
+                  runtime.init(effectsRoot, spec.params, ctx);
+              } catch (_err) { /* noop */ }
               let out: any = undefined;
               try {
-                out = runtime.animate(effectsRoot, spec.params, ctx, Math.max(0, w1 - w0));
-              } catch {}
+                out = runtime.animate(
+                  effectsRoot,
+                  spec.params,
+                  ctx,
+                  Math.max(0, w1 - w0)
+                );
+              } catch (_err) { /* noop */ }
               if (typeof out === 'function') {
                 ap = out as (_p: number) => void;
               } else if (out && typeof out.progress === 'function') {
-                ap = (pp: number) => { try { out.pause().progress(pp); } catch {} };
+                ap = (pp: number) => {
+                  try {
+                    out.pause().progress(pp);
+                  } catch (_err) { /* noop */ }
+                };
               } else {
                 ap = (_pp: number) => {};
               }
               appliers.set(i, ap);
             }
             const pnow = prog(t, w0, w1);
-            try { ap(pnow); } catch {}
+            try {
+              ap(pnow);
+            } catch (_err) { /* noop */ }
           }
         }
         let base = baseT;

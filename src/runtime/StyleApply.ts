@@ -71,7 +71,10 @@ export function applyGroupStyle(
   if (s.boxBg) (el.style as any).background = String(s.boxBg);
   // Border
   if (s.border) {
-    const wpx = Math.max(0, Math.round(containerHeight * (s.border.widthRel || 0)));
+    const wpx = Math.max(
+      0,
+      Math.round(containerHeight * (s.border.widthRel || 0))
+    );
     (el.style as any).borderStyle = 'solid';
     (el.style as any).borderWidth = `${wpx}px`;
     (el.style as any).borderColor = String(s.border.color || '#000');
@@ -82,8 +85,14 @@ export function applyGroupStyle(
   }
   // Padding from layout (normalized relative to stage height)
   if (layout?.padding) {
-    const px = Math.max(0, Math.round(containerHeight * (layout.padding.x || 0)));
-    const py = Math.max(0, Math.round(containerHeight * (layout.padding.y || 0)));
+    const px = Math.max(
+      0,
+      Math.round(containerHeight * (layout.padding.x || 0))
+    );
+    const py = Math.max(
+      0,
+      Math.round(containerHeight * (layout.padding.y || 0))
+    );
     el.style.padding = `${py}px ${px}px`;
   }
 }

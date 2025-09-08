@@ -60,8 +60,8 @@ export function applyNormalizedPosition(
     // Horizontal clamp
     if (wN > 0) {
       // Calculate the bounds for the anchor point position
-      const xmin2 = xmin + (1 - ax) * wN;  // minimum anchor position (considering element extends away from anchor)
-      const xmax2 = xmax - ax * wN;        // maximum anchor position (considering element extends toward anchor)
+      const xmin2 = xmin + (1 - ax) * wN; // minimum anchor position (considering element extends away from anchor)
+      const xmax2 = xmax - ax * wN; // maximum anchor position (considering element extends toward anchor)
       x = Math.min(Math.max(x, xmin2), xmax2);
     } else {
       x = Math.min(Math.max(x, xmin), xmax);
@@ -72,10 +72,10 @@ export function applyNormalizedPosition(
       // For bottom anchor (ay = 1.0): anchor point is at element bottom, element extends upward
       // For top anchor (ay = 0.0): anchor point is at element top, element extends downward
       // For center anchor (ay = 0.5): anchor point is at element center
-      
+
       // Calculate the bounds for the anchor point position
-      const ymin2 = ymin + (1 - ay) * hN;  // minimum anchor position (considering element extends away from anchor)
-      const ymax2 = ymax - ay * hN;        // maximum anchor position (considering element extends toward anchor)
+      const ymin2 = ymin + (1 - ay) * hN; // minimum anchor position (considering element extends away from anchor)
+      const ymax2 = ymax - ay * hN; // maximum anchor position (considering element extends toward anchor)
       y = Math.min(Math.max(y, ymin2), ymax2);
     } else {
       y = Math.min(Math.max(y, ymin), ymax);

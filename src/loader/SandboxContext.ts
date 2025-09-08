@@ -7,11 +7,18 @@ export interface AssetsHelper {
   getUrl: (_path: string) => string;
 }
 
-export function createDevContext(baseUrl: string, container: HTMLElement, extras?: Partial<PluginContext>): PluginContext {
+export function createDevContext(
+  baseUrl: string,
+  container: HTMLElement,
+  extras?: Partial<PluginContext>
+): PluginContext {
   const assets: AssetsHelper = {
     getUrl: (p: string) => new URL(p, baseUrl).toString(),
   };
-  const gsapObj: any = (extras && (extras as any).gsap) || (typeof window !== 'undefined' && (window as any).gsap) || (gsapImport as any);
+  const gsapObj: any =
+    (extras && (extras as any).gsap) ||
+    (typeof window !== 'undefined' && (window as any).gsap) ||
+    (gsapImport as any);
   return {
     container,
     assets,

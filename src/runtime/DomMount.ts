@@ -1,7 +1,9 @@
 // DOM mounting utilities for nodes and plugin containers.
 
 export function ensureEffectsRoot(el: HTMLElement): HTMLElement {
-  let root = el.querySelector(':scope > [data-mtx-effects-root]') as HTMLElement | null;
+  let root = el.querySelector(
+    ':scope > [data-mtx-effects-root]'
+  ) as HTMLElement | null;
   if (!root) {
     root = document.createElement('div');
     root.setAttribute('data-mtx-effects-root', '');

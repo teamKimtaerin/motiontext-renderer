@@ -40,13 +40,14 @@ export async function loadFrom(manifestUrl: string): Promise<RegisteredPlugin> {
       if (actual) ok = satisfies(actual, range);
       else ok = false;
       if (!ok) {
+        /* eslint-disable-next-line no-console */
         console.warn(
           `[DevPluginLoader] Peer 'gsap' version mismatch or missing. Required: '${range}', ` +
             `Detected: '${actual ?? 'none'}' (dev-warning)`
         );
       }
     }
-  } catch {}
+  } catch (_err) { /* noop */ }
   const base = baseOf(manifestUrl);
   const entryUrl = new URL(manifest.entry, base).toString();
   const entryRes = await fetch(entryUrl);
