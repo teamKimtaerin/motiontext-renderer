@@ -118,8 +118,9 @@ export class Stage {
 
     // Set up new bindings
     // Mark overlay container as stage for plugin runtime sizing
-    if (this.container) {
-      this.container.classList.add('stage');
+    // Be defensive: tests may pass a minimal mock without classList
+    if (this.container && (this.container as any).classList?.add) {
+      (this.container as any).classList.add('stage');
     }
     this.ro = new ResizeObserver(() => this.scheduleBoundsUpdate());
     this.ro.observe(parent);
@@ -160,9 +161,9 @@ export class Stage {
     // Reset tracking
     this._boundParent = null;
     this._boundMedia = null;
-    // Remove stage marker class
-    if (this.container) {
-      this.container.classList.remove('stage');
+    // Remove stage marker class (guard for mocked containers without classList)
+    if (this.container && (this.container as any).classList?.remove) {
+      (this.container as any).classList.remove('stage');
     }
   }
 
