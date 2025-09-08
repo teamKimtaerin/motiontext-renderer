@@ -63,7 +63,12 @@ jobs:
       - name: Configure npm token (fresh .npmrc)
         run: |
           rm -f "$HOME/.npmrc"
-          printf "registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=%s\n" "$NPM_TOKEN" > "$HOME/.npmrc"
+          cat > "$HOME/.npmrc" << EOF
+          registry=https://registry.npmjs.org/
+          //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+          @kimtaerin:registry=https://registry.npmjs.org/
+          //registry.npmjs.org/:always-auth=true
+          EOF
 
       - name: Verify npm authentication
         run: |
