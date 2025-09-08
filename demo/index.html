@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MotionText Renderer Demo</title>
+    <!-- Roboto Flex for CwI demo (dev) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -24,15 +26,8 @@
               controls
               crossorigin="anonymous"
             >
-              <!-- 샘플 비디오 URL (저작권 프리) -->
-              <source
-                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                type="video/mp4"
-              />
-              <source
-                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.webm"
-                type="video/webm"
-              />
+              <!-- Demo sample video (local) -->
+              <source src="./samples/assets/friends.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
 
@@ -56,6 +51,8 @@
               <option value="animated_free_mixed">free 다위치 테스트</option>
               <option value="tilted_box">기울어진 텍스트(30°)</option>
               <option value="m5_layout_features">M5 레이아웃 기능 종합</option>
+              <option value="cwi_demo">CwI 캡션 데모</option>
+              <option value="cwi_demo_full">CwI 캡션 데모 (전체)</option>
             </select>
             <button id="load-sample" class="btn btn-primary">샘플 로드</button>
           </div>

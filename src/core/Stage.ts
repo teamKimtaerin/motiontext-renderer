@@ -113,6 +113,10 @@ export class Stage {
     this._boundMedia = this.media;
 
     // Set up new bindings
+    // Mark overlay container as stage for plugin runtime sizing
+    if (this.container) {
+      this.container.classList.add('stage');
+    }
     this.ro = new ResizeObserver(() => this.scheduleBoundsUpdate());
     this.ro.observe(parent);
 
@@ -149,6 +153,10 @@ export class Stage {
     // Reset tracking
     this._boundParent = null;
     this._boundMedia = null;
+    // Remove stage marker class
+    if (this.container) {
+      this.container.classList.remove('stage');
+    }
   }
 
   private scheduleBoundsUpdate() {

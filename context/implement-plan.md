@@ -28,7 +28,8 @@
 - M5.5 리팩토링: 경계 정리/중복 제거/모듈화 — 완료
 - M5.6 품질 보완/최적화: 이벤트/성능/타입/테스트 보강 — 완료
 - M6 타임라인: TimelineController 시킹/배속/rVFC — 완료(rVFC 도입, snapToFrame 연동, 테스트 통과)
-- M6.5 로컬 플러그인 서버/데모 통합: dev 전용 경량 서버 + 동적 로딩 연동 — 신규(보안 검증 제외)
+- M6.5 로컬 플러그인 서버/데모 통합: dev 전용 경량 서버 + 동적 로딩 연동 — 완료(보안 검증 제외)
+- M6.7 Caption with Intention 데모: 전용 영상 교체, CwI 3대 애니메이션 플러그인(pop/wave, loud, whisper), 캡션 박스 + 박스 탈출 구현 — 진행중
 - M7 보안 로더: Integrity/Manifest/Asset/PluginLoader 파이프라인 — 예정
 - M8 런타임: PortalManager/DomMount/CssVars — 예정(StyleApply 일부 사용 중)
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
@@ -262,46 +263,6 @@
 - 자산 규약:
   - `ctx.assets.getUrl(relPath)`로 manifest 기준 절대 URL 제공
   - font는 Dev 단계에서 `FontFace` 등록 허용(Prod는 M7에서 무결성/캐시)
-
-폴더 구조(제안/리팩토링)
-```text
-demo/                        # Vite dev root (변경 없음)
-  index.html
-  main.ts                   # 가볍게 유지, Dev 플러그인 연동은 별도 모듈로 분리 권장
-  style.css
-  samples/                  # 시나리오 JSON 보관 (현 구조 유지)
-    assets/                 # 샘플 전용 정적 리소스 (영상 등)
-    plugin_local.json       # (추가) 로컬 플러그인 활용 샘플
-  ui/                       # (신규, 선택) 데모 전용 UI 헬퍼
-    safeAreaDev.ts          # safe area 패널 로직 분리
-  devPlugins.ts             # (신규) Dev 로더 초기화/사전 로드 진입점
-
-demo/plugin-server/         # (신규) 로컬 플러그인 서버 루트
-  server.js                 # Node http 정적 서버 (ESM)
-  README.md                 # 사용법/주의사항(Dev 전용)
-  plugins/
-    spin@1.0.0/
-      manifest.json
-      index.mjs
-      assets/
-        ...
-    bobY@1.0.0/
-      manifest.json
-      index.mjs
-    pulse@1.0.0/
-      manifest.json
-      index.mjs
-
-src/loader/dev/             # (신규) Dev 전용 로더/레지스트리
-  DevPluginRegistry.ts
-  DevPluginLoader.ts
-
-src/runtime/                # (보완)
-  DomMount.ts               # baseWrapper/effectsRoot 생성 유틸(간소)
-  PortalManager.ts          # (M8에서 본격 구현, 본 단계에선 인터페이스만)
-```
-
-리팩토링 포인트(데모 프론트)
 - main.ts 부피 감소: Dev 플러그인 초기화(`devPlugins.ts`), SafeArea UI(`ui/safeAreaDev.ts`) 분리로 가독성/유지보수성 향상(선택 적용).
 - 샘플 자산 경로: 기존 `demo/samples/assets/` 유지. 플러그인 패키지 자산은 서버 쪽 `plugins/*/assets/`에만 둬서 책임 분리.
 - 플러그인 서버 접속 설정: `devPlugins.ts`에서 `const PLUGIN_ORIGIN = 'http://localhost:3300'` 상수로 중앙화(환경별 오버라이드 용이).
@@ -354,6 +315,62 @@ src/runtime/                # (보완)
 소요/리스크
 - 소요: 0.5일 내외(서버/샘플/로더/연동/데모 반영).
 - 리스크: Dev 인터페이스(`evalChannels`)와 default 인터페이스 간 차이 → M7~M8에서 마이그레이션/경계 테스트 필요. 보안 미적용 상태를 반드시 문서화.
+
+## 6.7) Caption with Intention 데모 (CwI)
+
+목표(스코프)
+- 데모 샘플 영상을 `demo/samples/assets/friends.mp4`로 교체.
+- CwI 3대 애니메이션을 제공하는 dev 플러그인 구현:
+  - pop/wave: 글자별 발화 시점에 맞춘 1.15x 팝(파도타기 느낌)
+  - loud: 큰 볼륨 구간에서 확대 + 미세 떨림(트램블)
+  - whisper: 속삭임 구간에서 축소
+- `tmp/real.json`을 읽어 시나리오 v1.3 구조로 변환한 데모 JSON 추가(`demo/samples/cwi_demo.json`).
+
+-설계/구조
+- 캡션 박스(Containing Box) 구성
+  - Track 활용: `tracks: [{ id:'captions', type:'subtitle', layer: 20, overlapPolicy:'ignore', defaultStyle:{ /* box style */ } }]`
+  - Cue/root 그룹은 `absolute` + `anchor:'bc'` + `position:{x:0.5,y:0.9~0.95}`로 하단 20% 작업 영역에 배치
+  - 박스 규칙: 기본 `overflow:'clip'`, 배경 `boxBg: rgba(0,0,0,0.9)`, 내부 패딩 `padding:{ x:0.02, y:0.01 }`
+  - 줄 정책: 기본 1줄, 필요 시 최대 2줄(플러그인 내부에서 토큰 래핑으로 처리)
+  - Work Area: `stage.safeArea.top = 0.8`로 하단 20% 확보(+ track.safeArea로 좌/우 여백 선택 적용)
+- Loud 토큰의 박스 탈출
+  - 의도: loud 효과는 박스를 “뚫고” 상단으로 확대되어 보임
+  - 시나리오 표기: 해당 노드/플러그인에 `effectScope.breakout:{ mode:'portal', toLayer: 30, coordSpace:'stage', transfer:'clone', return:'end' }` 권장
+  - Dev 구현(PortalManager 미완성 시): 플러그인에서 span을 임시 복제하여 overlay 루트로 올리는 경량 포털(fallback) 적용 후 종료 시 복귀
+- 플러그인: `demo/plugin-server/plugins/cwi@1.0.0/`
+  - `manifest.json`: pluginApi 2.1, targets:["text"], capabilities:[]
+  - `index.mjs`: effectsRoot 내부에서 토큰(span) DOM을 생성하여 선행 흰색 문장 표기 후, 시킹에 따라 글자별 색상/스케일/트램블을 적용
+  - params: 
+    - `tokens: [{ ch:string, t0:number, t1:number, speaker?:string, kind?:'pop'|'loud'|'whisper', color?:string, volumeDb?:number, pitchHz?:number, offscreen?:boolean }]`
+    - `palette?: Record<string,string>` (speaker→color 매핑)
+    - `typeSize?: { min:number, base:number, max:number }` (상대 화면 높이 비율)
+    - `popScale?: number`(기본 1.15), `tremble?: { ampPx:number, freq:number }`
+  - Font(Roboto Flex): 데모에서는 Google Fonts 사용 가능
+    - `<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex&display=swap" rel="stylesheet" />`
+    - 필요 시 로컬 폰트(`demo/samples/assets/Instal Font - RobotoFlex.ttf`)를 `FontFace`로 등록하는 대체 경로도 허용
+
+- 시나리오 구성:
+  - 하단 20% 작업영역: `stage.safeArea.top=0.8` + 필요 시 노드 `layout.safeAreaClamp=true`
+  - 캡션 박스는 `captions` 트랙의 cue/root 그룹에서 구성(배경/clip/패딩), 텍스트 노드에는 실제 문자열은 넣지 않고 플러그인이 토큰 DOM 렌더
+  - 텍스트 노드: `pluginChain:[{ name:'cwi', params, /* loud 토큰에 한해 breakout 권장 */ }]`
+
+체크리스트
+- [ ] `demo/index.html`의 비디오 src를 `samples/assets/friends.mp4`로 지정
+- [ ] `cwi@1.0.0` 플러그인(manifest/index.mjs) 구현 및 dev 로더 동작 확인
+- [ ] `tmp/real.json` → `demo/samples/cwi_demo.json` 변환 로직/정적 산출물 추가
+- [ ] `demo/main.ts` 샘플 목록에 `cwi_demo` 추가 및 preload 연동
+
+-수용 기준
+- [ ] 재생 시 글자별 발화 타이밍에 맞춰 색상 전환과 모션(pop/loud/whisper)이 체감 가능
+- [ ] 일반/whisper 토큰은 캡션 박스 클립 내에서 동작하고, loud 토큰만 박스를 탈출해 확대 연출됨
+- [ ] 데모에서 `cwi_demo` 선택 시 오류 없이 로드/재생
+- [ ] 기존 샘플 동작 회귀 없음
+
+소요/리스크
+- 소요: 0.5일 내외(플러그인 DOM/seek 처리 + JSON 변환)
+- 리스크: 문자 수가 많을 경우 DOM 업데이트 비용 증가 → 필요 시 requestIdleCallback 등 최적화 후속
+
+---
 
 ## 7) 보안 로더 (M7)
 - [ ] ManifestValidator: 필수 필드/버전/peer/minRenderer 체크

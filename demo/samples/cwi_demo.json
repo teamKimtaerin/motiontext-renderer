@@ -1,0 +1,65 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": {
+    "baseAspect": "16:9",
+    "safeArea": { "top": 0.8, "left": 0.1, "right": 0.1, "bottom": 0.02 }
+  },
+  "tracks": [
+    {
+      "id": "captions",
+      "type": "subtitle",
+      "layer": 20,
+      "overlapPolicy": "ignore",
+      "defaultStyle": {
+        "fontFamily": "'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+        "fontSizeRel": 0.05,
+        "color": "#ffffff"
+      },
+      "safeArea": { "left": 0.1, "right": 0.1, "bottom": 0.02 }
+    }
+  ],
+  "cues": [
+    {
+      "id": "cwi-1",
+      "track": "captions",
+      "hintTime": { "start": 4.2, "end": 9.0 },
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "absolute", "anchor": "bc", "position": { "x": 0.5, "y": 0.92 }, "safeAreaClamp": true },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 4.408,
+            "absEnd": 8.754,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": { "SPEAKER_03": "#B469FF" },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    { "ch": "You", "t0": 0.500, "t1": 0.580, "kind": "loud", "speaker": "SPEAKER_03" },
+                    { "ch": "know,", "t0": 0.600, "t1": 0.760, "kind": "loud", "speaker": "SPEAKER_03" },
+                    { "ch": "we", "t0": 0.780, "t1": 0.861, "kind": "loud", "speaker": "SPEAKER_03" },
+                    { "ch": "should", "t0": 0.881, "t1": 1.041, "kind": "whisper", "speaker": "SPEAKER_03" },
+                    { "ch": "all", "t0": 1.241, "t1": 1.401, "kind": "loud", "speaker": "SPEAKER_03" },
+                    { "ch": "do.", "t0": 1.461, "t1": 1.642, "kind": "pop", "speaker": "SPEAKER_03" },
+                    { "ch": "Go", "t0": 1.702, "t1": 3.344, "kind": "whisper", "speaker": "SPEAKER_03" },
+                    { "ch": "see", "t0": 3.404, "t1": 3.625, "kind": "pop", "speaker": "SPEAKER_03" },
+                    { "ch": "a", "t0": 3.705, "t1": 3.745, "kind": "whisper", "speaker": "SPEAKER_03" },
+                    { "ch": "musical.", "t0": 3.865, "t1": 4.346, "kind": "whisper", "speaker": "SPEAKER_03" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+

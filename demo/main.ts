@@ -5,6 +5,8 @@
 import { MotionTextRenderer, MotionTextController } from '../src/index';
 import { preloadPluginsForScenario } from './devPlugins';
 import pluginLocal from './samples/plugin_local.json';
+import cwiDemo from './samples/cwi_demo.json';
+import cwiDemoFull from './samples/cwi_demo_full.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
 import animatedFreeMixed from './samples/animated_free_mixed.json';
@@ -98,6 +100,8 @@ const sampleConfigs: Record<string, RendererConfig> = {
   m5_layout_features: m5Layout as RendererConfig,
   plugin_local: pluginLocal as RendererConfig,
   plugin_showcase: pluginShowcase as RendererConfig,
+  cwi_demo: cwiDemo as RendererConfig,
+  cwi_demo_full: cwiDemoFull as RendererConfig,
 
   animated: {
     version: '1.3',

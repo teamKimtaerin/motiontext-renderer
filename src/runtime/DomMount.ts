@@ -5,13 +5,11 @@ export function ensureEffectsRoot(el: HTMLElement): HTMLElement {
   if (!root) {
     root = document.createElement('div');
     root.setAttribute('data-mtx-effects-root', '');
-    root.style.position = 'absolute';
-    root.style.left = '0';
-    root.style.top = '0';
-    root.style.width = '100%';
-    root.style.height = '100%';
+    // In-flow container so host element can size to content.
+    // Absolute positioning here caused zero-width hosts and vertical wrapping.
+    root.style.position = 'relative';
     root.style.pointerEvents = 'none';
-    // Ensure parent is positioned so absolute child anchors correctly
+    // If host is static, allow anchoring relative to itself when needed
     const pos = getComputedStyle(el).position;
     if (pos === 'static') el.style.position = 'relative';
     el.appendChild(root);

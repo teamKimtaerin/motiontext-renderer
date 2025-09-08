@@ -1,0 +1,2774 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": {
+    "baseAspect": "16:9",
+    "safeArea": { "top": 0.8, "left": 0.025, "right": 0.025, "bottom": 0.05 }
+  },
+  "tracks": [
+    {
+      "id": "captions",
+      "type": "subtitle",
+      "layer": 20,
+      "overlapPolicy": "ignore",
+      "defaultStyle": {
+        "fontFamily": "'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif",
+        "fontSizeRel": 0.05,
+        "color": "#ffffff"
+      },
+      "safeArea": { "left": 0.025, "right": 0.025, "bottom": 0.05 }
+    }
+  ],
+  "cues": [
+    {
+      "id": "cwi-001",
+      "track": "captions",
+      "hintTime": { "start": 4.408, "end": 8.754 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 4.408,
+            "absEnd": 8.754,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "You",
+                      "t0": 0.5,
+                      "t1": 0.58,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "know,",
+                      "t0": 0.6,
+                      "t1": 0.76,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "we",
+                      "t0": 0.78,
+                      "t1": 0.861,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "should",
+                      "t0": 0.881,
+                      "t1": 1.041,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "all",
+                      "t0": 1.241,
+                      "t1": 1.401,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "do.",
+                      "t0": 1.461,
+                      "t1": 1.642,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "Go",
+                      "t0": 1.702,
+                      "t1": 3.344,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "see",
+                      "t0": 3.404,
+                      "t1": 3.625,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 3.705,
+                      "t1": 3.745,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "musical.",
+                      "t0": 3.865,
+                      "t1": 4.346,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-002",
+      "track": "captions",
+      "hintTime": { "start": 11.779, "end": 12.74 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 11.779,
+            "absEnd": 12.74,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Sure.",
+                      "t0": 0.5,
+                      "t1": 0.961,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-003",
+      "track": "captions",
+      "hintTime": { "start": 12.28, "end": 20.351 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 12.28,
+            "absEnd": 20.351,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "And",
+                      "t0": 0.5,
+                      "t1": 0.56,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 2.743,
+                      "t1": 2.823,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "know",
+                      "t0": 2.843,
+                      "t1": 2.923,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "which",
+                      "t0": 2.943,
+                      "t1": 3.063,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "one",
+                      "t0": 3.124,
+                      "t1": 3.184,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "we",
+                      "t0": 3.224,
+                      "t1": 3.264,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "should",
+                      "t0": 3.304,
+                      "t1": 3.464,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "see?",
+                      "t0": 3.524,
+                      "t1": 3.724,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "The",
+                      "t0": 3.744,
+                      "t1": 3.805,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "1996",
+                      "t0": 5.307,
+                      "t1": 6.989,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "Tony",
+                      "t0": 7.089,
+                      "t1": 7.45,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "Award",
+                      "t0": 7.49,
+                      "t1": 7.811,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "winner.",
+                      "t0": 7.851,
+                      "t1": 8.071,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-004",
+      "track": "captions",
+      "hintTime": { "start": 21.974, "end": 23.996 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 21.974,
+            "absEnd": 23.996,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Do",
+                      "t0": 0.5,
+                      "t1": 0.56,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 0.58,
+                      "t1": 0.66,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "happen",
+                      "t0": 0.72,
+                      "t1": 0.921,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "to",
+                      "t0": 0.961,
+                      "t1": 1.041,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "know",
+                      "t0": 1.061,
+                      "t1": 1.161,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "the",
+                      "t0": 1.201,
+                      "t1": 1.281,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "name",
+                      "t0": 1.341,
+                      "t1": 1.562,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "of",
+                      "t0": 1.622,
+                      "t1": 1.662,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "that",
+                      "t0": 1.702,
+                      "t1": 1.842,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "one?",
+                      "t0": 1.922,
+                      "t1": 2.022,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-005",
+      "track": "captions",
+      "hintTime": { "start": 24.878, "end": 26.22 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 24.878,
+            "absEnd": 26.22,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "I",
+                      "t0": 0.5,
+                      "t1": 0.52,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "don't",
+                      "t0": 0.54,
+                      "t1": 0.641,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "know,",
+                      "t0": 0.661,
+                      "t1": 0.761,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Greece.",
+                      "t0": 1.021,
+                      "t1": 1.342,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-006",
+      "track": "captions",
+      "hintTime": { "start": 28.063, "end": 29.004 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 28.063,
+            "absEnd": 29.004,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "No.",
+                      "t0": 0.5,
+                      "t1": 0.941,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-007",
+      "track": "captions",
+      "hintTime": { "start": 31.528, "end": 32.569 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 31.528,
+            "absEnd": 32.569,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Rent.",
+                      "t0": 0.5,
+                      "t1": 1.041,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-008",
+      "track": "captions",
+      "hintTime": { "start": 33.315, "end": 36.579 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 33.315,
+            "absEnd": 36.579,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Yes!",
+                      "t0": 0.5,
+                      "t1": 1.301,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "Rent!",
+                      "t0": 1.321,
+                      "t1": 3.264,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-009",
+      "track": "captions",
+      "hintTime": { "start": 36.099, "end": 37.68 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 36.099,
+            "absEnd": 37.68,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Okay,",
+                      "t0": 0.5,
+                      "t1": 0.86,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "so",
+                      "t0": 0.88,
+                      "t1": 1.0,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "when",
+                      "t0": 1.02,
+                      "t1": 1.101,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "do",
+                      "t0": 1.121,
+                      "t1": 1.161,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 1.181,
+                      "t1": 1.241,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "want",
+                      "t0": 1.261,
+                      "t1": 1.341,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "to",
+                      "t0": 1.361,
+                      "t1": 1.401,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "go?",
+                      "t0": 1.461,
+                      "t1": 1.581,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-010",
+      "track": "captions",
+      "hintTime": { "start": 37.661, "end": 40.464 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 37.661,
+            "absEnd": 40.464,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "What?",
+                      "t0": 0.5,
+                      "t1": 0.7,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "Oh,",
+                      "t0": 1.561,
+                      "t1": 1.641,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "I'm",
+                      "t0": 1.661,
+                      "t1": 1.782,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "sorry",
+                      "t0": 1.822,
+                      "t1": 2.002,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "I",
+                      "t0": 2.022,
+                      "t1": 2.082,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "can't,",
+                      "t0": 2.142,
+                      "t1": 2.402,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "I'm",
+                      "t0": 2.462,
+                      "t1": 2.523,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "busy.",
+                      "t0": 2.543,
+                      "t1": 2.803,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-011",
+      "track": "captions",
+      "hintTime": { "start": 43.729, "end": 48.995 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 43.729,
+            "absEnd": 48.995,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Hey,",
+                      "t0": 0.5,
+                      "t1": 0.58,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "man,",
+                      "t0": 2.403,
+                      "t1": 2.823,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it",
+                      "t0": 2.843,
+                      "t1": 2.903,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "is",
+                      "t0": 3.003,
+                      "t1": 3.063,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "so",
+                      "t0": 3.184,
+                      "t1": 3.464,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "hard",
+                      "t0": 3.584,
+                      "t1": 3.885,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "to",
+                      "t0": 3.945,
+                      "t1": 4.045,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "shop",
+                      "t0": 4.165,
+                      "t1": 4.465,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 4.525,
+                      "t1": 4.666,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "girls.",
+                      "t0": 4.766,
+                      "t1": 5.266,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-012",
+      "track": "captions",
+      "hintTime": { "start": 50.238, "end": 52.861 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 50.238,
+            "absEnd": 52.861,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Yes,",
+                      "t0": 0.5,
+                      "t1": 0.68,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "it",
+                      "t0": 0.74,
+                      "t1": 0.8,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "is",
+                      "t0": 0.96,
+                      "t1": 1.101,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "at",
+                      "t0": 1.141,
+                      "t1": 1.321,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "office",
+                      "t0": 1.601,
+                      "t1": 1.982,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "max.",
+                      "t0": 2.162,
+                      "t1": 2.623,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-013",
+      "track": "captions",
+      "hintTime": { "start": 55.405, "end": 56.646 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 55.405,
+            "absEnd": 56.646,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "What",
+                      "t0": 0.5,
+                      "t1": 0.62,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "did",
+                      "t0": 0.66,
+                      "t1": 0.76,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 0.8,
+                      "t1": 0.88,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "get",
+                      "t0": 0.94,
+                      "t1": 1.1,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "her?",
+                      "t0": 1.161,
+                      "t1": 1.241,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-014",
+      "track": "captions",
+      "hintTime": { "start": 56.186, "end": 64.618 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 56.186,
+            "absEnd": 64.618,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "A",
+                      "t0": 0.5,
+                      "t1": 0.52,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "pen.",
+                      "t0": 3.003,
+                      "t1": 3.704,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "It's",
+                      "t0": 5.186,
+                      "t1": 5.366,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "two",
+                      "t0": 5.386,
+                      "t1": 5.547,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "gifts",
+                      "t0": 5.587,
+                      "t1": 5.787,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "in",
+                      "t0": 5.847,
+                      "t1": 5.927,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "one.",
+                      "t0": 6.028,
+                      "t1": 6.148,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "It's",
+                      "t0": 6.168,
+                      "t1": 6.268,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 6.328,
+                      "t1": 6.348,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "pen.",
+                      "t0": 6.408,
+                      "t1": 6.709,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "That's",
+                      "t0": 7.009,
+                      "t1": 7.23,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "also",
+                      "t0": 7.35,
+                      "t1": 7.691,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 7.711,
+                      "t1": 7.731,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "clock.",
+                      "t0": 7.951,
+                      "t1": 8.432,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-015",
+      "track": "captions",
+      "hintTime": { "start": 67.124, "end": 74.757 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 67.124,
+            "absEnd": 74.757,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "You",
+                      "t0": 0.5,
+                      "t1": 0.62,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "can't",
+                      "t0": 0.68,
+                      "t1": 0.92,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "give",
+                      "t0": 0.981,
+                      "t1": 1.161,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "her",
+                      "t0": 1.201,
+                      "t1": 1.281,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "that.",
+                      "t0": 1.361,
+                      "t1": 1.582,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Why",
+                      "t0": 2.363,
+                      "t1": 2.423,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "not?",
+                      "t0": 2.443,
+                      "t1": 2.644,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Because",
+                      "t0": 2.704,
+                      "t1": 2.924,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "she's",
+                      "t0": 2.944,
+                      "t1": 3.105,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "not",
+                      "t0": 3.165,
+                      "t1": 3.285,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "11.",
+                      "t0": 3.305,
+                      "t1": 3.565,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "And",
+                      "t0": 3.606,
+                      "t1": 5.95,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "it's",
+                      "t0": 5.97,
+                      "t1": 6.07,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "not",
+                      "t0": 6.09,
+                      "t1": 6.21,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "the",
+                      "t0": 6.25,
+                      "t1": 6.311,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "seventh",
+                      "t0": 6.331,
+                      "t1": 6.631,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "night",
+                      "t0": 6.671,
+                      "t1": 6.791,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "of",
+                      "t0": 6.812,
+                      "t1": 6.852,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Hanukkah.",
+                      "t0": 6.892,
+                      "t1": 7.633,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-016",
+      "track": "captions",
+      "hintTime": { "start": 77.679, "end": 84.669 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 77.679,
+            "absEnd": 84.669,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Honey,",
+                      "t0": 0.5,
+                      "t1": 1.281,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "what",
+                      "t0": 1.301,
+                      "t1": 1.442,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "he",
+                      "t0": 1.482,
+                      "t1": 1.562,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "means",
+                      "t0": 1.622,
+                      "t1": 1.802,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "by",
+                      "t0": 1.862,
+                      "t1": 1.942,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "that",
+                      "t0": 2.002,
+                      "t1": 2.143,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "is,",
+                      "t0": 2.203,
+                      "t1": 2.283,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "while",
+                      "t0": 2.864,
+                      "t1": 3.024,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "this",
+                      "t0": 3.044,
+                      "t1": 3.164,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "is",
+                      "t0": 3.204,
+                      "t1": 3.284,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 3.325,
+                      "t1": 3.365,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "very",
+                      "t0": 3.505,
+                      "t1": 3.805,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "nice",
+                      "t0": 3.885,
+                      "t1": 4.086,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "gift,",
+                      "t0": 4.166,
+                      "t1": 4.426,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "maybe",
+                      "t0": 4.807,
+                      "t1": 5.027,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "it's",
+                      "t0": 5.047,
+                      "t1": 5.127,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "just",
+                      "t0": 5.168,
+                      "t1": 5.308,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "not",
+                      "t0": 5.348,
+                      "t1": 5.508,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "something",
+                      "t0": 5.548,
+                      "t1": 5.849,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 5.869,
+                      "t1": 5.889,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "boyfriend",
+                      "t0": 6.209,
+                      "t1": 6.65,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_03"
+                    },
+                    {
+                      "ch": "gives?",
+                      "t0": 6.69,
+                      "t1": 6.99,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_03"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-017",
+      "track": "captions",
+      "hintTime": { "start": 84.55, "end": 91.861 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 84.55,
+            "absEnd": 91.861,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Sure",
+                      "t0": 0.5,
+                      "t1": 0.7,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it",
+                      "t0": 0.781,
+                      "t1": 0.901,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "is.",
+                      "t0": 0.921,
+                      "t1": 1.301,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "She",
+                      "t0": 1.341,
+                      "t1": 2.283,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "needs",
+                      "t0": 2.343,
+                      "t1": 2.503,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 2.563,
+                      "t1": 2.583,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "pen",
+                      "t0": 2.623,
+                      "t1": 2.804,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 2.844,
+                      "t1": 2.964,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "work.",
+                      "t0": 3.024,
+                      "t1": 3.325,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "She's",
+                      "t0": 3.785,
+                      "t1": 3.966,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "writing.",
+                      "t0": 4.066,
+                      "t1": 4.466,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "She",
+                      "t0": 4.507,
+                      "t1": 4.687,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "turns",
+                      "t0": 4.727,
+                      "t1": 4.947,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it",
+                      "t0": 5.007,
+                      "t1": 5.047,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "over.",
+                      "t0": 5.148,
+                      "t1": 5.308,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "Whoa!",
+                      "t0": 5.368,
+                      "t1": 5.749,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "It's",
+                      "t0": 6.049,
+                      "t1": 6.149,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "time",
+                      "t0": 6.169,
+                      "t1": 6.269,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 6.289,
+                      "t1": 6.39,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "my",
+                      "t0": 6.43,
+                      "t1": 6.55,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "date",
+                      "t0": 6.57,
+                      "t1": 6.71,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "with",
+                      "t0": 6.75,
+                      "t1": 6.87,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "Joey!",
+                      "t0": 6.89,
+                      "t1": 7.311,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-018",
+      "track": "captions",
+      "hintTime": { "start": 94.366, "end": 99.093 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 94.366,
+            "absEnd": 99.093,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "All",
+                      "t0": 0.5,
+                      "t1": 0.56,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "right,",
+                      "t0": 0.58,
+                      "t1": 0.7,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "look,",
+                      "t0": 0.72,
+                      "t1": 0.921,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "look.",
+                      "t0": 0.941,
+                      "t1": 1.181,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "What",
+                      "t0": 2.403,
+                      "t1": 2.503,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "did",
+                      "t0": 2.543,
+                      "t1": 2.623,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 2.643,
+                      "t1": 2.723,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "get",
+                      "t0": 2.743,
+                      "t1": 2.844,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 2.884,
+                      "t1": 2.964,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Angela",
+                      "t0": 3.044,
+                      "t1": 3.364,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Delvecchio",
+                      "t0": 3.405,
+                      "t1": 3.965,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 4.006,
+                      "t1": 4.106,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "her",
+                      "t0": 4.166,
+                      "t1": 4.266,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "birthday?",
+                      "t0": 4.326,
+                      "t1": 4.727,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-019",
+      "track": "captions",
+      "hintTime": { "start": 99.394, "end": 103.039 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 99.394,
+            "absEnd": 103.039,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "She",
+                      "t0": 0.5,
+                      "t1": 0.58,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "didn't",
+                      "t0": 0.62,
+                      "t1": 0.78,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "have",
+                      "t0": 0.8,
+                      "t1": 0.921,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 0.941,
+                      "t1": 0.981,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "birthday",
+                      "t0": 1.021,
+                      "t1": 1.301,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "while",
+                      "t0": 1.341,
+                      "t1": 1.462,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "we",
+                      "t0": 1.502,
+                      "t1": 1.562,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "were",
+                      "t0": 1.582,
+                      "t1": 1.682,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "going",
+                      "t0": 1.722,
+                      "t1": 1.882,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "out.",
+                      "t0": 1.962,
+                      "t1": 2.062,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "For",
+                      "t0": 2.483,
+                      "t1": 2.583,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "three",
+                      "t0": 2.683,
+                      "t1": 2.924,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "years,",
+                      "t0": 2.984,
+                      "t1": 3.645,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-020",
+      "track": "captions",
+      "hintTime": { "start": 105.776, "end": 110.762 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 105.776,
+            "absEnd": 110.762,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Look,",
+                      "t0": 0.5,
+                      "t1": 1.321,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it's",
+                      "t0": 1.341,
+                      "t1": 1.461,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "too",
+                      "t0": 1.561,
+                      "t1": 1.802,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "late",
+                      "t0": 1.902,
+                      "t1": 2.242,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "and",
+                      "t0": 2.382,
+                      "t1": 2.483,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "I",
+                      "t0": 2.543,
+                      "t1": 2.643,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "got",
+                      "t0": 2.663,
+                      "t1": 2.783,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "an",
+                      "t0": 2.843,
+                      "t1": 2.923,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "audition.",
+                      "t0": 2.983,
+                      "t1": 3.304,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "I",
+                      "t0": 3.344,
+                      "t1": 3.384,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "can't",
+                      "t0": 3.464,
+                      "t1": 3.704,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "shop",
+                      "t0": 3.824,
+                      "t1": 4.185,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "anymore.",
+                      "t0": 4.305,
+                      "t1": 4.986,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-021",
+      "track": "captions",
+      "hintTime": { "start": 110.302, "end": 117.771 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 110.302,
+            "absEnd": 117.771,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "I",
+                      "t0": 0.5,
+                      "t1": 0.52,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "will",
+                      "t0": 2.983,
+                      "t1": 3.163,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "go",
+                      "t0": 3.223,
+                      "t1": 3.363,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "out",
+                      "t0": 3.504,
+                      "t1": 3.604,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "and",
+                      "t0": 3.704,
+                      "t1": 3.784,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "I",
+                      "t0": 3.824,
+                      "t1": 3.864,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "will",
+                      "t0": 3.884,
+                      "t1": 4.024,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "try",
+                      "t0": 4.044,
+                      "t1": 4.164,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "to",
+                      "t0": 4.204,
+                      "t1": 4.265,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "find",
+                      "t0": 4.345,
+                      "t1": 4.585,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "something",
+                      "t0": 4.645,
+                      "t1": 4.965,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "for",
+                      "t0": 5.046,
+                      "t1": 5.266,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "her,",
+                      "t0": 5.306,
+                      "t1": 5.446,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "okay?",
+                      "t0": 5.466,
+                      "t1": 5.867,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "Thanks,",
+                      "t0": 6.668,
+                      "t1": 7.088,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "man.",
+                      "t0": 7.168,
+                      "t1": 7.469,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-022",
+      "track": "captions",
+      "hintTime": { "start": 117.972, "end": 120.694 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 117.972,
+            "absEnd": 120.694,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "And",
+                      "t0": 0.5,
+                      "t1": 0.58,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "oh,",
+                      "t0": 0.68,
+                      "t1": 1.341,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "while",
+                      "t0": 1.361,
+                      "t1": 1.501,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "you're",
+                      "t0": 1.521,
+                      "t1": 1.641,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "at",
+                      "t0": 1.661,
+                      "t1": 1.741,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it,",
+                      "t0": 1.781,
+                      "t1": 1.841,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "could",
+                      "t0": 1.861,
+                      "t1": 1.981,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 2.001,
+                      "t1": 2.082,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "get",
+                      "t0": 2.102,
+                      "t1": 2.202,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "her",
+                      "t0": 2.222,
+                      "t1": 2.302,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 2.342,
+                      "t1": 2.362,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "card?",
+                      "t0": 2.422,
+                      "t1": 2.722,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-023",
+      "track": "captions",
+      "hintTime": { "start": 121.796, "end": 124.399 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 121.796,
+            "absEnd": 124.399,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Would",
+                      "t0": 0.5,
+                      "t1": 0.621,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "you",
+                      "t0": 0.661,
+                      "t1": 0.761,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "like",
+                      "t0": 0.801,
+                      "t1": 1.081,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "me",
+                      "t0": 1.121,
+                      "t1": 1.161,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "to",
+                      "t0": 1.201,
+                      "t1": 1.241,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "write",
+                      "t0": 1.261,
+                      "t1": 1.402,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "her",
+                      "t0": 1.442,
+                      "t1": 1.522,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 1.542,
+                      "t1": 1.562,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "little",
+                      "t0": 1.582,
+                      "t1": 1.762,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "poem",
+                      "t0": 1.822,
+                      "t1": 2.183,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "as",
+                      "t0": 2.263,
+                      "t1": 2.343,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_01"
+                    },
+                    {
+                      "ch": "well?",
+                      "t0": 2.383,
+                      "t1": 2.603,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_01"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-024",
+      "track": "captions",
+      "hintTime": { "start": 125.361, "end": 128.284 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 125.361,
+            "absEnd": 128.284,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "Or",
+                      "t0": 0.5,
+                      "t1": 0.62,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "just",
+                      "t0": 1.101,
+                      "t1": 1.281,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "get",
+                      "t0": 1.381,
+                      "t1": 1.501,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 1.561,
+                      "t1": 1.581,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "card",
+                      "t0": 1.621,
+                      "t1": 1.782,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "that",
+                      "t0": 1.802,
+                      "t1": 1.902,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "has",
+                      "t0": 1.922,
+                      "t1": 2.022,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "a",
+                      "t0": 2.062,
+                      "t1": 2.082,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "poem",
+                      "t0": 2.102,
+                      "t1": 2.322,
+                      "kind": "loud",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "already",
+                      "t0": 2.382,
+                      "t1": 2.563,
+                      "kind": "pop",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "in",
+                      "t0": 2.583,
+                      "t1": 2.643,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    },
+                    {
+                      "ch": "it?",
+                      "t0": 2.663,
+                      "t1": 2.923,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_02"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cwi-025",
+      "track": "captions",
+      "hintTime": { "start": 141.973, "end": 143.439 },
+      "root": {
+        "e_type": "group",
+        "layout": {
+          "mode": "absolute",
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true
+        },
+        "children": [
+          {
+            "e_type": "text",
+            "text": "",
+            "absStart": 141.973,
+            "absEnd": 143.439,
+            "layout": { "anchor": "bc" },
+            "pluginChain": [
+              {
+                "name": "cwi@1.0.0",
+                "params": {
+                  "palette": {
+                    "SPEAKER_03": "#FFD400",
+                    "SPEAKER_01": "#4AA3FF",
+                    "SPEAKER_02": "#FF4D4D",
+                    "SPEAKER_00": "#FF8A00"
+                  },
+                  "popScale": 1.15,
+                  "tremble": { "ampPx": 1.8, "freq": 12 },
+                  "tokens": [
+                    {
+                      "ch": "you",
+                      "t0": 0.5,
+                      "t1": 1.466,
+                      "kind": "whisper",
+                      "speaker": "SPEAKER_00"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
