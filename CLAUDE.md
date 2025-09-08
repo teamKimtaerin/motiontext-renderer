@@ -251,7 +251,7 @@ __tests__/           # 120개 테스트 (5개 모듈)
 ## 💡 사용 예시
 
 ```typescript
-import { MotionTextRenderer } from '@teamkimtaerin/motiontext-renderer';
+import { MotionTextRenderer } from 'motiontext-renderer';
 
 // 렌더러 초기화
 const renderer = new MotionTextRenderer();
