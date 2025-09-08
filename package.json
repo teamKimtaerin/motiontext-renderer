@@ -1,5 +1,5 @@
 {
-  "name": "@teamkimtaerin/motiontext-renderer",
+  "name": "@kimtaerin/motiontext-renderer",
   "version": "0.2.0",
   "description": "Web-based animated caption/subtitle renderer with plugin system",
   "type": "module",
@@ -16,6 +16,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite --mode development",
     "plugin:server": "node demo/plugin-server/server.js",

@@ -16,15 +16,15 @@
 ## 🚀 설치
 
 ```bash
-pnpm add @teamkimtaerin/motiontext-renderer
+pnpm add @kimtaerin/motiontext-renderer
 ```
 
 ```bash
-npm install @teamkimtaerin/motiontext-renderer
+npm install @kimtaerin/motiontext-renderer
 ```
 
 ```bash
-yarn add @teamkimtaerin/motiontext-renderer
+yarn add @kimtaerin/motiontext-renderer
 ```
 
 > 참고: 이 라이브러리는 GSAP을 피어 의존성으로 요구합니다. 호스트 앱에 GSAP을 설치하세요.
@@ -34,7 +34,7 @@ yarn add @teamkimtaerin/motiontext-renderer
 ## 📖 기본 사용법
 
 ```typescript
-import { MotionTextRenderer } from '@teamkimtaerin/motiontext-renderer';
+import { MotionTextRenderer } from '@kimtaerin/motiontext-renderer';
 
 // 컨테이너 요소와 비디오 요소 준비
 const container = document.getElementById('caption-container');
@@ -188,7 +188,7 @@ git push origin feature/새기능
 
 ```bash
 # 현재 배포된 버전 확인
-npm info @teamkimtaerin/motiontext-renderer
+npm info @kimtaerin/motiontext-renderer
 
 # 로컬 버전 확인  
 pnpm version
@@ -325,7 +325,7 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 ## 🔗 링크
 
 - **GitHub**: https://github.com/teamKimtaerin/motiontext-renderer
-- **NPM**: https://npmjs.com/package/@teamkimtaerin/motiontext-renderer
+- **NPM**: https://npmjs.com/package/@kimtaerin/motiontext-renderer
 - **Issues**: https://github.com/teamKimtaerin/motiontext-renderer/issues
 
 ---
