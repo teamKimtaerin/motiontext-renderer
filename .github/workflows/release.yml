@@ -18,6 +18,8 @@ jobs:
     env:
       # Use PAT if available; fall back to default token
       GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+      # Make NPM token available to all steps
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     
     steps:
       - name: Checkout
@@ -52,12 +54,16 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Configure npm token
-        if: always()
+      - name: Assert NPM_TOKEN present
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "::error::NPM_TOKEN is not set or empty"; exit 1;
+          fi
+
+      - name: Configure npm token (fresh .npmrc)
+        run: |
+          rm -f "$HOME/.npmrc"
+          printf "registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=%s\n" "$NPM_TOKEN" > "$HOME/.npmrc"
 
       - name: Verify npm authentication
         run: |
