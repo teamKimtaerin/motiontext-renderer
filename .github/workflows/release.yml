@@ -15,10 +15,16 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      # Use PAT if available; fall back to default token
+      GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Ensure git operations (branch push) use the same token
+          token: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
