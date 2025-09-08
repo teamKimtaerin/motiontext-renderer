@@ -80,3 +80,5 @@ jobs:
           # Create a repo-scoped PAT (classic) with repo + pull_request write, save as RELEASE_PAT or GH_PAT
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Ensure scoped packages are published publicly
+          NPM_CONFIG_ACCESS: public
