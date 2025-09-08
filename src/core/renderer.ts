@@ -190,7 +190,9 @@ export class Renderer {
           (g.node as any).style,
           (g.node as any).layout
         );
-      } catch (_err) { /* noop */ }
+      } catch (_err) {
+        /* noop */
+      }
     }
     for (const item of this.mountedTextEls) {
       const tn = item.node;
@@ -310,7 +312,9 @@ export class Renderer {
               try {
                 if (typeof runtime.init === 'function')
                   runtime.init(effectsRoot, spec.params, ctx);
-              } catch (_err) { /* noop */ }
+              } catch (_err) {
+                /* noop */
+              }
               let out: any = undefined;
               try {
                 out = runtime.animate(
@@ -319,14 +323,18 @@ export class Renderer {
                   ctx,
                   Math.max(0, w1 - w0)
                 );
-              } catch (_err) { /* noop */ }
+              } catch (_err) {
+                /* noop */
+              }
               if (typeof out === 'function') {
                 ap = out as (_p: number) => void;
               } else if (out && typeof out.progress === 'function') {
                 ap = (pp: number) => {
                   try {
                     out.pause().progress(pp);
-                  } catch (_err) { /* noop */ }
+                  } catch (_err) {
+                    /* noop */
+                  }
                 };
               } else {
                 ap = (_pp: number) => {};
@@ -336,7 +344,9 @@ export class Renderer {
             const pnow = prog(t, w0, w1);
             try {
               ap(pnow);
-            } catch (_err) { /* noop */ }
+            } catch (_err) {
+              /* noop */
+            }
           }
         }
         let base = baseT;
