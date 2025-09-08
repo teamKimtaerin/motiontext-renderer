@@ -59,6 +59,12 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Verify npm authentication
+        run: |
+          echo "Registry: $(npm config get registry)"
+          echo "npm whoami:" && npm whoami || (echo "::error::Invalid NPM_TOKEN or npm auth failed" && exit 1)
+          echo "Intended scope: @kimtaerin"
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
