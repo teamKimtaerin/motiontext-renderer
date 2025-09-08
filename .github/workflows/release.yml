@@ -46,6 +46,13 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Configure npm token
+        if: always()
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
@@ -56,5 +63,7 @@ jobs:
           commit: 'Version Packages'
           version: pnpm version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Prefer a PAT to bypass org/repo restriction on the Actions bot creating PRs
+          # Create a repo-scoped PAT (classic) with repo + pull_request write, save as RELEASE_PAT or GH_PAT
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
