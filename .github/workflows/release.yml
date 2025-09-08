@@ -54,14 +54,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Verify npm authentication
-        run: |
-          echo "Registry: $(npm config get registry)"
-          echo "npm whoami:" && npm whoami
-          echo "Intended scope: @kimtaerin"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
