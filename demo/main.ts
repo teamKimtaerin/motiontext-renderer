@@ -6,6 +6,7 @@
 import { MotionTextRenderer, MotionTextController } from '../src/index';
 import { preloadPluginsForScenario } from './devPlugins';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
+import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -40,6 +41,12 @@ const applySafeBtn = document.getElementById('apply-safearea') as HTMLButtonElem
 const modeServerBtn = document.getElementById('plugin-mode-server') as HTMLButtonElement | null;
 const modeLocalBtn = document.getElementById('plugin-mode-local') as HTMLButtonElement | null;
 const modeAutoBtn = document.getElementById('plugin-mode-auto') as HTMLButtonElement | null;
+// Quick plugin preview controls
+const pluginPreviewSelector = document.getElementById('plugin-preview-selector') as HTMLSelectElement | null;
+const pluginPreviewText = document.getElementById('plugin-preview-text') as HTMLInputElement | null;
+const pluginPreviewLoop = document.getElementById('plugin-preview-loop') as HTMLInputElement | null;
+const pluginPreviewDuration = document.getElementById('plugin-preview-duration') as HTMLInputElement | null;
+const pluginPreviewGenerate = document.getElementById('plugin-preview-generate') as HTMLButtonElement | null;
 
 // Status displays
 const rendererStatus = document.getElementById('renderer-status') as HTMLSpanElement;
@@ -202,7 +209,7 @@ const sampleConfigs: Record<string, RendererConfig> = {
 };
 
 // Initialize demo application
-function initDemo() {
+async function initDemo() {
   updateStatus('렌더러 준비됨');
   
   // Set up video time update
@@ -236,6 +243,43 @@ function initDemo() {
     const base = prompt('Local plugin folder base (optional):', './plugin-server/plugins/') || './plugin-server/plugins/';
     await setPluginModeAuto(origin, base);
   });
+
+  // Populate plugin preview selector and wire generator
+  await populatePluginSelector();
+  if (pluginPreviewGenerate) {
+    pluginPreviewGenerate.addEventListener('click', async () => {
+      try {
+        const nameRaw = pluginPreviewSelector?.value || '';
+        if (!nameRaw) { alert('플러그인을 선택하세요.'); return; }
+        const key = nameRaw.includes('@') ? nameRaw : `${nameRaw}@1.0.0`;
+        const manifest = await loadPluginManifest(key);
+        const defaults = getDefaultParameters(manifest);
+        // Heuristic defaults for certain plugins that need time windows
+        const dur = Number(pluginPreviewDuration?.value || '3') || 3;
+        if (manifest.name === 'cwi') {
+          (defaults as any).kind = (defaults as any).kind || 'pop';
+          (defaults as any).t0 = (defaults as any).t0 ?? 0.0;
+          (defaults as any).t1 = (defaults as any).t1 ?? Math.max(0.5, dur);
+        }
+        const txt = pluginPreviewText?.value || manifest.name;
+        // Center region with reasonable size
+        const settings = {
+          text: txt,
+          position: { x: 320, y: 180 },
+          size: { width: 480, height: 120 },
+          pluginParams: defaults,
+        };
+        const cfg = (pluginPreviewLoop?.checked
+          ? generateLoopedScenario(key, settings, dur)
+          : generatePreviewScenario(key, settings, dur));
+        await loadConfiguration(cfg);
+        if (renderer) { renderer.play(); }
+      } catch (e) {
+        console.error('플러그인 미리보기 생성 실패:', e);
+        alert('미리보기 생성 실패: ' + e);
+      }
+    });
+  }
 
   console.log('✅ MotionText Renderer Demo 초기화 완료');
 }
@@ -370,6 +414,7 @@ if (document.readyState === 'loading') {
   setPluginModeServer,
   setPluginModeLocal,
   setPluginModeAuto,
+  populatePluginSelector,
 };
 
 // Helper: apply safe area controls to current config and reload
@@ -443,4 +488,41 @@ async function reloadCurrentConfig() {
   // Reuse existing flow to ensure plugins preload under new config
   await preloadPluginsForScenario(currentConfig);
   await loadConfiguration(currentConfig);
+}
+
+// Discover available local plugins via Vite glob and populate selector
+async function populatePluginSelector() {
+  if (!pluginPreviewSelector) return;
+  try {
+    const entries: Record<string, () => Promise<any>> = {
+      ...(import.meta as any).glob('/plugin-server/plugins/*/manifest.json'),
+      ...(import.meta as any).glob('./plugin-server/plugins/*/manifest.json'),
+    };
+    const keys = Object.keys(entries);
+    const seen = new Set<string>();
+    const options: { label: string; value: string }[] = [];
+    for (const p of keys) {
+      const m = p.match(/\/plugins\/(.+)\/manifest\.json$/);
+      if (!m) continue;
+      const folder = decodeURIComponent(m[1]);
+      const at = folder.lastIndexOf('@');
+      const name = at > 0 ? folder.slice(0, at) : folder;
+      const ver = at > 0 ? folder.slice(at + 1) : '1.0.0';
+      const key = `${name}@${ver}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      options.push({ label: `${name} ${ver}`, value: key });
+    }
+    options.sort((a, b) => a.label.localeCompare(b.label));
+    // Clear and append
+    pluginPreviewSelector.innerHTML = '<option value="">-- 플러그인 선택 --</option>';
+    for (const opt of options) {
+      const el = document.createElement('option');
+      el.value = opt.value;
+      el.textContent = opt.label;
+      pluginPreviewSelector.appendChild(el);
+    }
+  } catch (e) {
+    console.warn('플러그인 목록 수집 실패:', e);
+  }
 }

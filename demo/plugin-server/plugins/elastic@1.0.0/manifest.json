@@ -1,0 +1,58 @@
+{
+  "name": "elastic",
+  "version": "1.0.0",
+  "pluginApi": "2.1",
+  "minRenderer": "1.3.0",
+  "entry": "index.mjs",
+  "targets": ["text"],
+  "capabilities": ["style-vars"],
+  "peer": { "gsap": "^3.12.0" },
+  "preload": [],
+  "schema": {
+    "bounceStrength": {
+      "type": "number",
+      "label": "바운스 강도",
+      "description": "탄성 효과의 강도를 조절합니다",
+      "default": 0.7,
+      "min": 0.1,
+      "max": 2,
+      "step": 0.1
+    },
+    "animationDuration": {
+      "type": "number",
+      "label": "애니메이션 속도",
+      "description": "전체 애니메이션 지속 시간 (초)",
+      "default": 1.5,
+      "min": 0.5,
+      "max": 4,
+      "step": 0.1
+    },
+    "staggerDelay": {
+      "type": "number",
+      "label": "단어 간격",
+      "description": "각 단어 사이의 시작 간격 (초)",
+      "default": 0.1,
+      "min": 0,
+      "max": 0.5,
+      "step": 0.05
+    },
+    "startScale": {
+      "type": "number",
+      "label": "시작 크기",
+      "description": "애니메이션 시작 시 텍스트 크기 비율",
+      "default": 0,
+      "min": 0,
+      "max": 1,
+      "step": 0.1
+    },
+    "overshoot": {
+      "type": "number",
+      "label": "오버슈트 크기",
+      "description": "바운스 시 최대 크기 배율",
+      "default": 1.3,
+      "min": 1,
+      "max": 2,
+      "step": 0.1
+    }
+  }
+}
