@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # MotionText Renderer – Current Status & Context
 
 ## 🎯 프로젝트 개요
@@ -207,20 +211,37 @@ applyChannels(element, baseTransform, channels) // DOM 적용
 ## 🛠 개발 명령어
 
 ```bash
-# 개발 서버 실행 (localhost:3000)
+# 개발 서버 실행 (localhost:3000, demo 모드)
 pnpm dev
 
-# 테스트 실행 (120개 테스트)
-pnpm test
+# 플러그인 서버 실행 (개발용)
+pnpm plugin:server
 
-# 타입 체크
-pnpm typecheck
+# 테스트 실행
+pnpm test              # 전체 테스트 (Vitest watch 모드)
+pnpm test:run          # 단일 실행 (CI용)
+pnpm test:ui           # Vitest UI
+pnpm test:coverage     # 커버리지 포함
 
-# 린팅 (ESLint)
-pnpm lint
+# 코드 품질
+pnpm lint              # ESLint 실행
+pnpm lint:fix          # ESLint 자동 수정
+pnpm format            # Prettier 포맷팅
+pnpm format:check      # 포맷팅 검사
+pnpm typecheck         # TypeScript 타입 체크
 
 # 빌드
-pnpm build
+pnpm build             # 라이브러리 빌드 (ES/CJS)
+pnpm dev:build         # 빌드 watch 모드
+pnpm clean             # dist 폴더 정리
+
+# 통합 검증
+pnpm verify            # lint + format + typecheck + test (CI 동일)
+
+# 릴리스 관리
+pnpm changeset         # 변경사항 기록
+pnpm version           # 버전 업데이트
+pnpm release           # NPM 배포
 ```
 
 ---
@@ -279,4 +300,44 @@ renderer.seek(10.5);
 
 ---
 
-*최종 업데이트: 2025-09-07 - M4 플러그인 체인 합성 완료*
+---
+
+## 🛠️ 개발 환경 설정
+
+### 필수 요구사항
+- **Node.js**: >= 18.0.0
+- **pnpm**: >= 8.0.0 (필수, npm/yarn 사용 불가)
+- **TypeScript**: 프로젝트에 포함됨
+
+### 개발 서버 모드
+- **Demo 모드**: `pnpm dev` → `demo/` 폴더를 루트로 Vite 서버 실행 (port 3000)
+- **라이브러리 빌드**: `pnpm build` → ES/CJS 모듈 생성 (`dist/`)
+
+### 테스트 환경
+- **Vitest**: 120개 테스트 (5개 모듈별 분할)
+- **단일 테스트**: `pnpm test src/utils/__tests__/time.test.ts` 
+- **커버리지**: `pnpm test:coverage` (c8 기반)
+
+### 플러그인 개발
+- **로컬 서버**: `pnpm plugin:server` → `http://localhost:3300`
+- **플러그인 경로**: `demo/plugin-server/plugins/<name@version>/`
+- **매니페스트**: `manifest.json` + `index.mjs` 필수
+
+---
+
+## ⚡ 성능 및 디버깅
+
+### 빌드 최적화
+- **Terser 압축**: 프로덕션 빌드 활성화
+- **소스맵**: 디버깅용 `.map` 파일 생성
+- **외부 의존성**: GSAP은 peerDependency로 제외
+- **트리쉐이킹**: ES 모듈 기반 데드코드 제거
+
+### 타입 안전성
+- **Strict 모드**: `tsconfig.json`에서 엄격한 타입 체크
+- **Path alias**: `@/*` → `src/*` 매핑
+- **Declaration 생성**: `.d.ts` 파일 자동 생성
+
+---
+
+*최종 업데이트: 2025-09-09 - M4 플러그인 체인 합성 완료*
