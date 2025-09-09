@@ -1,10 +1,23 @@
 /**
- * Motion Text Renderer 시나리오 생성 유틸리티
- * 플러그인 manifest.json을 기반으로 RendererConfig 생성
+ * Motion Text Renderer 시나리오 생성 유틸리티 (standalone)
+ * - 외부 프로젝트에서도 그대로 복사/사용 가능하도록 내부 의존성 제거
+ * - 플러그인 manifest.json을 기반으로 RendererConfig 생성
  */
 
-import type { RendererConfig } from '../src/types';
-import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
+// 최소 RendererConfig 타입 (시나리오 v1.3 하위셋)
+export interface RendererConfig {
+  version: '1.3';
+  timebase: { unit: 'seconds' | 'tc'; fps?: number };
+  stage: { baseAspect: '16:9' | '9:16' | 'auto'; backgroundColor?: string; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } };
+  behavior?: { preloadMs?: number; resizeThrottleMs?: number; snapToFrame?: boolean };
+  tracks: Array<{ id: string; type: 'subtitle' | 'free'; layer: number; defaultStyle?: any; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } }>;
+  cues: Array<{
+    id: string;
+    track: string;
+    hintTime?: { start?: number; end?: number };
+    root: any;
+  }>;
+}
 
 export interface PluginManifest {
   name: string
@@ -33,73 +46,54 @@ export interface PreviewSettings {
   pluginParams: Record<string, unknown>
 }
 
+export type ManifestLoadMode = 'server' | 'local' | 'auto';
+
+export interface ManifestLoadOptions {
+  mode?: ManifestLoadMode; // default 'auto'
+  serverBase?: string;     // e.g., 'http://localhost:3300'
+  localBase?: string;      // e.g., '/plugin-server/plugins/' or './plugin-server/plugins/'
+  fetchImpl?: typeof fetch; // optional custom fetch for SSR/tests
+}
+
 /**
  * 플러그인 manifest를 로드합니다
  */
-export async function loadPluginManifest(pluginName: string): Promise<PluginManifest> {
+export async function loadPluginManifest(pluginName: string, opts: ManifestLoadOptions = {}): Promise<PluginManifest> {
   try {
-    // Resolve manifest from dev config (server/local/auto)
-    const cfg = getDevPluginConfig();
     const key = pluginName.includes('@') ? pluginName : `${pluginName}@1.0.0`;
+    const mode: ManifestLoadMode = opts.mode ?? 'auto';
+    const serverBase = (opts.serverBase ?? '').replace(/\/$/, '');
+    const localBase = opts.localBase ?? '';
+    const f = opts.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch.bind(window) : undefined);
+    if (!f) throw new Error('No fetch implementation available in this environment');
+
     const tryUrls: string[] = [];
-    // 0) Try Vite glob dynamic import when in dev (local files)
-    try {
-      const ENTRIES: Record<string, () => Promise<any>> = {
-        ...(import.meta as any).glob('/plugin-server/plugins/*/manifest.json'),
-        ...(import.meta as any).glob('./plugin-server/plugins/*/manifest.json'),
-      };
-      let match: string | undefined;
-      const suffixRaw = `/${key}/manifest.json`;
-      const suffixEnc = `/${encodeURIComponent(key)}/manifest.json`;
-      for (const p of Object.keys(ENTRIES)) {
-        if (p.endsWith(suffixRaw) || p.endsWith(suffixEnc)) { match = p; break; }
-      }
-      if (match) {
-        const mod = await ENTRIES[match]!();
-        const json = (mod?.default ?? mod) as PluginManifest;
-        if (json && typeof json === 'object' && json.name) return json;
-      }
-    } catch { /* ignore and fall through to fetch */ }
-    if (cfg.mode === 'server' || cfg.mode === 'auto') {
-      tryUrls.push(`${cfg.serverBase.replace(/\/$/, '')}/plugins/${encodeURIComponent(key)}/manifest.json`);
+    if (mode === 'server' || mode === 'auto') {
+      if (serverBase) tryUrls.push(`${serverBase}/plugins/${encodeURIComponent(key)}/manifest.json`);
+      if (serverBase) tryUrls.push(`${serverBase}/plugins/${key}/manifest.json`);
     }
-    if (cfg.mode === 'local' || cfg.mode === 'auto') {
-      // localBase is usually './plugin-server/plugins/' relative to demo root
-      const base = cfg.localBase; // already ensured trailing slash
-      tryUrls.push(`${base}${encodeURIComponent(key)}/manifest.json`);
-      // Also attempt absolute dev root mapping
+    if (mode === 'local' || mode === 'auto') {
+      if (localBase) {
+        const base = localBase.endsWith('/') ? localBase : localBase + '/';
+        tryUrls.push(`${base}${encodeURIComponent(key)}/manifest.json`);
+        tryUrls.push(`${base}${key}/manifest.json`);
+      }
+      // Optional conventional absolute path
       tryUrls.push(`/plugin-server/plugins/${encodeURIComponent(key)}/manifest.json`);
+      tryUrls.push(`/plugin-server/plugins/${key}/manifest.json`);
     }
-    let response: Response | null = null;
+
     let lastErr: unknown = null;
-    // Prepare fetch URL variants (raw and encoded)
-    const variants: string[] = [];
-    for (const u of tryUrls) {
-      if (!u) continue;
-      // Replace only the last segment folder with raw/encoded variants
-      variants.push(u.replace(/\/(?:[^\/]+)\/manifest\.json$/, `/${key}/manifest.json`));
-      variants.push(u.replace(/\/(?:[^\/]+)\/manifest\.json$/, `/${encodeURIComponent(key)}/manifest.json`));
-      variants.push(u); // original
-    }
-    for (const url of variants) {
+    for (const url of tryUrls) {
       try {
-        response = await fetch(url);
-        if (!response.ok) { continue; }
-        // Ensure we actually got JSON (avoid SPA HTML fallbacks)
-        const ct = response.headers.get('content-type') || '';
-        if (!/json/i.test(ct)) {
-          // Attempt to parse anyway but guard
-          try { return await response.clone().json(); }
-          catch { continue; }
-        }
-        try {
-          return await response.json();
-        } catch (e) {
-          lastErr = e; continue;
-        }
+        const res = await f(url);
+        if (!res || !res.ok) continue;
+        const ct = res.headers.get('content-type') || '';
+        if (/json/i.test(ct)) return await res.json();
+        try { return await res.json(); } catch { continue; }
       } catch (e) { lastErr = e; }
     }
-    throw new Error(`Failed to load manifest for ${pluginName} (tried server/local). Last error: ${String(lastErr)}`);
+    throw new Error(`Failed to load manifest for ${pluginName}. Tried ${tryUrls.join(', ')}. Last error: ${String(lastErr)}`);
   } catch (error) {
     console.error(`Error loading manifest for ${pluginName}:`, error)
     throw error

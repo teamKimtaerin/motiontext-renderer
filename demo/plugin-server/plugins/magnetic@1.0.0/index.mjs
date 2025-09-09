@@ -94,7 +94,17 @@ export default {
 
 function splitTextIntoCharacters(element) {
   if (!element) return;
-  const text = element.textContent || '';
+  let text = element.textContent || '';
+  if (!text.trim() && element.parentElement) {
+    let collected = '';
+    const host = element.parentElement;
+    const toRemove = [];
+    for (const node of Array.from(host.childNodes)) {
+      if (node.nodeType === 3) { collected += node.textContent || ''; toRemove.push(node); }
+    }
+    toRemove.forEach(n => host.removeChild(n));
+    text = collected;
+  }
   element.innerHTML = '';
   element.className = 'magnetic-text';
 

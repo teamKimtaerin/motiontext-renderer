@@ -112,7 +112,17 @@ function setupRotation3D(element, options) {
 
 function splitTextIntoCharacters(element) {
   const container = element.querySelector('.rotation-container') || element;
-  const text = element.textContent || '';
+  let text = element.textContent || '';
+  if (!text.trim() && element.parentElement) {
+    let collected = '';
+    const host = element.parentElement;
+    const toRemove = [];
+    for (const node of Array.from(host.childNodes)) {
+      if (node.nodeType === 3) { collected += node.textContent || ''; toRemove.push(node); }
+    }
+    toRemove.forEach(n => host.removeChild(n));
+    text = collected;
+  }
   container.innerHTML = '';
   element.className = 'rotation-text';
 

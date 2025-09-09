@@ -7,6 +7,7 @@ import { MotionTextRenderer, MotionTextController } from '../src/index';
 import { preloadPluginsForScenario } from './devPlugins';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
+import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -252,7 +253,8 @@ async function initDemo() {
         const nameRaw = pluginPreviewSelector?.value || '';
         if (!nameRaw) { alert('플러그인을 선택하세요.'); return; }
         const key = nameRaw.includes('@') ? nameRaw : `${nameRaw}@1.0.0`;
-        const manifest = await loadPluginManifest(key);
+        const dev = getDevPluginConfig();
+        const manifest = await loadPluginManifest(key, { mode: dev.mode, serverBase: dev.serverBase, localBase: dev.localBase });
         const defaults = getDefaultParameters(manifest);
         // Heuristic defaults for certain plugins that need time windows
         const dur = Number(pluginPreviewDuration?.value || '3') || 3;

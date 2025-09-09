@@ -98,7 +98,18 @@ export default {
 function splitTextIntoCharacters(element, gsap) {
   if (!element) return;
 
-  const text = element.textContent || '';
+  // Prefer text inside effectsRoot; if empty, collect from host text nodes
+  let text = element.textContent || '';
+  if (!text.trim() && element.parentElement) {
+    let collected = '';
+    const host = element.parentElement;
+    const toRemove = [];
+    for (const node of Array.from(host.childNodes)) {
+      if (node.nodeType === 3) { collected += node.textContent || ''; toRemove.push(node); }
+    }
+    toRemove.forEach(n => host.removeChild(n));
+    text = collected;
+  }
   element.innerHTML = '';
   element.className = 'fade-in-stagger-text';
 
