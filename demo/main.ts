@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * MotionText Renderer Demo Application
  */
@@ -127,19 +128,17 @@ const sampleConfigs: Record<string, RendererConfig> = {
       {
         id: 'title-cue',
         track: 'title',
-        hintTime: 1,
+        hintTime: { start: 1 },
         root: {
-          id: 'title-group',
-          type: 'group',
+          e_type: 'group',
           children: [
             {
-              id: 'title-text',
-              type: 'text',
+              e_type: 'text',
               absStart: 1,
               absEnd: 4,
-              content: '🎬 애니메이션 테스트',
+              text: '🎬 애니메이션 테스트',
               layout: {
-                position: [0.5, 0.2],
+                position: { x: 0.5, y: 0.2 },
               },
             },
           ],
@@ -148,19 +147,17 @@ const sampleConfigs: Record<string, RendererConfig> = {
       {
         id: 'subtitle-cue',
         track: 'subtitle',
-        hintTime: 4,
+        hintTime: { start: 4 },
         root: {
-          id: 'subtitle-group',
-          type: 'group',
+          e_type: 'group',
           children: [
             {
-              id: 'subtitle-text',
-              type: 'text',
+              e_type: 'text',
               absStart: 4,
               absEnd: 8,
-              content: '다양한 애니메이션 효과를 지원합니다',
+              text: '다양한 애니메이션 효과를 지원합니다',
               layout: {
-                position: [0.5, 0.8],
+                position: { x: 0.5, y: 0.8 },
               },
             },
           ],
@@ -184,19 +181,17 @@ const sampleConfigs: Record<string, RendererConfig> = {
       {
         id: 'plugin-cue',
         track: 'effect',
-        hintTime: 2,
+        hintTime: { start: 2 },
         root: {
-          id: 'plugin-group',
-          type: 'group',
+          e_type: 'group',
           children: [
             {
-              id: 'plugin-text',
-              type: 'text',
+              e_type: 'text',
               absStart: 2,
               absEnd: 6,
-              content: '플러그인 시스템 테스트',
+              text: '플러그인 시스템 테스트',
               layout: {
-                position: [0.5, 0.5],
+                position: { x: 0.5, y: 0.5 },
               },
             },
           ],

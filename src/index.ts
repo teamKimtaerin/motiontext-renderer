@@ -7,6 +7,9 @@ import { TrackManager } from "./core/TrackManager";
 import { Renderer } from "./core/Renderer";
 import gsap from "gsap";
 export { MotionTextController } from "./controller";
+// Public plugin configuration/registration API (for external consumers)
+export { configureDevPlugins as configurePluginSource, getDevPluginConfig } from './loader/dev/DevPluginConfig';
+import { devRegistry } from './loader/dev/DevPluginRegistry';
 
 // (reserved) type helpers can be added later
 
@@ -110,3 +113,60 @@ export class MotionTextRenderer {
 }
 
 export type { ScenarioFileV1_3 };
+
+// Register a plugin module programmatically (external/custom plugins)
+export function registerExternalPlugin(params: {
+  name: string;
+  version: string;
+  module: any;               // plugin module (default export + optional named)
+  baseUrl: string;           // base URL for assets.getUrl resolution
+  manifest?: any;            // optional manifest-like metadata
+}): void {
+  const { name, version, module, baseUrl, manifest } = params;
+  devRegistry.register({
+    name,
+    version,
+    module,
+    baseUrl,
+    manifest: manifest ?? { name, version, entry: 'index.mjs' },
+  });
+}
+
+// Bulk-register plugins from a path→import-function map (e.g., Vite's import.meta.glob)
+export async function registerExternalPluginsFromGlob(
+  globMap: Record<string, () => Promise<any>>,
+  parse?: (_path: string) => { name: string; version: string; baseUrl: string } | null
+): Promise<void> {
+  const entries = Object.entries(globMap || {});
+  for (const [path, loader] of entries) {
+    try {
+      const info = (typeof parse === 'function') ? parse(path) : defaultParsePluginPath(path);
+      if (!info) continue;
+      const mod = await loader();
+      devRegistry.register({
+        name: info.name,
+        version: info.version,
+        module: mod,
+        baseUrl: info.baseUrl,
+        manifest: { name: info.name, version: info.version, entry: 'index.mjs' },
+      });
+    } catch { /* ignore single entry failures */ }
+  }
+}
+
+function defaultParsePluginPath(path: string): { name: string; version: string; baseUrl: string } | null {
+  // Match ".../<name>@<version>/index.mjs" at end of path
+  const m = String(path).match(/\/(?<folder>[^/]+)\/(?:index\.mjs)$/);
+  const folder = m?.groups?.folder;
+  if (!folder) return null;
+  const at = folder.lastIndexOf('@');
+  const name = at > 0 ? folder.slice(0, at) : folder;
+  const version = at > 0 ? folder.slice(at + 1) : '0.0.0';
+  try {
+    const u = (typeof window !== 'undefined') ? new URL(path, window.location.origin) : new URL(path, 'http://localhost/');
+    const baseUrl = new URL('./', u).toString();
+    return { name, version, baseUrl };
+  } catch {
+    return null;
+  }
+}

@@ -89,6 +89,95 @@ renderer.attachMedia(video);
 renderer.play();
 ```
 
+### 🔌 외부(커스텀) 플러그인 등록/원점 설정
+
+프로덕션 사용처에서 커스텀 플러그인을 등록하거나, 플러그인 원점(server/local/auto)을 설정할 수 있는 공개 API를 제공합니다.
+
+```ts
+import {
+  configurePluginSource,         // 원점 설정 (server/local/auto)
+  registerExternalPlugin,        // 단일 플러그인 등록
+  registerExternalPluginsFromGlob // 다건 등록 (예: import.meta.glob)
+} from 'motiontext-renderer';
+
+// 1) 원점 설정 (선택)
+configurePluginSource({
+  mode: 'auto',                  // 'server' | 'local' | 'auto'
+  serverBase: 'https://plugins.example.com',
+  localBase: '/plugins/'         // 번들/정적 경로
+});
+
+// 2) 플러그인 등록 (단일)
+//   - module: { default: { name, version, animate... }, evalChannels? }
+//   - baseUrl: assets.getUrl()의 기준 URL
+registerExternalPlugin({
+  name: 'myEffect',
+  version: '1.0.0',
+  module: await import('/plugins/myEffect@1.0.0/index.mjs'),
+  baseUrl: '/plugins/myEffect@1.0.0/'
+});
+
+// 3) 플러그인 일괄 등록 (Vite dev 예시)
+const PLUGINS = import.meta.glob('/plugins/*/index.mjs');
+await registerExternalPluginsFromGlob(PLUGINS);
+```
+
+모드 개요
+- server: `serverBase`에서 `plugins/<name@version>/manifest.json`을 받아 entry(index.mjs)를 로드합니다. CDN/별도 플러그인 서버를 쓰는 배포 환경에 적합합니다.
+- local: 번들 또는 정적 경로에 포함된 플러그인을 직접 import합니다. 서버 없이도 동작하며, 앱이 제공하는 정적 자산에서 즉시 로딩할 때 적합합니다.
+- auto: 서버 우선 시도 후 실패하면 로컬로 폴백합니다. 개발/시연 환경에서 편리합니다.
+
+언제 어떤 모드를 쓸까
+- 배포용 CDN/전용 서버가 있고, 플러그인 교체·무효화·버전 고정이 필요: server
+- 앱 번들에 플러그인을 포함하거나, 프록시/오프라인 환경: local
+- 개발 중 서버가 있을 때/없을 때를 모두 고려: auto
+
+플러그인 모듈 규약(요약, v2.1)
+```js
+// index.mjs (예시)
+export default {
+  name: 'myEffect',
+  version: '1.0.0',
+  init(el, opts, ctx) {
+    // effectsRoot(el) 하위만 조작 (샌드박스)
+  },
+  animate(el, opts, ctx, duration) {
+    // 0..1 진행을 받는 seek 함수형 또는 GSAP Timeline 반환
+    return (p) => {
+      el.style.opacity = String(Math.min(1, Math.max(0, p)));
+    };
+  },
+  cleanup(el) {}
+};
+```
+
+자산 URL과 baseUrl
+- `registerExternalPlugin`의 `baseUrl`은 플러그인 내부 `ctx.assets.getUrl('path')` 해석 기준이 됩니다.
+- server 모드에서는 manifest의 entry/자산 경로를 기준으로 자동 계산됩니다.
+- `registerExternalPluginsFromGlob`는 기본 파서로 `.../<name>@<version>/index.mjs`를 인식해 `baseUrl=.../<name>@<version>/`로 설정합니다. 다른 디렉터리 구조라면 `parse` 콜백을 전달해 직접 지정하세요.
+
+서버 모드용 최소 manifest 예시
+```json
+{
+  "name": "myEffect",
+  "version": "1.0.0",
+  "entry": "index.mjs"
+}
+```
+서버는 `plugins/<name>@<version>/manifest.json`와 `index.mjs`(및 필요 자산)를 정적으로 서빙하면 됩니다.
+
+다건 등록(번들러별 팁)
+- Vite: `import.meta.glob('/plugins/*/index.mjs')`를 권장 (비동기 로더 맵 생성)
+- Webpack/기타: 정적 import 후 `registerExternalPlugin`을 반복 호출하거나, 동적 import 가능한 경로 규칙을 사용하여 로더 맵을 구성하세요.
+
+SSR/Next.js 주의
+- 클라이언트에서만 등록하세요. 예: `if (typeof window !== 'undefined') await registerExternalPluginsFromGlob(...)`.
+
+트러블슈팅
+- “Failed to fetch dynamically imported module”: 경로/도메인(서버 모드), 정적 파일 위치(local 모드) 확인. 서버 모드라면 CORS/경로(`plugins/<name@version>/...`)를 점검하세요.
+- “not found @ version”: 시나리오 JSON의 `plugin.name`이 `myEffect@1.0.0`처럼 버전까지 포함되어야 합니다(혹은 동일 name 키로 등록).
+- 로컬 경로 404 (Vite dev): dev root에 맞는 경로인지 확인하고, 가능하면 글롭(registrar)을 사용하세요.
+
 ---
 
 ## 🔧 개발 가이드
