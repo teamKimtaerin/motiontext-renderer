@@ -1,5 +1,11 @@
 # @teamkimtaerin/motiontext-renderer
 
+## 0.3.1
+
+### Patch Changes
+
+- 9c95552: chore(dev): add pnpm scripts for verify (lint/format/typecheck/test) and release:all (verify+build+publish) to streamline local/CI releases.
+
 ## 0.3.0
 
 ### Minor Changes
