@@ -349,14 +349,17 @@ function initAIEditor() {
         aiEditor.saveOriginalConfig(currentConfig);
       }
 
-      // Apply AI edit
+      // Apply AI edit (자동으로 적용됨)
       await aiEditor?.applyEdit(instruction);
       
       // Clear instruction after successful edit
       editInstructionTextarea.value = '';
+      
+      // 성공하면 더 이상 alert 표시하지 않음 (자동 알림으로 대체)
     } catch (error) {
       console.error('AI 편집 실패:', error);
-      alert(`AI 편집 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      // 에러는 여전히 alert으로 표시 (중요한 정보이므로)
+      // alert(`AI 편집 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   });
 
