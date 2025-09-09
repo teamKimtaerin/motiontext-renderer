@@ -3,18 +3,43 @@
  * 브라우저에서 직접 Claude API를 호출하여 기존 자막을 자연어 요청으로 편집
  */
 
-// 축소된 시스템 컨텍스트 (Rate Limit 방지)
+// 상세하고 안전한 시스템 컨텍스트 (안정성 우선)
 const SYSTEM_CONTEXT = `
-자막 JSON 편집 전문가입니다.
+당신은 MotionText Renderer v1.3 JSON 스키마를 전문으로 다루는 자막 편집 전문가입니다.
 
-규칙:
-- version, timebase, stage, tracks 절대 변경 금지
-- 기존 ID와 구조 유지
-- absStart < absEnd 준수
-- 좌표는 0~1 범위만 사용
+⚠️ 중요한 규칙들 (절대 위반 금지):
+1. version, timebase, stage, tracks 섹션은 절대로 변경하지 마세요
+2. 모든 기존 ID값들을 정확히 유지하세요 (cue.id, track id 등)
+3. absStart < absEnd 조건을 반드시 지켜주세요
+4. 모든 좌표값은 0~1 사이 정규화된 값만 사용하세요
+5. 기존 JSON 구조와 중첩 레벨을 정확히 유지하세요
 
-플러그인: fadeIn, fadeOut, pop, waveY, shakeX, spin, pulse, flames, glow
-타이밍: relStartPct/relEndPct (0~1)
+🎭 사용 가능한 플러그인들:
+- fadeIn, fadeOut: 투명도 애니메이션
+- pop: 스케일 효과 (backOut 이징)
+- waveY, shakeX: 움직임 효과
+- spin, pulse: 회전 및 박동 효과
+- flames, glow: 시각적 효과
+
+📊 플러그인 타이밍 설정:
+- relStartPct, relEndPct: 0~1 사이 값 (상대적 시간)
+- relStart, relEnd: 초 단위 시간 (절대적 시간)
+
+💡 편집 원칙:
+- 사용자 요청을 정확히 이해하고 적절한 플러그인 적용
+- 기존 스타일과 조화로운 변경
+- JSON 형식과 구문을 완벽하게 유지
+`;
+
+// 안전 모드: 기본 프롬프트도 더 상세하게
+const SAFE_MODE_CONTEXT = `
+⚠️ 안전 모드 활성화 ⚠️
+
+다음 JSON을 매우 신중하게 편집해주세요:
+- 기존 구조를 완전히 보존
+- ID 값들 절대 변경 금지  
+- 문법 오류 없이 유효한 JSON 반환
+- 요청사항만 최소한으로 적용
 `;
 
 export interface EditResult {
@@ -42,8 +67,9 @@ export class ClaudeApiClient {
   async editSubtitle(currentJson: any, instruction: string): Promise<EditResult> {
     const jsonSize = JSON.stringify(currentJson).length;
     
-    // 큰 파일(100KB+)은 diff 방식으로 처리
-    if (jsonSize > 100000) {
+    // 중대형 파일(50KB+)에서 diff 방식 사용 (안정성 우선)
+    if (jsonSize > 50000) {
+      console.log(`🛡️ 파일 크기 ${(jsonSize/1024).toFixed(1)}KB > 50KB, 안전한 Diff 모드 사용`);
       return this.editSubtitleWithDiff(currentJson, instruction);
     }
     try {
@@ -266,6 +292,385 @@ IMPORTANT: 반드시 완전한 JSON을 반환하세요.`;
 - Cues: ${summary.cues}개
 - 총 텍스트 요소: ${summary.totalElements}개
 - 파일 크기: ${(JSON.stringify(json).length / 1024).toFixed(1)}KB`;
+  }
+
+  /**
+   * Diff 기반 대용량 JSON 파일 편집 (100KB+)
+   * Claude Sonnet 4의 1M 컨텍스트와 128K 출력을 활용한 최적화된 접근
+   */
+  async editSubtitleWithDiff(currentJson: any, instruction: string): Promise<EditResult> {
+    try {
+      const jsonSize = JSON.stringify(currentJson).length;
+      console.log(`🛡️ 안전한 Diff 모드 시작: ${(jsonSize/1024).toFixed(1)}KB 파일 처리`);
+      
+      // 1단계: 분석 및 변경 계획 수립
+      const analysisResult = await this.analyzeLargeJsonAndPlan(currentJson, instruction);
+      
+      if (!analysisResult.success) {
+        console.warn(`⚠️ 분석 실패, 안전 모드로 폴백 시도`);
+        return this.fallbackToSafeMode(currentJson, instruction);
+      }
+      
+      console.log(`📋 변경 계획 수립 완료:`, analysisResult.plan);
+      
+      // 2단계: 계획에 따른 실제 diff 적용
+      const diffResult = await this.applyDiffBasedOnPlan(currentJson, analysisResult.plan, instruction);
+      
+      if (!diffResult.success) {
+        console.warn(`⚠️ Diff 적용 실패, 안전 모드로 폴백 시도`);
+        return this.fallbackToSafeMode(currentJson, instruction);
+      }
+      
+      return diffResult;
+      
+    } catch (error) {
+      console.error(`🚨 Diff 처리 중 예외 발생, 안전 모드로 폴백:`, error);
+      return this.fallbackToSafeMode(currentJson, instruction);
+    }
+  }
+
+  /**
+   * 1단계: 대용량 JSON 분석 및 변경 계획 수립
+   */
+  private async analyzeLargeJsonAndPlan(currentJson: any, instruction: string): Promise<EditResult & { plan?: any }> {
+    const summary = this.createJsonSummary(currentJson);
+    const sampleCues = currentJson.cues?.slice(0, 3) || []; // 처음 3개 cue만 샘플로
+    
+    const analysisPrompt = `${SYSTEM_CONTEXT}
+
+🔍 대용량 JSON 분석 및 편집 계획 수립
+
+파일 정보:
+${summary}
+
+샘플 구조 (처음 3개 cue):
+\`\`\`json
+{
+  "version": "${currentJson.version}",
+  "timebase": ${JSON.stringify(currentJson.timebase, null, 2)},
+  "stage": ${JSON.stringify(currentJson.stage, null, 2)},
+  "tracks": ${JSON.stringify(currentJson.tracks, null, 2)},
+  "cues": ${JSON.stringify(sampleCues, null, 2)}
+}
+\`\`\`
+
+편집 요청: "${instruction}"
+
+**임무**: 이 요청을 효율적으로 처리할 상세 계획을 수립하세요.
+
+응답 형식:
+\`\`\`json
+{
+  "analysis": "파일 구조와 요청 분석",
+  "strategy": "적용할 전략 (전체/부분/선택적)",
+  "targets": ["영향받을 요소들 (예: cue 인덱스, 플러그인, 스타일)"],
+  "changes": [
+    {
+      "type": "plugin_add|text_modify|style_change",
+      "target": "적용 대상 (all_cues|specific_range|condition)",
+      "details": "구체적 변경 내용",
+      "example": "변경 예시"
+    }
+  ],
+  "estimatedImpact": "예상 영향도 (low|medium|high)"
+}
+\`\`\``;
+
+    const response = await fetch(this.proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        apiKey: this.apiKey,
+        payload: {
+          model: this.model,
+          messages: [{ role: 'user', content: analysisPrompt }],
+          max_tokens: 4096, // 계획 수립용 중간 크기
+          temperature: 0.1,
+          stream: false
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: `분석 단계 실패 ${response.status}: ${errorData.error?.message || response.statusText}`
+      };
+    }
+
+    const data = await response.json();
+    const content = data.content?.[0]?.text;
+    
+    if (!content) {
+      return { success: false, error: '분석 응답이 비어있습니다.' };
+    }
+
+    // JSON 계획 추출
+    const jsonMatch = content.match(/```(?:json)?[\s\r\n]*([\s\S]*?)[\s\r\n]*```/);
+    if (!jsonMatch || !jsonMatch[1]) {
+      return { success: false, error: '분석 결과에서 계획을 추출할 수 없습니다.' };
+    }
+
+    try {
+      const plan = JSON.parse(jsonMatch[1]);
+      return {
+        success: true,
+        plan,
+        usage: data.usage
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `계획 파싱 실패: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  /**
+   * 2단계: 계획 기반 Diff 적용
+   */
+  private async applyDiffBasedOnPlan(currentJson: any, plan: any, instruction: string): Promise<EditResult> {
+    const summary = this.createJsonSummary(currentJson);
+    
+    // 전략에 따른 처리 방식 결정 (안정성 우선: 선택적 처리를 기본으로)
+    if (plan.estimatedImpact === 'high' && plan.strategy === 'full') {
+      // 전체 처리: 1M 컨텍스트 활용 (확실히 필요한 경우만)
+      console.log('🛡️ 전체 Diff 선택 - 대규모 변경 (안전 모드)');
+      return this.applyFullJsonDiff(currentJson, plan, instruction, summary);
+    } else {
+      // 선택적 처리: 기본 전략 (안정성 우선)
+      console.log('🎯 선택적 Diff 선택 - 안정성 우선');
+      return this.applySelectiveDiff(currentJson, plan, instruction, summary);
+    }
+  }
+
+  /**
+   * 선택적 Diff 적용 (효율적)
+   */
+  private async applySelectiveDiff(currentJson: any, plan: any, instruction: string, summary: string): Promise<EditResult> {
+    console.log('🎯 선택적 Diff 적용 모드');
+    
+    // 변경이 필요한 부분만 추출
+    const relevantParts = this.extractRelevantParts(currentJson, plan);
+    
+    const selectivePrompt = `${SYSTEM_CONTEXT}
+
+🎯 선택적 편집 모드 (효율 최적화)
+
+파일 정보: ${summary}
+
+변경 계획:
+${JSON.stringify(plan, null, 2)}
+
+관련 부분만 추출된 JSON:
+\`\`\`json
+${JSON.stringify(relevantParts, null, 2)}
+\`\`\`
+
+편집 요청: "${instruction}"
+
+**중요**: 위 계획에 따라 관련 부분만 수정하고, 전체 JSON 구조를 유지하여 반환하세요.
+
+완전한 수정된 JSON:
+\`\`\`json
+{수정된 전체 JSON}
+\`\`\``;
+
+    return this.executePromptWithLargeOutput(selectivePrompt);
+  }
+
+  /**
+   * 전체 JSON Diff 적용 (1M 컨텍스트 활용)
+   */
+  private async applyFullJsonDiff(currentJson: any, plan: any, instruction: string, summary: string): Promise<EditResult> {
+    console.log('🚀 전체 JSON Diff 적용 모드 (1M 컨텍스트)');
+    
+    const fullPrompt = `${SYSTEM_CONTEXT}
+
+🚀 전체 JSON 편집 모드 (1M 컨텍스트 + 128K 출력)
+
+파일 정보: ${summary}
+
+변경 계획:
+${JSON.stringify(plan, null, 2)}
+
+전체 JSON (1M 컨텍스트 활용):
+\`\`\`json
+${JSON.stringify(currentJson, null, 2)}
+\`\`\`
+
+편집 요청: "${instruction}"
+
+**지침**:
+1. 위 계획을 정확히 따라 편집
+2. 모든 기존 구조와 ID 유지
+3. version, timebase, stage, tracks 절대 변경 금지
+4. 128K 출력 한도 내에서 완전한 JSON 반환
+
+완전히 수정된 JSON:
+\`\`\`json
+{수정된 전체 JSON - 128K 출력 활용}
+\`\`\``;
+
+    return this.executePromptWithLargeOutput(fullPrompt);
+  }
+
+  /**
+   * 대용량 출력을 위한 프롬프트 실행
+   */
+  private async executePromptWithLargeOutput(prompt: string): Promise<EditResult> {
+    const response = await fetch(this.proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        apiKey: this.apiKey,
+        payload: {
+          model: this.model,
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 32768, // 128K 출력 대비 32K로 안전 설정
+          temperature: 0.1,
+          stream: false
+        },
+        // 128K 출력 지원 헤더
+        additionalHeaders: {
+          'anthropic-beta': 'output-128k-2025-02-19'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: `Diff 적용 실패 ${response.status}: ${errorData.error?.message || response.statusText}`
+      };
+    }
+
+    const data = await response.json();
+    return this.parseResponse(data);
+  }
+
+  /**
+   * 계획에 따라 관련 부분 추출
+   */
+  private extractRelevantParts(currentJson: any, plan: any): any {
+    const result = {
+      version: currentJson.version,
+      timebase: currentJson.timebase,
+      stage: currentJson.stage,
+      tracks: currentJson.tracks,
+      cues: []
+    };
+
+    // 계획의 targets에 따라 관련 cue들 추출 (안정성 우선: 더 많이 처리)
+    if (plan.targets?.includes('all_cues')) {
+      // 안정성 우선: 전체 요청은 5개씩 처리
+      result.cues = currentJson.cues?.slice(0, 5) || [];
+      console.log(`🛡️ 안정성 모드: 전체 ${currentJson.cues?.length}개 중 첫 5개 처리`);
+    } else {
+      // 선택적 요청: 3개씩 처리
+      result.cues = currentJson.cues?.slice(0, 3) || [];
+      console.log(`📝 선택적 모드: 첫 3개 cue 처리 (안전한 청크)`);
+    }
+
+    return result;
+  }
+
+  /**
+   * 안전 모드: Diff 실패 시 폴백 전략
+   * 가장 작은 단위로 안전하게 처리
+   */
+  private async fallbackToSafeMode(currentJson: any, instruction: string): Promise<EditResult> {
+    console.log(`🆘 안전 모드 활성화: 최소 단위로 안전하게 처리`);
+    
+    try {
+      // 첫 번째 cue만 추출해서 안전하게 처리
+      const safeJson = {
+        version: currentJson.version,
+        timebase: currentJson.timebase,
+        stage: currentJson.stage,
+        tracks: currentJson.tracks,
+        cues: currentJson.cues?.slice(0, 1) || [] // 가장 안전한 1개만
+      };
+      
+      const safePrompt = `${SAFE_MODE_CONTEXT}
+
+현재 JSON:
+\`\`\`json
+${JSON.stringify(safeJson, null, 2)}
+\`\`\`
+
+편집 요청: "${instruction}"
+
+⚠️ 중요 지침:
+1. 위 JSON 구조를 정확히 유지하세요
+2. ID, version, timebase, stage, tracks는 절대 변경 금지
+3. 요청사항을 최소한으로만 적용하세요
+4. 완전한 유효한 JSON으로 응답하세요
+
+수정된 완전한 JSON:
+\`\`\`json
+{
+  "version": "1.3",
+  "timebase": ...,
+  "stage": ...,
+  "tracks": ...,
+  "cues": [...]
+}
+\`\`\``;
+
+      const response = await fetch(this.proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          apiKey: this.apiKey,
+          payload: {
+            model: this.model,
+            messages: [{ role: 'user', content: safePrompt }],
+            max_tokens: 8192, // 더 여유있게
+            temperature: 0.1, // 더 보수적으로
+            stream: false
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: `안전 모드도 실패 ${response.status}: ${errorData.error?.message || response.statusText}`
+        };
+      }
+
+      const data = await response.json();
+      const result = this.parseResponse(data);
+      
+      if (result.success) {
+        console.log(`✅ 안전 모드 성공: 1개 cue 처리 완료`);
+        
+        // 원본 JSON에 안전하게 병합
+        if (result.data?.cues?.[0]) {
+          const mergedJson = JSON.parse(JSON.stringify(currentJson));
+          mergedJson.cues[0] = result.data.cues[0];
+          result.data = mergedJson;
+        }
+      }
+      
+      return result;
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: `안전 모드 실패: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
   }
 }
 

@@ -116,3 +116,7 @@ Temporary Items
 .apdisk
 
 .tmp/
+
+# Claude API 응답 로그 
+/output/
+*.txt
