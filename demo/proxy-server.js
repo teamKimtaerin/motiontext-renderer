@@ -7,6 +7,17 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import { config } from 'dotenv';
+
+// 환경변수 로드 (루트 디렉토리의 .env 파일 찾기)
+config({ path: path.join(process.cwd(), '.env') });
+
+// 디버깅: API 키 로드 확인
+console.log('🔑 환경변수 로드 상태:');
+console.log('- 작업 디렉토리:', process.cwd());
+console.log('- .env 파일 경로:', path.join(process.cwd(), '.env'));
+console.log('- API 키 설정 여부:', !!process.env.ANTHROPIC_API_KEY);
+console.log('- API 키 앞부분:', process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.substring(0, 15) + '...' : 'undefined');
 
 const app = express();
 const port = 3002;
@@ -93,10 +104,15 @@ app.use(express.json({ limit: '10mb' }));
 // Claude API 프록시
 app.post('/proxy/claude', async (req, res) => {
   try {
-    const { apiKey, payload, additionalHeaders } = req.body;
+    const { payload, additionalHeaders } = req.body;
+    
+    // 환경변수에서 API 키 읽기
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     
     if (!apiKey) {
-      return res.status(400).json({ error: 'API key required' });
+      return res.status(500).json({ 
+        error: 'ANTHROPIC_API_KEY not found in environment variables. Please set it in .env file or system environment.' 
+      });
     }
 
     // Base headers
