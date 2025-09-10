@@ -307,23 +307,10 @@ function initAIEditor() {
     loadConfiguration(config);
   });
 
-  // API 키 저장 버튼
-  saveApiKeyBtn.addEventListener('click', () => {
-    const apiKey = claudeApiKeyInput.value.trim();
-    if (!apiKey) {
-      alert('API 키를 입력해주세요.');
-      return;
-    }
-
-    if (!apiKey.startsWith('sk-ant-')) {
-      alert('올바른 Claude API 키 형식이 아닙니다. (sk-ant-로 시작해야 함)');
-      return;
-    }
-
-    if (aiEditor) {
-      aiEditor.setApiKey(apiKey);
-    }
-  });
+  // AI Editor 자동 초기화
+  if (aiEditor) {
+    aiEditor.initializeClient();
+  }
 
   // AI 편집 버튼
   applyAiEditBtn.addEventListener('click', async () => {
@@ -339,7 +326,7 @@ function initAIEditor() {
     }
 
     if (!aiEditor?.hasValidApiKey()) {
-      alert('API 키를 먼저 설정해주세요.');
+      alert('환경변수에 ANTHROPIC_API_KEY를 설정하고 프록시 서버를 다시 시작해주세요.');
       return;
     }
 

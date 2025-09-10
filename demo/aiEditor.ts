@@ -688,31 +688,20 @@ export class AISubtitleEditor {
   }
 
   /**
-   * API 키 설정
+   * 서버 연결 초기화
    */
-  setApiKey(apiKey: string): void {
-    this.claudeApi = new ClaudeApiClient(apiKey);
-    localStorage.setItem('claude-api-key', apiKey);
-    this.updateStatus('API 키가 설정되었습니다');
+  initializeClient(): void {
+    this.claudeApi = new ClaudeApiClient();
+    this.updateStatus('준비됨 (환경변수 API 키 사용)');
     this.updateButtonState(true);
   }
 
   /**
-   * API 키 로드
+   * 클라이언트 초기화 로드
    */
   private loadApiKey(): void {
-    const apiKey = localStorage.getItem('claude-api-key');
-    if (apiKey) {
-      this.claudeApi = new ClaudeApiClient(apiKey);
-      this.updateStatus('준비됨');
-      this.updateButtonState(true);
-      
-      // API 키 입력란에 마스킹된 키 표시
-      const keyInput = document.getElementById('claude-api-key') as HTMLInputElement;
-      if (keyInput) {
-        keyInput.value = '●'.repeat(12) + apiKey.slice(-8);
-      }
-    }
+    // 환경변수에서 API 키를 읽는 방식으로 변경
+    this.initializeClient();
   }
 
   /**

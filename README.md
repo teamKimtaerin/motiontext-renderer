@@ -195,9 +195,24 @@ cd motiontext-renderer
 pnpm install
 ```
 
-3. **개발 서버 실행**
+3. **AI 편집기 환경 설정 (선택사항)**
+
+AI 기반 자막 편집 기능을 사용하려면 환경변수를 설정하세요:
+
+```bash
+# .env 파일 생성
+cp .env.example .env
+
+# .env 파일에 API 키 설정
+ANTHROPIC_API_KEY=sk-ant-your-api-key-here
+```
+
+4. **개발 서버 실행**
 ```bash
 pnpm dev
+
+# AI 편집기 사용 시 추가로 프록시 서버 실행
+pnpm proxy:server
 ```
 
 ### 개발 명령어
