@@ -8,6 +8,7 @@ import { preloadPluginsForScenario } from './devPlugins';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
+import { AISubtitleEditor } from './aiEditor';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -49,6 +50,13 @@ const pluginPreviewLoop = document.getElementById('plugin-preview-loop') as HTML
 const pluginPreviewDuration = document.getElementById('plugin-preview-duration') as HTMLInputElement | null;
 const pluginPreviewGenerate = document.getElementById('plugin-preview-generate') as HTMLButtonElement | null;
 
+// AI Editor elements
+const claudeApiKeyInput = document.getElementById('claude-api-key') as HTMLInputElement;
+const saveApiKeyBtn = document.getElementById('save-api-key') as HTMLButtonElement;
+const editInstructionTextarea = document.getElementById('edit-instruction') as HTMLTextAreaElement;
+const applyAiEditBtn = document.getElementById('apply-ai-edit') as HTMLButtonElement;
+const resetToOriginalBtn = document.getElementById('reset-to-original') as HTMLButtonElement;
+
 // Status displays
 const rendererStatus = document.getElementById('renderer-status') as HTMLSpanElement;
 const currentTime = document.getElementById('current-time') as HTMLSpanElement;
@@ -58,6 +66,7 @@ const activeCues = document.getElementById('active-cues') as HTMLSpanElement;
 let renderer: MotionTextRenderer | null = null;
 let controller: MotionTextController | null = null;
 let currentConfig: RendererConfig | null = null;
+let aiEditor: AISubtitleEditor | null = null;
 
 // Sample configurations
 const sampleConfigs: Record<string, RendererConfig> = {
@@ -213,6 +222,9 @@ const sampleConfigs: Record<string, RendererConfig> = {
 async function initDemo() {
   updateStatus('렌더러 준비됨');
   
+  // Initialize AI Editor
+  initAIEditor();
+  
   // Set up video time update
   video.addEventListener('timeupdate', () => {
     currentTime.textContent = `${video.currentTime.toFixed(2)}s`;
@@ -284,6 +296,81 @@ async function initDemo() {
   }
 
   console.log('✅ MotionText Renderer Demo 초기화 완료');
+}
+
+// Initialize AI Editor
+function initAIEditor() {
+  // Create AI editor instance
+  aiEditor = new AISubtitleEditor((config) => {
+    // Update config editor and reload
+    configEditor.value = JSON.stringify(config, null, 2);
+    loadConfiguration(config);
+  });
+
+  // API 키 저장 버튼
+  saveApiKeyBtn.addEventListener('click', () => {
+    const apiKey = claudeApiKeyInput.value.trim();
+    if (!apiKey) {
+      alert('API 키를 입력해주세요.');
+      return;
+    }
+
+    if (!apiKey.startsWith('sk-ant-')) {
+      alert('올바른 Claude API 키 형식이 아닙니다. (sk-ant-로 시작해야 함)');
+      return;
+    }
+
+    if (aiEditor) {
+      aiEditor.setApiKey(apiKey);
+    }
+  });
+
+  // AI 편집 버튼
+  applyAiEditBtn.addEventListener('click', async () => {
+    const instruction = editInstructionTextarea.value.trim();
+    if (!instruction) {
+      alert('편집 요청을 입력해주세요.');
+      return;
+    }
+
+    if (!currentConfig) {
+      alert('먼저 샘플을 로드해주세요.');
+      return;
+    }
+
+    if (!aiEditor?.hasValidApiKey()) {
+      alert('API 키를 먼저 설정해주세요.');
+      return;
+    }
+
+    try {
+      // Save original config if not already saved
+      if (aiEditor && currentConfig) {
+        aiEditor.saveOriginalConfig(currentConfig);
+      }
+
+      // Apply AI edit (자동으로 적용됨)
+      await aiEditor?.applyEdit(instruction);
+      
+      // Clear instruction after successful edit
+      editInstructionTextarea.value = '';
+      
+      // 성공하면 더 이상 alert 표시하지 않음 (자동 알림으로 대체)
+    } catch (error) {
+      console.error('AI 편집 실패:', error);
+      // 에러는 여전히 alert으로 표시 (중요한 정보이므로)
+      // alert(`AI 편집 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+    }
+  });
+
+  // 원본 복원 버튼
+  resetToOriginalBtn.addEventListener('click', () => {
+    if (aiEditor) {
+      aiEditor.restoreOriginal();
+    }
+  });
+
+  console.log('🤖 AI 편집기 초기화 완료');
 }
 
 // Load selected sample configuration
@@ -410,6 +497,7 @@ if (document.readyState === 'loading') {
   renderer,
   controller,
   video,
+  aiEditor,
   loadConfiguration,
   sampleConfigs,
   applySafeAreaFromUI,
