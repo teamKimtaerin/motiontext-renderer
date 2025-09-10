@@ -122,6 +122,89 @@ const PLUGINS = import.meta.glob('/plugins/*/index.mjs');
 await registerExternalPluginsFromGlob(PLUGINS);
 ```
 
+### 📦 내장 CWI 플러그인 시리즈
+
+Caption with Intention (CWI) 플러그인들은 단어별 발화 강도에 따른 다양한 애니메이션을 제공합니다:
+
+- **cwi-color@1.0.0**: 색상 변화 (흰색 → 화자별 색상)
+- **cwi-loud@1.0.0**: 큰 소리 효과 (2.4배 확대 + 진동)
+- **cwi-whisper@1.0.0**: 속삭임 효과 (0.6배 축소)
+- **cwi-bouncing@1.0.0**: 바운싱 효과 (1.15배 확대 + 상하 움직임)
+
+#### 사용 예시
+
+```json
+{
+  "definitions": {
+    "speakerPalette": {
+      "SPEAKER_01": "#4AA3FF",
+      "SPEAKER_02": "#FF4D4D",
+      "SPEAKER_03": "#FFD400"
+    }
+  },
+  "cues": [{
+    "root": {
+      "children": [{
+        "e_type": "text",
+        "text": "Hello",
+        "pluginChain": [
+          {
+            "name": "cwi-loud@1.0.0",
+            "params": {
+              "speaker": "SPEAKER_01",
+              "t0": 0.5,
+              "t1": 0.8
+            }
+          },
+          {
+            "name": "cwi-color@1.0.0", 
+            "params": {
+              "speaker": "SPEAKER_01",
+              "t0": 0.5,
+              "t1": 0.8
+            }
+          }
+        ]
+      }]
+    }
+  }]
+}
+```
+
+#### Definitions 섹션을 통한 최적화
+
+`definitions` 섹션을 사용하면 공통 데이터를 중앙에서 관리할 수 있습니다:
+
+```json
+{
+  "definitions": {
+    "speakerPalette": {
+      "SPEAKER_01": "#4AA3FF",
+      "SPEAKER_02": "#FF4D4D"  
+    }
+  },
+  "cues": [{
+    "root": {
+      "children": [{
+        "pluginChain": [{
+          "name": "cwi-color@1.0.0",
+          "params": {
+            "speaker": "SPEAKER_01",
+            "palette": "definitions.speakerPalette"
+          }
+        }]
+      }]
+    }
+  }]
+}
+```
+
+**주요 이점:**
+- **중복 제거**: palette를 한 번만 정의하고 참조로 재사용
+- **파일 크기 감소**: 기존 대비 약 75% 크기 감소 (예: 800KB → 206KB)
+- **유지보수 개선**: palette 중앙 관리로 색상 변경 용이
+- **런타임 해결**: 렌더러가 `"definitions.speakerPalette"` 문자열을 실제 객체로 치환
+
 모드 개요
 - server: `serverBase`에서 `plugins/<name@version>/manifest.json`을 받아 entry(index.mjs)를 로드합니다. CDN/별도 플러그인 서버를 쓰는 배포 환경에 적합합니다.
 - local: 번들 또는 정적 경로에 포함된 플러그인을 직접 import합니다. 서버 없이도 동작하며, 앱이 제공하는 정적 자산에서 즉시 로딩할 때 적합합니다.

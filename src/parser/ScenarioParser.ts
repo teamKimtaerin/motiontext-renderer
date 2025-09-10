@@ -292,6 +292,7 @@ export function parseScenario(input: any): ScenarioFileV1_3 {
   // pass-through optional fields if valid (no deep validation here)
   if (Array.isArray(input.bindings)) (out as any).bindings = input.bindings;
   if (isObj(input.wordStream)) (out as any).wordStream = input.wordStream;
+  if (isObj(input.definitions)) (out as any).definitions = input.definitions;
   return out;
 }
 

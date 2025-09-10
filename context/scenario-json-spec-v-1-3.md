@@ -27,6 +27,7 @@
     resizeThrottleMs?: number,    // 리사이즈 반응(기본 80)
     snapToFrame?: boolean         // true면 t0/t1 프레임 스냅
   },
+  definitions?: Record<string, any>, // (선택) 공통 데이터 정의 (palette, 상수 등)
   tracks: Track[],
   wordStream?: WordStream,        // (선택) ASR/align 결과 대량 입력
   bindings?: BindingRule[],       // (선택) wordStream을 트리에 바인딩하는 규칙
@@ -267,6 +268,15 @@ type BindingRule = {
     "safeArea": { "top": 0.06, "bottom": 0.16, "left": 0.06, "right": 0.06 }
   },
   "behavior": { "preloadMs": 300, "resizeThrottleMs": 80, "snapToFrame": false },
+
+  "definitions": {
+    "speakerPalette": {
+      "SPEAKER_01": "#4AA3FF",
+      "SPEAKER_02": "#FF4D4D", 
+      "SPEAKER_03": "#FFD400",
+      "SPEAKER_04": "#FF8A00"
+    }
+  },
 
   "tracks": [
     {

@@ -130,6 +130,7 @@ export interface ScenarioFileV1_3 {
   timebase: Timebase;
   stage: StageSpec;
   behavior?: BehaviorSpec;
+  definitions?: Record<string, any>;
   tracks: Track[];
   wordStream?: WordStream;
   bindings?: BindingRule[];

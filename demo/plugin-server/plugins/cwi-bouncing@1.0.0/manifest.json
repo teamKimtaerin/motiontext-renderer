@@ -1,0 +1,52 @@
+{
+  "name": "cwi-bouncing",
+  "version": "1.0.0",
+  "pluginApi": "2.1",
+  "minRenderer": "1.3.0",
+  "entry": "index.mjs",
+  "targets": ["text"],
+  "capabilities": ["style-vars"],
+  "preload": [],
+  "schema": {
+    "speaker": {
+      "type": "string",
+      "label": "화자 ID",
+      "description": "화자별 색상을 적용할 때 사용되는 화자 식별자"
+    },
+    "palette": {
+      "type": "object",
+      "label": "색상 팔레트",
+      "description": "화자별 색상 매핑 객체"
+    },
+    "color": {
+      "type": "string",
+      "label": "고정 색상",
+      "description": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)"
+    },
+    "popScale": {
+      "type": "number",
+      "label": "팝 스케일",
+      "description": "바운싱 시 최대 크기 배율",
+      "default": 1.15,
+      "min": 1,
+      "max": 2,
+      "step": 0.05
+    },
+    "t0": {
+      "type": "number",
+      "label": "시작 시간",
+      "description": "바운싱 효과가 시작되는 상대 시간 (초)",
+      "default": 0,
+      "min": 0,
+      "step": 0.1
+    },
+    "t1": {
+      "type": "number",
+      "label": "종료 시간",
+      "description": "바운싱 효과가 종료되는 상대 시간 (초)",
+      "default": 0,
+      "min": 0,
+      "step": 0.1
+    }
+  }
+}
