@@ -1,0 +1,144 @@
+{
+  "version": "2.0",
+  "timebase": {
+    "unit": "seconds"
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "define": {
+    "custom_font": {
+      "type": "font",
+      "url": "fonts/NotoSansKR-Regular.woff2"
+    },
+    "logo_image": {
+      "type": "image", 
+      "url": "images/logo.png"
+    },
+    "brand_theme": {
+      "colors": {
+        "primary": "#ff6b35",
+        "secondary": "#4ecdc4",
+        "text": "#333333"
+      },
+      "typography": {
+        "title": {
+          "fontFamily": "custom_font",
+          "fontSize": "32px",
+          "fontWeight": "bold",
+          "color": "define.brand_theme.colors.primary"
+        },
+        "subtitle": {
+          "fontFamily": "custom_font", 
+          "fontSize": "18px",
+          "fontWeight": "normal",
+          "color": "define.brand_theme.colors.text"
+        }
+      }
+    },
+    "animations": {
+      "slide_in": {
+        "name": "slideInLeft",
+        "time_offset": [0, 0.6]
+      },
+      "fade_out": {
+        "name": "fadeOut",
+        "time_offset": [0.8, 1.0]
+      }
+    },
+    "layout": {
+      "title_position": [0.5, 0.3],
+      "subtitle_position": [0.5, 0.7],
+      "logo_position": [0.1, 0.1]
+    }
+  },
+  "tracks": [
+    {
+      "id": "title",
+      "type": "free",
+      "layer": 2,
+      "defaultStyle": "define.brand_theme.typography.title"
+    },
+    {
+      "id": "subtitle", 
+      "type": "subtitle",
+      "layer": 1,
+      "defaultStyle": "define.brand_theme.typography.subtitle"
+    },
+    {
+      "id": "logo",
+      "type": "free",
+      "layer": 3
+    }
+  ],
+  "cues": [
+    {
+      "id": "logo_cue",
+      "track": "logo",
+      "domLifetime": [0, 15],
+      "root": {
+        "id": "logo_container",
+        "e_type": "image",
+        "src": "define.logo_image",
+        "displayTime": [0.5, 14.5],
+        "layout": {
+          "position": "define.layout.logo_position",
+          "size": [0.15, 0.15]
+        }
+      }
+    },
+    {
+      "id": "title_cue",
+      "track": "title",
+      "domLifetime": [1, 8],
+      "root": {
+        "id": "title_text",
+        "e_type": "text",
+        "text": "MotionText v2.0",
+        "displayTime": [2, 7],
+        "layout": {
+          "position": "define.layout.title_position",
+          "anchor": "cc"
+        },
+        "pluginChain": [
+          "define.animations.slide_in",
+          "define.animations.fade_out"
+        ]
+      }
+    },
+    {
+      "id": "subtitle_cue1", 
+      "track": "subtitle",
+      "domLifetime": [8, 15],
+      "root": {
+        "id": "subtitle_group1",
+        "e_type": "group",
+        "displayTime": [9, 14],
+        "children": [
+          {
+            "id": "subtitle_text1",
+            "e_type": "text",
+            "text": "Define 시스템으로 에셋과 스타일을 관리합니다",
+            "displayTime": [9, 12],
+            "layout": {
+              "position": "define.layout.subtitle_position",
+              "anchor": "cc"
+            },
+            "pluginChain": ["define.animations.slide_in"]
+          },
+          {
+            "id": "subtitle_text2", 
+            "e_type": "text",
+            "text": "모든 시간은 [start, end] 배열로 표현됩니다",
+            "displayTime": [12, 14],
+            "layout": {
+              "position": [0.5, 0.8],
+              "anchor": "cc"
+            },
+            "pluginChain": ["define.animations.slide_in"]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "version": "2.0",
+  "timebase": {
+    "unit": "seconds"
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "define": {
+    "subtitle_style": {
+      "fontSize": "24px",
+      "fontFamily": "Arial, sans-serif",
+      "color": "#ffffff",
+      "textShadow": "2px 2px 4px rgba(0,0,0,0.8)",
+      "stroke": { "widthRel": 0.002, "color": "#000000" },
+      "textAlign": "center"
+    },
+    "subtitle_position": [0.5, 0.85],
+    "cue1_timing": [2, 5],
+    "cue2_timing": [6, 9], 
+    "cue3_timing": [10, 13],
+    "fade_in": {
+      "name": "fadeIn",
+      "time_offset": [0, 0.3]
+    }
+  },
+  "tracks": [
+    {
+      "id": "subtitle",
+      "type": "subtitle",
+      "layer": 1,
+      "defaultStyle": "define.subtitle_style"
+    }
+  ],
+  "cues": [
+    {
+      "id": "cue1",
+      "track": "subtitle",
+      "domLifetime": [1.8, 5.5],
+      "root": {
+        "id": "group1",
+        "e_type": "group",
+        "children": [
+          {
+            "id": "text1",
+            "e_type": "text",
+            "text": "안녕하세요! MotionText Renderer v2.0입니다.",
+            "displayTime": "define.cue1_timing",
+            "layout": {
+              "position": "define.subtitle_position"
+            },
+            "pluginChain": ["define.fade_in"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue2",
+      "track": "subtitle",
+      "domLifetime": [5.8, 9.5],
+      "root": {
+        "id": "group2",
+        "e_type": "group",
+        "children": [
+          {
+            "id": "text2",
+            "e_type": "text",
+            "text": "Define 시스템으로 중복을 제거했습니다.",
+            "displayTime": "define.cue2_timing",
+            "layout": {
+              "position": "define.subtitle_position"
+            },
+            "pluginChain": ["define.fade_in"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue3",
+      "track": "subtitle",
+      "domLifetime": [9.8, 13.5],
+      "root": {
+        "id": "group3",
+        "e_type": "group",
+        "children": [
+          {
+            "id": "text3",
+            "e_type": "text",
+            "text": "시간 필드는 [start, end] 배열로 통일되었습니다.",
+            "displayTime": "define.cue3_timing",
+            "layout": {
+              "position": "define.subtitle_position"
+            },
+            "pluginChain": ["define.fade_in"]
+          }
+        ]
+      }
+    }
+  ]
+}
