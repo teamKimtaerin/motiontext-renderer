@@ -104,15 +104,16 @@ export class DefineResolver {
       throw new Error(`Undefined define key: "${rootKey}" referenced at ${keyPath}`);
     }
 
-    // 순환 참조 검출
-    if (this.visited.has(rootKey)) {
-      const cyclePath = [...this.resolutionPath, rootKey].join(' -> ');
+    // 정확한 경로 기반 순환 참조 검출
+    const fullRefPath = `define.${fullPath}`;
+    if (this.resolutionPath.includes(fullRefPath)) {
+      const cyclePath = [...this.resolutionPath, fullRefPath].join(' -> ');
       throw new Error(`Circular reference detected in define: ${cyclePath}`);
     }
 
     // 해석 경로에 추가 (순환 참조 추적용)
     this.visited.add(rootKey);
-    this.resolutionPath.push(rootKey);
+    this.resolutionPath.push(fullRefPath);
 
     try {
       // Root 값 해석

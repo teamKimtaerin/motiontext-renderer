@@ -17,6 +17,9 @@ import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
 import cwiDemoFull from './samples/cwi_demo_full.json';
+// v2.0 샘플들
+import basicV20 from './samples/v2/basic_v20.json';
+import withAssetsV20 from './samples/v2/with_assets_v20.json';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -80,6 +83,10 @@ const sampleConfigs: Record<string, RendererConfig> = {
   plugin_showcase: pluginShowcase as RendererConfig,
   // CwI full demo (statically imported to avoid top-level await delay)
   cwi_demo_full: cwiDemoFull as RendererConfig,
+  
+  // v2.0 샘플들
+  'basic_v20 (v2.0)': basicV20 as RendererConfig,
+  'with_assets_v20 (v2.0)': withAssetsV20 as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -335,6 +342,42 @@ async function loadConfiguration(config: RendererConfig) {
     configEditor.value = JSON.stringify(config, null, 2);
     currentConfig = config;
 
+    // v2.0 샘플 처리: DefineResolver + FieldMigration 사용
+    let processedConfig = config;
+    if ((config as any).version === '2.0') {
+      console.log('🔄 v2.0 시나리오 감지됨, Define 참조 해석 중...');
+      updateStatus('v2.0 시나리오 처리 중...');
+      
+      // 동적 import로 v2.0 처리 모듈들 로드
+      const { DefineResolver } = await import('../src/parser/DefineResolver');
+      const { AssetManager } = await import('../src/assets/AssetManager');
+      
+      // 1. Define 참조 해석
+      const resolver = new DefineResolver();
+      const resolvedConfig = resolver.resolveScenario(config as any);
+      
+      // 2. 에셋 로드 (가능한 경우)
+      const assetManager = new AssetManager();
+      try {
+        await assetManager.loadAssetsFromDefines(resolvedConfig.define || {});
+        const stats = assetManager.getLoadStats();
+        if (stats.total > 0) {
+          console.log(`✅ 에셋 로드 완료: 폰트 ${stats.fonts}개, 이미지 ${stats.images}개, 비디오 ${stats.videos}개, 오디오 ${stats.audios}개`);
+        }
+      } catch (assetError) {
+        console.warn('⚠️ 에셋 로드 실패 (무시됨):', assetError);
+      }
+      
+      // 3. v1.3으로 마이그레이션 (일단 간단한 버전 변경으로 시뮬레이션)
+      processedConfig = {
+        ...resolvedConfig,
+        version: '1.3' as any // 임시로 v1.3으로 변경해서 기존 렌더러가 처리할 수 있도록
+      };
+      
+      console.log('✅ v2.0 → v1.3 변환 완료');
+      assetManager.dispose();
+    }
+
     // Reinitialize renderer to ensure clean state (handles Undo/Apply edge cases)
     if (renderer) {
       renderer.dispose();
@@ -348,10 +391,10 @@ async function loadConfiguration(config: RendererConfig) {
     updateStatus('렌더러 초기화됨');
 
     // Preload plugins referenced by scenario (Dev loader)
-    await preloadPluginsForScenario(config);
+    await preloadPluginsForScenario(processedConfig);
 
     // Load configuration and attach media
-    await renderer.loadConfig(config);
+    await renderer.loadConfig(processedConfig);
     renderer.attachMedia(video);
 
     // Mount custom controller overlay for testing
@@ -368,9 +411,9 @@ async function loadConfiguration(config: RendererConfig) {
     }
 
     updateStatus('설정 로드 완료');
-    activeCues.textContent = config.cues.length.toString();
+    activeCues.textContent = processedConfig.cues.length.toString();
 
-    console.log('✅ 설정 로드 완료:', config);
+    console.log('✅ 설정 로드 완료:', processedConfig);
   } catch (error) {
     console.error('❌ 설정 로드 실패:', error);
     updateStatus('설정 로드 실패');
