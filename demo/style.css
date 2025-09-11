@@ -38,20 +38,37 @@ body {
 
 /* Header */
 .demo-header {
-  text-align: center;
   margin-bottom: 3rem;
 }
 
-.demo-header h1 {
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.header-title {
+  text-align: center;
+  flex: 1;
+}
+
+.header-title h1 {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
-.demo-header p {
+.header-title p {
   font-size: 1.1rem;
   color: var(--secondary-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Main Content */
@@ -209,6 +226,28 @@ body {
   color: white;
 }
 
+.btn-export {
+  background-color: #7c3aed;
+  color: white;
+  font-weight: 600;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.btn-export:hover:not(:disabled) {
+  background-color: #6d28d9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+}
+
+.btn-export:disabled {
+  background-color: var(--secondary-color);
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .control-buttons {
   display: flex;
   gap: 0.5rem;
@@ -327,8 +366,22 @@ body {
     padding: 1rem;
   }
   
-  .demo-header h1 {
+  .header-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .header-title h1 {
     font-size: 2rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .btn-export {
+    min-width: 160px;
   }
   
   .video-section {
