@@ -1,4 +1,17 @@
-# 플러그인 시스템 아키텍처 (v2.1 제안)
+# 플러그인 시스템 아키텍처 v2.1 ⚠️ 레거시
+
+**⚠️ 중요 알림**: 이 문서는 v2.1 레거시 스펙입니다. **v3.0 최신 스펙을 사용하세요**: [`context/plugin-system-architecture-v-3-0.md`](./plugin-system-architecture-v-3-0.md)
+
+**v3.0 주요 개선사항:**
+- 시나리오 v2.0과 완전 호환성 (Define 시스템, 노드 ID 지원)
+- 확장된 7가지 권한 시스템 (style-vars, portal-breakout, dom-manipulation 등)
+- 에셋 관리 통합 (font/image/video/audio + integrity)
+- 향상된 플러그인 컨텍스트 (scenario, channels, audio, asset APIs)
+- 마이그레이션 자동화 도구 포함
+
+---
+
+# 플러그인 시스템 아키텍처 v2.1 (레거시)
 
 동적 로딩, 무결성(후속), 에셋 관리, 샌드박싱을 유지하면서 텍스트/이미지/비디오 등 다양한 요소를 독립적으로 확장할 수 있도록 v2를 보완한 스펙입니다. v2.1은 “렌더러 독립성 + 플러그인 확장성”을 강하게 보장하기 위해 DOM 경계, 타임라인 계약, 에셋 규약을 명확히 합니다.
 

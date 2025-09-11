@@ -2,8 +2,8 @@
 
 이 문서는 현재 리포지토리의 폴더/파일 구조와 각 파일의 책임을 정리합니다. 동작의 세부 규칙은 다음 문서를 기준으로 합니다.
 
-- 시나리오(JSON) 상세 스펙: `context/scenario-json-spec-v-1-3.md`
-- 플러그인 시스템 상세 스펙: `context/plugin-system-architecture-v-2-1.md`
+- 시나리오(JSON) 상세 스펙: `context/scenario-json-spec-v-2-0.md`
+- 플러그인 시스템 상세 스펙: `context/plugin-system-architecture-v-3-0.md`
 - 개요 요약: `context/init-context.md`
 
 핵심 원칙 요약:
@@ -21,8 +21,8 @@
 .
 ├─ context/
 │  ├─ init-context.md
-│  ├─ scenario-json-spec-v-1-3.md
-│  ├─ plugin-system-architecture-v-2-1.md
+│  ├─ scenario-json-spec-v-2-0.md
+│  ├─ plugin-system-architecture-v-3-0.md
 │  ├─ ai-bootstrap-prompt.md
 │  └─ folder-structure.md  ← (본 문서)
 ├─ demo/
@@ -167,7 +167,7 @@
 - DevPluginLoader.ts: 보안 검증 없이 manifest→entry를 fetch 후 Blob URL로 동적 import, 레지스트리에 등록. 향후 M7 정식 로더로 대체.
 
 ### parser
-- ScenarioParser.ts: 시나리오(JSON v1.3) 파싱/스키마 검증 및 내부 구조로의 변환. 타입은 `src/types/scenario.ts` 참조.
+- ScenarioParser.ts: 시나리오(JSON v2.0) 파싱/스키마 검증 및 내부 구조로의 변환. 타입은 `src/types/scenario.ts` 참조.
 
 ### runtime
 - PortalManager.ts: effectScope.breakout 구현. 기본 transfer: "move"로 재부모화, 필요 시 clone 처리. coordSpace 변환 처리.
@@ -176,7 +176,7 @@
 - CssVars.ts: 공통 CSS 변수 명세와 조합 유틸.
 
 ### types
-- scenario.ts: 시나리오(JSON v1.3) 구조 타입(Top-level, Track, Cue, Node, Layout, Style, EffectScope 등).
+- scenario.ts: 시나리오(JSON v2.0) 구조 타입(Top-level, Track, Cue, Node, Layout, Style, EffectScope 등).
 - plugin.ts: 플러그인 인터페이스/PluginSpec/PluginChain 런타임 계약 정의(상대 타이밍 창 포함).
 - layout.ts: 레이아웃/스타일/브레이크아웃 타입 분리본. 구현 시 command 타입과 공유/재사용 가능하도록 설계.
 - timeline.ts: 타임라인/시킹 계약 타입. 렌더러 소유 원칙 반영.

@@ -9,6 +9,7 @@ import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import { AISubtitleEditor } from './aiEditor';
+import basicSample from './samples/basic.json';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -70,52 +71,7 @@ let aiEditor: AISubtitleEditor | null = null;
 
 // Sample configurations
 const sampleConfigs: Record<string, RendererConfig> = {
-  basic: {
-    version: '1.3',
-    timebase: { unit: 'seconds' },
-    stage: { baseAspect: '16:9' },
-    tracks: [
-      {
-        id: 'subtitle',
-        type: 'subtitle',
-        layer: 1,
-      },
-    ],
-    cues: [
-      {
-        id: 'cue1',
-        track: 'subtitle',
-        root: {
-          e_type: 'group',
-          children: [
-            {
-              e_type: 'text',
-              text: '안녕하세요! MotionText Renderer입니다.',
-              absStart: 2,
-              absEnd: 5,
-              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
-            },
-          ],
-        },
-      },
-      {
-        id: 'cue2',
-        track: 'subtitle',
-        root: {
-          e_type: 'group',
-          children: [
-            {
-              e_type: 'text',
-              text: '이것은 기본 자막 테스트입니다.',
-              absStart: 6,
-              absEnd: 9,
-              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
-            },
-          ],
-        },
-      },
-    ],
-  },
+  basic: basicSample as RendererConfig,
   animated_subtitle: animatedSubtitle as RendererConfig,
   animated_free_mixed: animatedFreeMixed as RendererConfig,
   tilted_box: tiltedBox as RendererConfig,

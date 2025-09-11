@@ -3,8 +3,9 @@
 이 문서는 구현 단계·우선순위·체크리스트를 관리하는 살아있는 계획서입니다. 작업 진행 시 이 파일을 계속 갱신합니다.
 
 참조 문서
-- 시나리오(JSON) 스펙 v1.3: `context/scenario-json-spec-v-1-3.md`
-- 플러그인 시스템 아키텍처(v2.1): `context/plugin-system-architecture-v-2-1.md`
+- **시나리오 JSON 상세 스펙** → `context/scenario-json-spec-v-2-0.md`
+- **플러그인 시스템 상세 스펙** → `context/plugin-system-architecture-v-3-0.md`
+- **레거시 스펙 (참조용)** → `context/scenario-json-spec-v-1-3.md`, `context/plugin-system-architecture-v-2-1.md`
 - 개요 요약: `context/init-context.md`
 - 폴더/파일 역할: `context/folder-structure.md`
 
@@ -37,6 +38,22 @@
 - M9 렌더러: 오케스트레이션(트랙/큐/노드/플러그인 통합) — 부분 완료(`MotionTextRenderer` 내 구현, `core/Renderer.ts` 보류)
 - M10 데모 연동: demo/main.ts 샘플/컨트롤러/세이프에어리어 — 부분 완료
 - M11 문서/예제: README 사용 가이드 — 예정
+
+## 🆕 v2.0 업데이트 (2025-01-16)
+
+MotionText Renderer가 v2.0으로 메이저 업데이트되었습니다.
+
+### Breaking Changes
+- **시나리오 스펙**: v1.3 → v2.0 (define 시스템, 필드명 변경, 상속 시스템)
+- **플러그인 API**: v2.1 → v3.0 (DOM 아키텍처 고도화, 권한 시스템 강화)
+- **하위 호환성**: 자동 마이그레이션 도구 제공 예정
+
+### 주요 개선사항
+- **Define 필드**: 중복 제거 및 에셋 관리 통합
+- **시간 표현 통일**: 모든 시간 필드를 `[start, end]` 배열로 통일
+- **노드 ID 의무화**: 편집 도구 지원을 위한 고유 식별자 필수
+- **상속 시스템**: 체계적인 값 우선순위 및 상속 규칙
+- **에셋 관리**: 폰트/이미지/비디오/오디오 통합 관리
 
 ---
 
@@ -464,6 +481,12 @@
 - [ ] AssetFetcher: preload + 무결성 검증
 - [ ] PluginLoader: fetch→검증→Blob→import 순서 엄수
 
+### v2.0 통합 (M7에서 추가 구현)
+- [ ] **v2.0 Define 에셋 무결성**: Define 시스템의 폰트/이미지/비디오/오디오 에셋에 SHA-384 검증 추가
+- [ ] **v3.0 플러그인 보안**: Plugin API v3.0의 7가지 capabilities 기반 권한 검증 강화
+- [ ] **매니페스트 v3.0 검증**: v3.0 매니페스트의 새로운 필드(lazyLoad, dependencies) 검증
+- [ ] **서명 검증 확장**: v2.0 시나리오 자체의 무결성 검증 옵션 추가
+
 ### 검증 (M7)
 - [ ] 정상 manifest: 해시 일치 → import 성공
 - [ ] 해시 불일치/서명 실패: import 차단 + 폴백 동작
@@ -472,6 +495,12 @@
 ## 8) 런타임 (M8)
 - [ ] PortalManager: breakout(mode/coordSpace/return/transfer)
 - [ ] DomMount/CssVars: DOM/스타일 반영(StyleApply 일부 사용 중)
+
+### v2.0 통합 (M8에서 추가 구현)
+- [ ] **v3.0 PortalManager**: v2.0 effectsRoot 기반 완전한 breakout 시스템 구현
+- [ ] **CSS 변수 채널 최적화**: v2.0 채널 합성 시스템(`--mtx-*`)의 성능 최적화
+- [ ] **고급 에셋 관리**: v2.0 Define 에셋에 LRU 캐싱 및 참조 카운팅 추가
+- [ ] **DOM 경계 강화**: baseWrapper/effectsRoot 분리 구조의 완전한 샌드박스 구현
 
 ### 검증 (M8)
 - [ ] breakout transfer 기본값이 move로 동작(clone 지정 시 복제 확인)
@@ -512,10 +541,11 @@
 - [x] M6 타임라인: rVFC 전환 + snapToFrame 연동 + 테스트 통과(2025-09-07)
 
 다음 작업(Next Up)
-1) M6.7.hotfix: CwI word-per-node 구조 이행  
-2) M7: PluginLoader 파이프라인(무결성 검증→Blob import)  
-3) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환)
-4) Transform 순서 개선 (M8 인접)
+1) **v2.0 메이저 업그레이드**: `context/v2plan.md` 참조 - Define 시스템, 필드명 통일, 상속 시스템, Plugin v3.0
+2) M6.7.hotfix: CwI word-per-node 구조 이행  
+3) M7: PluginLoader 파이프라인(무결성 검증→Blob import) + v2.0 통합  
+4) M8: PortalManager 기본 동작(transfer:"move"/coordSpace 변환) + v2.0 통합
+5) Transform 순서 개선 (M8 인접)
 
 ---
 
