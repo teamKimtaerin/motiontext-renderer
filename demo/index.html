@@ -33,7 +33,7 @@
               width="800"
               height="450"
               controls
-              crossorigin="anonymous"
+              preload="auto"
             >
               <!-- Demo sample video (local) -->
               <source src="./samples/assets/friends.mp4" type="video/mp4" />
@@ -199,6 +199,127 @@
           </a>
         </p>
       </footer>
+    </div>
+
+    <!-- MP4 내보내기 모달 -->
+    <div id="export-modal" class="export-modal" style="display: none;">
+      <div class="modal-overlay" id="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📥 MP4 내보내기</h3>
+          <button id="modal-close" class="modal-close">&times;</button>
+        </div>
+        
+        <!-- 설정 단계 -->
+        <div id="export-settings" class="modal-body">
+          <div class="setting-group">
+            <label>해상도:</label>
+            <select id="export-resolution" class="form-control">
+              <option value="1920x1080">1920×1080 (FHD)</option>
+              <option value="1280x720">1280×720 (HD)</option>
+              <option value="2560x1440">2560×1440 (QHD)</option>
+              <option value="3840x2160">3840×2160 (4K)</option>
+            </select>
+          </div>
+          
+          <div class="setting-group">
+            <label>프레임 레이트:</label>
+            <select id="export-fps" class="form-control">
+              <option value="30">30 FPS</option>
+              <option value="24">24 FPS</option>
+              <option value="60">60 FPS</option>
+            </select>
+          </div>
+          
+          <div class="setting-group">
+            <label>품질:</label>
+            <select id="export-quality" class="form-control">
+              <option value="0.95">최고 품질</option>
+              <option value="0.8">높음</option>
+              <option value="0.6">보통</option>
+            </select>
+          </div>
+          
+          <div class="setting-group">
+            <label>캡처 방식:</label>
+            <select id="export-capture-mode" class="form-control">
+              <option value="screen">🚀 Screen Capture (빠름, 권장)</option>
+              <option value="frame">🎨 Frame Capture (느림)</option>
+            </select>
+            <small style="color: #6b7280; margin-top: 4px; display: block;">
+              Screen Capture는 실시간 속도로 빠르게 처리됩니다. 브라우저에서 화면 공유 권한을 요청할 수 있습니다.
+            </small>
+          </div>
+          
+          <div class="setting-group">
+            <label>인코딩 방식:</label>
+            <select id="export-encoder" class="form-control">
+              <option value="auto">자동 선택 (권장)</option>
+              <option value="mediarecorder">MediaRecorder (안정적)</option>
+              <option value="webcodecs">WebCodecs (고성능, 실험적)</option>
+            </select>
+            <small style="color: #6b7280; margin-top: 4px; display: block;">
+              자동 선택은 브라우저 지원에 따라 최적의 방식을 선택합니다. (Frame Capture 모드에서만 사용)
+            </small>
+          </div>
+          
+          <div class="setting-group">
+            <label>구간 설정:</label>
+            <div class="time-range">
+              <input type="number" id="export-start-time" placeholder="시작 (초)" min="0" step="0.1" class="form-control" value="0">
+              <span>~</span>
+              <input type="number" id="export-end-time" placeholder="끝 (초, 전체는 비움)" min="0" step="0.1" class="form-control">
+            </div>
+          </div>
+          
+          <div class="export-info">
+            <div class="info-item">
+              <span>예상 파일 크기:</span>
+              <span id="estimated-size">계산 중...</span>
+            </div>
+            <div class="info-item">
+              <span>예상 소요 시간:</span>
+              <span id="estimated-time">1-3분</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 진행 단계 -->
+        <div id="export-progress" class="modal-body" style="display: none;">
+          <div class="progress-info">
+            <div class="progress-stage">
+              <span id="current-stage">준비 중...</span>
+              <span id="progress-percentage">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div class="progress-details">
+              <div class="detail-item">
+                <span>현재 진행:</span>
+                <span id="progress-current">-</span>
+              </div>
+              <div class="detail-item">
+                <span>예상 남은 시간:</span>
+                <span id="progress-eta">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <div id="export-actions">
+            <button id="export-start" class="btn btn-primary">내보내기 시작</button>
+            <button id="export-cancel" class="btn btn-secondary">취소</button>
+          </div>
+          <div id="export-complete" style="display: none;">
+            <div class="success-message">
+              ✅ 내보내기가 완료되었습니다!
+            </div>
+            <button id="export-done" class="btn btn-success">완료</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/main.ts"></script>

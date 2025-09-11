@@ -9,6 +9,7 @@ import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import { AISubtitleEditor } from './aiEditor';
+import { OfflineExporter } from './export/OfflineExporter.js';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -21,6 +22,7 @@ import type { RendererConfig } from '../src/types';
 // DOM Elements
 const video = document.getElementById('demo-video') as HTMLVideoElement;
 const captionContainer = document.getElementById('caption-container') as HTMLElement;
+const videoContainer = document.querySelector('.video-container') as HTMLElement;
 const sampleSelector = document.getElementById('sample-selector') as HTMLSelectElement;
 const loadSampleBtn = document.getElementById('load-sample') as HTMLButtonElement;
 const playBtn = document.getElementById('play-btn') as HTMLButtonElement;
@@ -49,6 +51,33 @@ const pluginPreviewText = document.getElementById('plugin-preview-text') as HTML
 const pluginPreviewLoop = document.getElementById('plugin-preview-loop') as HTMLInputElement | null;
 const pluginPreviewDuration = document.getElementById('plugin-preview-duration') as HTMLInputElement | null;
 const pluginPreviewGenerate = document.getElementById('plugin-preview-generate') as HTMLButtonElement | null;
+
+// Export controls
+const exportMp4Btn = document.getElementById('export-mp4-btn') as HTMLButtonElement;
+const exportModal = document.getElementById('export-modal') as HTMLElement;
+const modalOverlay = document.getElementById('modal-overlay') as HTMLElement;
+const modalClose = document.getElementById('modal-close') as HTMLButtonElement;
+const exportSettings = document.getElementById('export-settings') as HTMLElement;
+const exportProgress = document.getElementById('export-progress') as HTMLElement;
+const exportResolution = document.getElementById('export-resolution') as HTMLSelectElement;
+const exportFps = document.getElementById('export-fps') as HTMLSelectElement;
+const exportQuality = document.getElementById('export-quality') as HTMLSelectElement;
+const exportCaptureMode = document.getElementById('export-capture-mode') as HTMLSelectElement;
+const exportEncoder = document.getElementById('export-encoder') as HTMLSelectElement;
+const exportStartTime = document.getElementById('export-start-time') as HTMLInputElement;
+const exportEndTime = document.getElementById('export-end-time') as HTMLInputElement;
+const estimatedSize = document.getElementById('estimated-size') as HTMLSpanElement;
+const estimatedTime = document.getElementById('estimated-time') as HTMLSpanElement;
+const exportStart = document.getElementById('export-start') as HTMLButtonElement;
+const exportCancel = document.getElementById('export-cancel') as HTMLButtonElement;
+const currentStage = document.getElementById('current-stage') as HTMLSpanElement;
+const progressPercentage = document.getElementById('progress-percentage') as HTMLSpanElement;
+const progressFill = document.getElementById('progress-fill') as HTMLElement;
+const progressCurrent = document.getElementById('progress-current') as HTMLSpanElement;
+const progressEta = document.getElementById('progress-eta') as HTMLSpanElement;
+const exportActions = document.getElementById('export-actions') as HTMLElement;
+const exportComplete = document.getElementById('export-complete') as HTMLElement;
+const exportDone = document.getElementById('export-done') as HTMLButtonElement;
 
 // AI Editor elements
 const claudeApiKeyInput = document.getElementById('claude-api-key') as HTMLInputElement;
@@ -228,6 +257,11 @@ async function initDemo() {
   // Set up video time update
   video.addEventListener('timeupdate', () => {
     currentTime.textContent = `${video.currentTime.toFixed(2)}s`;
+  });
+  
+  // Update export button when video metadata loads
+  video.addEventListener('loadedmetadata', () => {
+    updateExportButtonState();
   });
 
   // Set up event listeners
@@ -413,6 +447,9 @@ async function loadConfiguration(config: RendererConfig) {
 
     updateStatus('설정 로드 완료');
     activeCues.textContent = config.cues.length.toString();
+    
+    // Initialize export system
+    initializeExportSystem();
 
     console.log('✅ 설정 로드 완료:', config);
   } catch (error) {
@@ -603,3 +640,259 @@ async function populatePluginSelector() {
     console.warn('플러그인 목록 수집 실패:', e);
   }
 }
+
+// =====================================
+// Export Functionality
+// =====================================
+
+// Export-related globals
+let offlineExporter: OfflineExporter | null = null;
+
+/**
+ * Initialize export functionality
+ */
+function initializeExportSystem() {
+  if (offlineExporter) {
+    offlineExporter.dispose();
+  }
+  
+  // 렌더러 인스턴스와 함께 OfflineExporter 생성
+  offlineExporter = new OfflineExporter(video, videoContainer, renderer);
+  
+  // Enable/disable export button based on renderer state
+  updateExportButtonState();
+  
+  console.log('Export system initialized with renderer');
+}
+
+/**
+ * Update export button availability
+ */
+function updateExportButtonState() {
+  const hasScenario = currentConfig !== null;
+  const isVideoLoaded = video && video.duration > 0;
+  
+  exportMp4Btn.disabled = !hasScenario || !isVideoLoaded;
+  
+  if (!hasScenario) {
+    exportMp4Btn.title = '시나리오를 먼저 로드해주세요';
+  } else if (!isVideoLoaded) {
+    exportMp4Btn.title = '비디오가 로드되지 않았습니다';
+  } else {
+    exportMp4Btn.title = 'MP4로 내보내기';
+  }
+}
+
+/**
+ * Show export modal
+ */
+function showExportModal() {
+  if (!video || !video.duration) {
+    alert('비디오가 로드되지 않았습니다.');
+    return;
+  }
+  
+  // Reset modal to settings view
+  exportSettings.style.display = 'block';
+  exportProgress.style.display = 'none';
+  exportActions.style.display = 'block';
+  exportComplete.style.display = 'none';
+  
+  // Update end time default
+  exportEndTime.value = video.duration.toFixed(1);
+  
+  // Update estimates
+  updateExportEstimates();
+  
+  // Show modal
+  exportModal.style.display = 'flex';
+}
+
+/**
+ * Hide export modal
+ */
+function hideExportModal() {
+  exportModal.style.display = 'none';
+  
+  // Cancel export if in progress
+  if (offlineExporter?.isExportInProgress()) {
+    offlineExporter.cancelExport();
+  }
+}
+
+/**
+ * Update export estimates based on current settings
+ */
+function updateExportEstimates() {
+  if (!video || !video.duration || !offlineExporter) return;
+  
+  const resolution = exportResolution.value.split('x');
+  const width = parseInt(resolution[0]);
+  const height = parseInt(resolution[1]);
+  const fps = parseInt(exportFps.value);
+  const startTime = parseFloat(exportStartTime.value) || 0;
+  const endTime = parseFloat(exportEndTime.value) || video.duration;
+  const duration = Math.max(0.1, endTime - startTime);
+  
+  // File size estimate
+  const fileSize = offlineExporter.estimateFileSize(width, height, fps, duration);
+  estimatedSize.textContent = fileSize;
+  
+  // Time estimate (rough calculation)
+  const frameCount = Math.ceil(duration * fps);
+  const estimatedSeconds = Math.max(30, frameCount * 0.2); // ~200ms per frame
+  estimatedTime.textContent = offlineExporter.formatTime(estimatedSeconds * 1000);
+}
+
+/**
+ * Start export process
+ */
+async function startExport() {
+  if (!offlineExporter) return;
+  
+  const resolution = exportResolution.value.split('x');
+  const width = parseInt(resolution[0]);
+  const height = parseInt(resolution[1]);
+  const fps = parseInt(exportFps.value);
+  const quality = parseFloat(exportQuality.value);
+  const captureMode = exportCaptureMode.value;
+  const encodingMode = exportEncoder.value;
+  const startTime = parseFloat(exportStartTime.value) || 0;
+  const endTime = parseFloat(exportEndTime.value) || video.duration;
+  
+  // 캡처 모드 설정
+  offlineExporter.setCaptureMode(captureMode);
+  
+  // 인코딩 모드 설정 (Frame Capture 모드에서만 사용)
+  if (captureMode === 'frame' && offlineExporter.videoEncoder) {
+    offlineExporter.videoEncoder.setEncodingMode(encodingMode);
+  }
+  
+  // Validate settings
+  if (startTime >= endTime) {
+    alert('시작 시간은 끝 시간보다 작아야 합니다.');
+    return;
+  }
+  
+  if (endTime > video.duration) {
+    alert('끝 시간이 비디오 길이를 초과합니다.');
+    return;
+  }
+  
+  // Switch to progress view
+  exportSettings.style.display = 'none';
+  exportProgress.style.display = 'block';
+  exportActions.style.display = 'none';
+  
+  // Reset progress
+  progressFill.style.width = '0%';
+  progressPercentage.textContent = '0%';
+  currentStage.textContent = '준비 중...';
+  progressCurrent.textContent = '-';
+  progressEta.textContent = '-';
+  
+  try {
+    const options = {
+      fps,
+      width,
+      height,
+      quality,
+      startTime,
+      endTime,
+      filename: 'motiontext-export',
+      downloadAutomatically: true
+    };
+    
+    console.log('Starting export with options:', options);
+    
+    await offlineExporter.exportVideo(options, (progress) => {
+      updateProgressUI(progress);
+    });
+    
+    // Show completion
+    exportProgress.style.display = 'none';
+    exportComplete.style.display = 'block';
+    
+  } catch (error) {
+    console.error('Export failed:', error);
+    
+    // Show error and go back to settings
+    alert(`내보내기 실패: ${error.message}`);
+    exportProgress.style.display = 'none';
+    exportSettings.style.display = 'block';
+    exportActions.style.display = 'block';
+  }
+}
+
+/**
+ * Update progress UI
+ */
+function updateProgressUI(progress: any) {
+  const percentage = Math.round(progress.progress * 100);
+  
+  progressFill.style.width = `${percentage}%`;
+  progressPercentage.textContent = `${percentage}%`;
+  
+  // Stage messages
+  const stageMessages = {
+    preparation: '준비 중...',
+    capturing: '프레임 캡처 중...',
+    encoding: '비디오 인코딩 중...',
+    finalizing: '마무리 중...',
+    completed: '완료!',
+    error: '오류 발생'
+  };
+  
+  // 폴백 메시지 우선 표시
+  if (progress.fallbackMessage) {
+    currentStage.textContent = progress.fallbackMessage;
+    currentStage.style.color = '#f59e0b'; // 주황색으로 강조
+    setTimeout(() => {
+      currentStage.style.color = ''; // 2초 후 원래 색상으로
+    }, 2000);
+  } else {
+    currentStage.textContent = progress.details?.message || stageMessages[progress.stage] || progress.stage;
+    currentStage.style.color = ''; // 기본 색상
+  }
+  
+  if (progress.details) {
+    if (progress.details.currentFrame && progress.details.totalFrames) {
+      progressCurrent.textContent = `${progress.details.currentFrame}/${progress.details.totalFrames} 프레임`;
+    } else if (progress.details.encodedFrames && progress.details.totalFrames) {
+      progressCurrent.textContent = `${progress.details.encodedFrames}/${progress.details.totalFrames} 인코딩됨`;
+    }
+    
+    if (progress.details.estimatedTimeLeft) {
+      progressEta.textContent = progress.details.estimatedTimeLeft;
+    }
+  }
+}
+
+// =====================================
+// Export Event Listeners
+// =====================================
+
+// Export button click
+exportMp4Btn.addEventListener('click', showExportModal);
+
+// Modal close events
+modalClose.addEventListener('click', hideExportModal);
+modalOverlay.addEventListener('click', hideExportModal);
+
+// Settings change events
+[exportResolution, exportFps, exportQuality, exportEncoder, exportStartTime, exportEndTime].forEach(element => {
+  element.addEventListener('change', updateExportEstimates);
+  element.addEventListener('input', updateExportEstimates);
+});
+
+// Export action buttons
+exportStart.addEventListener('click', startExport);
+exportCancel.addEventListener('click', hideExportModal);
+exportDone.addEventListener('click', hideExportModal);
+
+// ESC key to close modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && exportModal.style.display === 'flex') {
+    hideExportModal();
+  }
+});
