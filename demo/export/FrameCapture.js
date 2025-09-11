@@ -26,18 +26,32 @@ export class FrameCapture {
       waitTime = 40 // DOM 업데이트 대기 시간(ms) - 최적화: 150ms → 40ms
     } = options;
 
+    // 원본 컨테이너 크기 저장
+    const originalStyles = this.saveOriginalStyles();
+
     try {
       // 1. 비디오를 특정 시간으로 이동 (가상 시간 주입)
       await this.seekVideoToTime(timeInSeconds);
       
-      // 2. DOM 업데이트 및 애니메이션이 적용될 때까지 대기
+      // 2. 컨테이너를 목표 해상도로 임시 조정
+      this.resizeContainerForCapture(width, height);
+      
+      // 3. DOM 업데이트 및 애니메이션이 적용될 때까지 대기
       await this.waitForRender(waitTime);
 
       // 3. html2canvas로 DOM 영역 캡처 (비디오 + 자막 컨테이너)
+      // CSS 스케일링 계산 (현재 DOM 크기 대비 목표 해상도)
+      const containerRect = this.container.getBoundingClientRect();
+      const scaleX = width / containerRect.width;
+      const scaleY = height / containerRect.height;
+      const scale = Math.min(scaleX, scaleY); // 종횡비 유지를 위해 작은 값 선택
+      
+      console.log(`Capture scaling: container=${containerRect.width}x${containerRect.height}, target=${width}x${height}, scale=${scale.toFixed(2)}`);
+      
       const canvas = await html2canvas(this.container, {
         width: width,
         height: height,
-        scale: 1,
+        scale: scale,
         useCORS: false, // 로컬 비디오 파일의 CORS 문제 해결
         allowTaint: true,
         backgroundColor: '#000000', // 비디오 배경색과 일치
@@ -46,31 +60,45 @@ export class FrameCapture {
         imageTimeout: 15000, // 비디오 로딩 대기 시간 증가: 3초 → 15초
         foreignObjectRendering: false, // 비디오 렌더링 방식 변경
         onclone: (clonedDoc) => {
+          // 클론된 문서에서 컨테이너 크기 강제 설정
+          const clonedContainer = clonedDoc.querySelector('.video-container');
+          if (clonedContainer) {
+            clonedContainer.style.width = `${width}px`;
+            clonedContainer.style.height = `${height}px`;
+            clonedContainer.style.position = 'relative';
+            clonedContainer.style.overflow = 'hidden';
+          }
+          
           // 클론된 문서에서 비디오 요소가 올바르게 보이도록 설정
           const clonedVideos = clonedDoc.querySelectorAll('video');
           clonedVideos.forEach(video => {
             video.style.display = 'block';
             video.style.visibility = 'visible';
             video.style.opacity = '1';
-            video.style.width = '100%';
-            video.style.height = '100%';
-            video.style.objectFit = 'fill';
+            video.style.width = `${width}px`;
+            video.style.height = `${height}px`;
+            video.style.objectFit = 'fill'; // 전체 영역을 채우도록 강제
             // 현재 시간과 동기화
             video.currentTime = timeInSeconds;
             // 비디오 로딩 상태 강제 설정
             video.load();
           });
           
-          // 자막 컨테이너도 보이도록 설정
+          // 자막 컨테이너도 목표 크기로 설정
           const clonedCaptions = clonedDoc.querySelectorAll('.caption-overlay');
           clonedCaptions.forEach(caption => {
             caption.style.display = 'block';
             caption.style.visibility = 'visible';
             caption.style.opacity = '1';
             caption.style.pointerEvents = 'none';
+            caption.style.width = `${width}px`;
+            caption.style.height = `${height}px`;
+            caption.style.position = 'absolute';
+            caption.style.top = '0';
+            caption.style.left = '0';
           });
           
-          console.log(`Clone document prepared: ${clonedVideos.length} videos, ${clonedCaptions.length} captions`);
+          console.log(`Clone document prepared: ${clonedVideos.length} videos, ${clonedCaptions.length} captions at ${width}x${height}`);
         }
       });
 
@@ -111,6 +139,9 @@ export class FrameCapture {
     } catch (error) {
       console.error(`Error capturing frame at ${timeInSeconds}s:`, error);
       throw new Error(`Frame capture failed: ${error.message}`);
+    } finally {
+      // 4. 원본 크기로 복원
+      this.restoreOriginalStyles(originalStyles);
     }
   }
 
@@ -331,6 +362,95 @@ export class FrameCapture {
     const remainingFrames = totalFrames - (currentFrame + 1);
     
     return Math.round(remainingFrames * avgTimePerFrame);
+  }
+
+  /**
+   * 원본 컨테이너 스타일 저장
+   * @returns {Object} - 저장된 스타일 정보
+   */
+  saveOriginalStyles() {
+    const video = this.video;
+    const container = this.container;
+    const captionContainer = container.querySelector('#caption-container');
+    
+    return {
+      container: {
+        width: container.style.width || getComputedStyle(container).width,
+        height: container.style.height || getComputedStyle(container).height,
+        position: container.style.position,
+        overflow: container.style.overflow
+      },
+      video: {
+        width: video.style.width || video.getAttribute('width') + 'px',
+        height: video.style.height || video.getAttribute('height') + 'px',
+        objectFit: video.style.objectFit
+      },
+      caption: captionContainer ? {
+        width: captionContainer.style.width,
+        height: captionContainer.style.height
+      } : null
+    };
+  }
+
+  /**
+   * 컨테이너를 캡처용 크기로 조정
+   * @param {number} targetWidth - 목표 너비
+   * @param {number} targetHeight - 목표 높이
+   */
+  resizeContainerForCapture(targetWidth, targetHeight) {
+    const video = this.video;
+    const container = this.container;
+    const captionContainer = container.querySelector('#caption-container');
+    
+    console.log(`Resizing container for capture: ${targetWidth}x${targetHeight}`);
+    
+    // 컨테이너 크기 조정
+    container.style.width = `${targetWidth}px`;
+    container.style.height = `${targetHeight}px`;
+    container.style.position = 'relative';
+    container.style.overflow = 'hidden';
+    
+    // 비디오 크기 조정
+    video.style.width = `${targetWidth}px`;
+    video.style.height = `${targetHeight}px`;
+    video.style.objectFit = 'fill'; // 전체 영역을 채우도록
+    
+    // 자막 컨테이너 크기 조정
+    if (captionContainer) {
+      captionContainer.style.width = `${targetWidth}px`;
+      captionContainer.style.height = `${targetHeight}px`;
+    }
+    
+    // 강제 레이아웃 업데이트
+    container.offsetHeight; // Force reflow
+  }
+
+  /**
+   * 원본 스타일로 복원
+   * @param {Object} originalStyles - 저장된 원본 스타일
+   */
+  restoreOriginalStyles(originalStyles) {
+    if (!originalStyles) return;
+    
+    const video = this.video;
+    const container = this.container;
+    const captionContainer = container.querySelector('#caption-container');
+    
+    console.log('Restoring original container styles');
+    
+    // 컨테이너 복원
+    Object.assign(container.style, originalStyles.container);
+    
+    // 비디오 복원
+    Object.assign(video.style, originalStyles.video);
+    
+    // 자막 컨테이너 복원
+    if (captionContainer && originalStyles.caption) {
+      Object.assign(captionContainer.style, originalStyles.caption);
+    }
+    
+    // 강제 레이아웃 업데이트
+    container.offsetHeight; // Force reflow
   }
 
   /**
