@@ -47,7 +47,9 @@ export async function loadFrom(manifestUrl: string): Promise<RegisteredPlugin> {
         );
       }
     }
-  } catch (_err) { /* noop */ }
+  } catch (_err) {
+    /* noop */
+  }
   const base = baseOf(manifestUrl);
   const entryUrl = new URL(manifest.entry, base).toString();
   const entryRes = await fetch(entryUrl);
@@ -70,7 +72,9 @@ export async function loadFrom(manifestUrl: string): Promise<RegisteredPlugin> {
 
 // Minimal semver '^' and exact comparator for dev warnings
 function parseVer(v: string): [number, number, number] {
-  const m = String(v).trim().match(/^(\d+)\.(\d+)\.(\d+)/);
+  const m = String(v)
+    .trim()
+    .match(/^(\d+)\.(\d+)\.(\d+)/);
   if (!m) return [0, 0, 0];
   return [Number(m[1]), Number(m[2]), Number(m[3])];
 }

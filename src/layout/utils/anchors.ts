@@ -1,25 +1,25 @@
 // Anchor utility functions for layout positioning
-import type { Anchor } from "../../types/layout";
+import type { Anchor } from '../../types/layout';
 
 export function anchorTranslate(anchor: Anchor): { tx: number; ty: number } {
   switch (anchor) {
-    case "tl":
+    case 'tl':
       return { tx: 0, ty: 0 };
-    case "tc":
+    case 'tc':
       return { tx: -50, ty: 0 };
-    case "tr":
+    case 'tr':
       return { tx: -100, ty: 0 };
-    case "cl":
+    case 'cl':
       return { tx: 0, ty: -50 };
-    case "cc":
+    case 'cc':
       return { tx: -50, ty: -50 };
-    case "cr":
+    case 'cr':
       return { tx: -100, ty: -50 };
-    case "bl":
+    case 'bl':
       return { tx: 0, ty: -100 };
-    case "bc":
+    case 'bc':
       return { tx: -50, ty: -100 };
-    case "br":
+    case 'br':
       return { tx: -100, ty: -100 };
     default:
       return { tx: -50, ty: -50 };
@@ -28,15 +28,25 @@ export function anchorTranslate(anchor: Anchor): { tx: number; ty: number } {
 
 export function anchorFraction(anchor: Anchor): { ax: number; ay: number } {
   switch (anchor) {
-    case 'tl': return { ax: 0, ay: 0 };
-    case 'tc': return { ax: 0.5, ay: 0 };
-    case 'tr': return { ax: 1, ay: 0 };
-    case 'cl': return { ax: 0, ay: 0.5 };
-    case 'cc': return { ax: 0.5, ay: 0.5 };
-    case 'cr': return { ax: 1, ay: 0.5 };
-    case 'bl': return { ax: 0, ay: 1 };
-    case 'bc': return { ax: 0.5, ay: 1 };
-    case 'br': return { ax: 1, ay: 1 };
-    default:   return { ax: 0.5, ay: 0.5 };
+    case 'tl':
+      return { ax: 0, ay: 0 };
+    case 'tc':
+      return { ax: 0.5, ay: 0 };
+    case 'tr':
+      return { ax: 1, ay: 0 };
+    case 'cl':
+      return { ax: 0, ay: 0.5 };
+    case 'cc':
+      return { ax: 0.5, ay: 0.5 };
+    case 'cr':
+      return { ax: 1, ay: 0.5 };
+    case 'bl':
+      return { ax: 0, ay: 1 };
+    case 'bc':
+      return { ax: 0.5, ay: 1 };
+    case 'br':
+      return { ax: 1, ay: 1 };
+    default:
+      return { ax: 0.5, ay: 0.5 };
   }
 }

@@ -13,13 +13,19 @@ const localEntries: Record<string, () => Promise<any>> =
     ? (import.meta as any).glob('/plugin-server/plugins/*/index.mjs')
     : {};
 
-export async function importFrom(base: string, key: string): Promise<RegisteredPlugin> {
+export async function importFrom(
+  base: string,
+  key: string
+): Promise<RegisteredPlugin> {
   // 1) Try Vite glob mapping for reliable dev-time resolution
   let matchPath: string | undefined = undefined;
   const suffix = `/${key}/index.mjs`;
   const suffixEnc = `/${encodeURIComponent(key)}/index.mjs`;
   for (const p of Object.keys(localEntries)) {
-    if (p.endsWith(suffix) || p.endsWith(suffixEnc)) { matchPath = p; break; }
+    if (p.endsWith(suffix) || p.endsWith(suffixEnc)) {
+      matchPath = p;
+      break;
+    }
   }
   let mod: any = undefined;
   let baseUrl: string | undefined = undefined;
@@ -30,7 +36,10 @@ export async function importFrom(base: string, key: string): Promise<RegisteredP
     baseUrl = new URL('./', u).toString();
   } else {
     // 2) Fallback: direct URL import from configured base
-    const baseAbs = new URL(ensureTrailingSlash(base), window.location.href).toString();
+    const baseAbs = new URL(
+      ensureTrailingSlash(base),
+      window.location.href
+    ).toString();
     const folder = encodeURIComponent(key);
     const entryUrl = new URL(`${folder}/index.mjs`, baseAbs).toString();
     mod = await import(/* @vite-ignore */ entryUrl);

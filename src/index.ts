@@ -1,14 +1,17 @@
 // Public entry for motiontext-renderer (M2.5 minimal slice)
-import type { ScenarioFileV1_3 } from "./types/scenario";
-import { parseScenario } from "./parser/ScenarioParser";
-import { TimelineController } from "./core/TimelineController";
-import { Stage } from "./core/Stage";
-import { TrackManager } from "./core/TrackManager";
-import { Renderer } from "./core/Renderer";
-import gsap from "gsap";
-export { MotionTextController } from "./controller";
+import type { ScenarioFileV1_3 } from './types/scenario';
+import { parseScenario } from './parser/ScenarioParser';
+import { TimelineController } from './core/TimelineController';
+import { Stage } from './core/Stage';
+import { TrackManager } from './core/TrackManager';
+import { Renderer } from './core/Renderer';
+import gsap from 'gsap';
+export { MotionTextController } from './controller';
 // Public plugin configuration/registration API (for external consumers)
-export { configureDevPlugins as configurePluginSource, getDevPluginConfig } from './loader/dev/DevPluginConfig';
+export {
+  configureDevPlugins as configurePluginSource,
+  getDevPluginConfig,
+} from './loader/dev/DevPluginConfig';
 import { devRegistry } from './loader/dev/DevPluginRegistry';
 
 // (reserved) type helpers can be added later
@@ -29,11 +32,15 @@ export class MotionTextRenderer {
     this.container = container;
     // Enforce GSAP presence (peer dependency)
     if (!gsap) {
-      throw new Error("GSAP is required as a peer dependency. Install 'gsap' and ensure it is available to the host app.");
+      throw new Error(
+        "GSAP is required as a peer dependency. Install 'gsap' and ensure it is available to the host app."
+      );
     }
     this.stage.setContainer(container);
     this.renderer = new Renderer(container, this.stage, this.trackManager);
-    this.stageBoundsUnsub = this.stage.onBoundsChange(() => this.renderer.recomputeMountedBases());
+    this.stageBoundsUnsub = this.stage.onBoundsChange(() =>
+      this.renderer.recomputeMountedBases()
+    );
     // Do not override container positioning; demo CSS positions it absolutely.
   }
 
@@ -55,7 +62,11 @@ export class MotionTextRenderer {
     this.timeline.attachMedia(video);
     this.stage.setMedia(video);
     if (this.unsub) {
-      try { this.unsub(); } finally { this.unsub = null; }
+      try {
+        this.unsub();
+      } finally {
+        this.unsub = null;
+      }
     }
     this.unsub = this.timeline.onTick((t) => this.renderer.update(t));
     this.renderer.update(video.currentTime);
@@ -99,14 +110,17 @@ export class MotionTextRenderer {
   }
 
   setCaptionsVisible(visible: boolean) {
-    this.container.style.visibility = visible ? "visible" : "hidden";
+    this.container.style.visibility = visible ? 'visible' : 'hidden';
   }
 
   // Allow controller to reserve bottom safe area in pixels (e.g., controller height)
   setControlSafeBottom(px: number) {
     this.controlSafeBottomPx = Math.max(0, Math.floor(px || 0));
     // Expose to CSS so layout can offset bottom-anchored items
-    this.container.style.setProperty('--mtx-safe-bottom-px', `${this.controlSafeBottomPx}px`);
+    this.container.style.setProperty(
+      '--mtx-safe-bottom-px',
+      `${this.controlSafeBottomPx}px`
+    );
   }
 
   // (Orchestration methods moved to core/Renderer.ts)
@@ -118,9 +132,9 @@ export type { ScenarioFileV1_3 };
 export function registerExternalPlugin(params: {
   name: string;
   version: string;
-  module: any;               // plugin module (default export + optional named)
-  baseUrl: string;           // base URL for assets.getUrl resolution
-  manifest?: any;            // optional manifest-like metadata
+  module: any; // plugin module (default export + optional named)
+  baseUrl: string; // base URL for assets.getUrl resolution
+  manifest?: any; // optional manifest-like metadata
 }): void {
   const { name, version, module, baseUrl, manifest } = params;
   devRegistry.register({
@@ -135,12 +149,17 @@ export function registerExternalPlugin(params: {
 // Bulk-register plugins from a path→import-function map (e.g., Vite's import.meta.glob)
 export async function registerExternalPluginsFromGlob(
   globMap: Record<string, () => Promise<any>>,
-  parse?: (_path: string) => { name: string; version: string; baseUrl: string } | null
+  parse?: (
+    _path: string
+  ) => { name: string; version: string; baseUrl: string } | null
 ): Promise<void> {
   const entries = Object.entries(globMap || {});
   for (const [path, loader] of entries) {
     try {
-      const info = (typeof parse === 'function') ? parse(path) : defaultParsePluginPath(path);
+      const info =
+        typeof parse === 'function'
+          ? parse(path)
+          : defaultParsePluginPath(path);
       if (!info) continue;
       const mod = await loader();
       devRegistry.register({
@@ -148,13 +167,21 @@ export async function registerExternalPluginsFromGlob(
         version: info.version,
         module: mod,
         baseUrl: info.baseUrl,
-        manifest: { name: info.name, version: info.version, entry: 'index.mjs' },
+        manifest: {
+          name: info.name,
+          version: info.version,
+          entry: 'index.mjs',
+        },
       });
-    } catch { /* ignore single entry failures */ }
+    } catch {
+      /* ignore single entry failures */
+    }
   }
 }
 
-function defaultParsePluginPath(path: string): { name: string; version: string; baseUrl: string } | null {
+function defaultParsePluginPath(
+  path: string
+): { name: string; version: string; baseUrl: string } | null {
   // Match ".../<name>@<version>/index.mjs" at end of path
   const m = String(path).match(/\/(?<folder>[^/]+)\/(?:index\.mjs)$/);
   const folder = m?.groups?.folder;
@@ -163,7 +190,10 @@ function defaultParsePluginPath(path: string): { name: string; version: string; 
   const name = at > 0 ? folder.slice(0, at) : folder;
   const version = at > 0 ? folder.slice(at + 1) : '0.0.0';
   try {
-    const u = (typeof window !== 'undefined') ? new URL(path, window.location.origin) : new URL(path, 'http://localhost/');
+    const u =
+      typeof window !== 'undefined'
+        ? new URL(path, window.location.origin)
+        : new URL(path, 'http://localhost/');
     const baseUrl = new URL('./', u).toString();
     return { name, version, baseUrl };
   } catch {

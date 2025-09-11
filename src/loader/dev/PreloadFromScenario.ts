@@ -58,7 +58,11 @@ export async function preloadFromScenario(
     : [];
   for (const b of bindings) {
     const src = b?.fromWordStream;
-    if (src && src.pluginPerToken && typeof src.pluginPerToken.name === 'string') {
+    if (
+      src &&
+      src.pluginPerToken &&
+      typeof src.pluginPerToken.name === 'string'
+    ) {
       const { id, version } = parseName(src.pluginPerToken.name);
       want.set(`${id}@${version || defaultVersion}`, {
         id,
