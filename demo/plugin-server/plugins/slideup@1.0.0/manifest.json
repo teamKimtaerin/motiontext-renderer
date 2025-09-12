@@ -1,11 +1,11 @@
 {
   "name": "slideup",
   "version": "1.0.0",
-  "pluginApi": "2.1",
-  "minRenderer": "1.3.0",
+  "pluginApi": "3.0",
+  "minRenderer": "2.0.0",
   "entry": "index.mjs",
   "targets": ["text"],
-  "capabilities": ["style-vars"],
+  "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
   "schema": {

@@ -1,4 +1,4 @@
-import type { ScenarioFileV1_3 } from '../types/scenario';
+import type { Scenario } from '../types/scenario-v2';
 
 export interface ContentRect {
   left: number;
@@ -37,7 +37,7 @@ export function computeContentRect(
 export class Stage {
   private container: HTMLElement | null = null;
   private media: HTMLVideoElement | null = null;
-  private scenario: ScenarioFileV1_3 | null = null;
+  private scenario: Scenario | null = null;
   private ro: ResizeObserver | null = null;
   private onLoadedMetaBound: (() => void) | null = null;
   private onFullscreenBound: (() => void) | null = null;
@@ -57,7 +57,7 @@ export class Stage {
     this.installOverlayBinding();
   }
 
-  setScenario(scenario: ScenarioFileV1_3) {
+  setScenario(scenario: Scenario) {
     this.scenario = scenario;
   }
 

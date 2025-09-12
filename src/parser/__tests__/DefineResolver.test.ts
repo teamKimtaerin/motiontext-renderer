@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DefineResolver } from '../DefineResolver';
-import type { ScenarioV2, DefineSection } from '../../types/scenario-v2';
+import type { Scenario as ScenarioV2, DefineSection } from '../../types/scenario-v2';
 
 describe('DefineResolver', () => {
   describe('기본 동작', () => {

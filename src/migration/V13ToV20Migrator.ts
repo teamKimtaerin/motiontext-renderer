@@ -1,7 +1,7 @@
 // V13ToV20Migrator
 // 완전한 v1.3 → v2.0 자동 마이그레이션 도구
 
-import type { ScenarioV2, DefineSection } from '../types/scenario-v2';
+import type { Scenario as ScenarioV2, DefineSection } from '../types/scenario-v2';
 import { FieldMigration } from '../parser/FieldMigration';
 
 export interface MigrationOptions {
@@ -103,7 +103,7 @@ export class V13ToV20Migrator {
 
       hasMoreToExtract = false;
 
-      for (const [valueStr, occurrence] of valueOccurrences) {
+      for (const [, occurrence] of valueOccurrences) {
         if (occurrence.paths.length >= this.options.minDuplicateCount && 
             this.isExtractableValue(occurrence.value)) {
           

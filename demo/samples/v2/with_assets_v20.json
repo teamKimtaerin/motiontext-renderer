@@ -26,13 +26,13 @@
           "fontFamily": "custom_font",
           "fontSize": "32px",
           "fontWeight": "bold",
-          "color": "define.brand_theme.colors.primary"
+          "color": "#ff6b35"
         },
         "subtitle": {
           "fontFamily": "custom_font", 
           "fontSize": "18px",
           "fontWeight": "normal",
-          "color": "define.brand_theme.colors.text"
+          "color": "#333333"
         }
       }
     },

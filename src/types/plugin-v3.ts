@@ -7,7 +7,7 @@
 // - 에셋 관리 통합 (무결성 검증, FontFace 자동화)
 // - Define 시스템 연동
 
-import type { TimeRange, DefineReference } from './scenario-v2-native';
+import type { TimeRange, DefineReference } from './scenario-v2';
 
 // ============================================================================
 // Core Plugin Types

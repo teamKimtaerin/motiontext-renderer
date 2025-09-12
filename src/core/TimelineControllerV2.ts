@@ -351,7 +351,7 @@ export class TimelineControllerV2 {
   /**
    * 프레임률 계산
    */
-  private calculateFrameRate(now: number): number {
+  private calculateFrameRate(_now: number): number {
     // 간단한 이동 평균으로 프레임률 계산
     // 실제 구현에서는 더 정교한 계산이 필요할 수 있음
     return this.options.fps || 60;

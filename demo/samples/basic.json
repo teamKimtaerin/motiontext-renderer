@@ -30,12 +30,12 @@
       "track": "subtitle",
       "root": {
         "id": "group1",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "text1",
-            "type": "text",
-            "content": "안녕하세요! MotionText Renderer입니다.",
+            "e_type": "text",
+            "text": "안녕하세요! MotionText Renderer입니다.",
             "layout": {
               "position": [
                 0.5,
@@ -59,12 +59,12 @@
       "track": "subtitle",
       "root": {
         "id": "group2",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "text2",
-            "type": "text",
-            "content": "이것은 기본 자막 테스트입니다.",
+            "e_type": "text",
+            "text": "이것은 기본 자막 테스트입니다.",
             "layout": {
               "position": [
                 0.5,
@@ -88,12 +88,12 @@
       "track": "subtitle",
       "root": {
         "id": "group3",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "text3",
-            "type": "text",
-            "content": "정규화된 좌표계(0~1)를 사용합니다.",
+            "e_type": "text",
+            "text": "정규화된 좌표계(0~1)를 사용합니다.",
             "layout": {
               "position": [
                 0.5,

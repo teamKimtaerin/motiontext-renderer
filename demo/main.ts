@@ -4,11 +4,11 @@
  */
 
 import { MotionTextRenderer, MotionTextController } from '../src/index';
-import { preloadPluginsForScenario } from './devPlugins';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import { AISubtitleEditor } from './aiEditor';
+import { preloadPluginsForScenario } from './devPlugins';
 import basicSample from './samples/basic.json';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
@@ -342,42 +342,6 @@ async function loadConfiguration(config: RendererConfig) {
     configEditor.value = JSON.stringify(config, null, 2);
     currentConfig = config;
 
-    // v2.0 샘플 처리: DefineResolver + FieldMigration 사용
-    let processedConfig = config;
-    if ((config as any).version === '2.0') {
-      console.log('🔄 v2.0 시나리오 감지됨, Define 참조 해석 중...');
-      updateStatus('v2.0 시나리오 처리 중...');
-      
-      // 동적 import로 v2.0 처리 모듈들 로드
-      const { DefineResolver } = await import('../src/parser/DefineResolver');
-      const { AssetManager } = await import('../src/assets/AssetManager');
-      
-      // 1. Define 참조 해석
-      const resolver = new DefineResolver();
-      const resolvedConfig = resolver.resolveScenario(config as any);
-      
-      // 2. 에셋 로드 (가능한 경우)
-      const assetManager = new AssetManager();
-      try {
-        await assetManager.loadAssetsFromDefines(resolvedConfig.define || {});
-        const stats = assetManager.getLoadStats();
-        if (stats.total > 0) {
-          console.log(`✅ 에셋 로드 완료: 폰트 ${stats.fonts}개, 이미지 ${stats.images}개, 비디오 ${stats.videos}개, 오디오 ${stats.audios}개`);
-        }
-      } catch (assetError) {
-        console.warn('⚠️ 에셋 로드 실패 (무시됨):', assetError);
-      }
-      
-      // 3. v1.3으로 마이그레이션 (일단 간단한 버전 변경으로 시뮬레이션)
-      processedConfig = {
-        ...resolvedConfig,
-        version: '1.3' as any // 임시로 v1.3으로 변경해서 기존 렌더러가 처리할 수 있도록
-      };
-      
-      console.log('✅ v2.0 → v1.3 변환 완료');
-      assetManager.dispose();
-    }
-
     // Reinitialize renderer to ensure clean state (handles Undo/Apply edge cases)
     if (renderer) {
       renderer.dispose();
@@ -390,11 +354,27 @@ async function loadConfiguration(config: RendererConfig) {
     (window as any).demoApp.renderer = renderer;
     updateStatus('렌더러 초기화됨');
 
-    // Preload plugins referenced by scenario (Dev loader)
-    await preloadPluginsForScenario(processedConfig);
-
-    // Load configuration and attach media
-    await renderer.loadConfig(processedConfig);
+    // v2.0 네이티브 처리: MotionTextRenderer가 내부적으로 처리
+    if ((config as any).version === '2.0') {
+      console.log('🔄 v2.0 시나리오 감지됨, 네이티브 처리 중...');
+      updateStatus('v2.0 플러그인 로드 중...');
+      
+      // v2.0 시나리오에서 사용되는 플러그인들을 미리 로드
+      await preloadPluginsForScenario(config as any);
+      
+      updateStatus('v2.0 네이티브 처리 중...');
+      // v2.0은 MotionTextRenderer가 직접 처리 (parseScenario + AssetManager 내장)
+      await renderer.loadConfig(config);
+      console.log('✅ v2.0 네이티브 처리 완료');
+    } else {
+      // v1.3 지원 중단 경고
+      console.warn('⚠️ v1.3 시나리오는 더 이상 지원되지 않습니다. v2.0으로 마이그레이션하세요.');
+      updateStatus('v1.3 지원 중단됨');
+      alert('v1.3 시나리오는 더 이상 지원되지 않습니다.\nv2.0 샘플을 사용해주세요.');
+      return;
+    }
+    
+    // Attach media
     renderer.attachMedia(video);
 
     // Mount custom controller overlay for testing
@@ -411,9 +391,9 @@ async function loadConfiguration(config: RendererConfig) {
     }
 
     updateStatus('설정 로드 완료');
-    activeCues.textContent = processedConfig.cues.length.toString();
+    activeCues.textContent = config.cues.length.toString();
 
-    console.log('✅ 설정 로드 완료:', processedConfig);
+    console.log('✅ 설정 로드 완료:', config);
   } catch (error) {
     console.error('❌ 설정 로드 실패:', error);
     updateStatus('설정 로드 실패');
@@ -561,8 +541,7 @@ async function setPluginModeAuto(origin?: string, localBase?: string) {
 
 async function reloadCurrentConfig() {
   if (!currentConfig) return;
-  // Reuse existing flow to ensure plugins preload under new config
-  await preloadPluginsForScenario(currentConfig);
+  // Reload configuration with new plugin settings
   await loadConfiguration(currentConfig);
 }
 

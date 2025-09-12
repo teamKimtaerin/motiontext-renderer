@@ -1,4 +1,4 @@
-import type { ScenarioV2, TimeRange } from '../types/scenario-v2';
+import type { Scenario as ScenarioV2, TimeRange } from '../types/scenario-v2';
 
 /**
  * FieldMigration

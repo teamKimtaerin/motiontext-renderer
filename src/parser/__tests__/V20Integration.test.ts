@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { DefineResolver } from '../DefineResolver';
 import { FieldMigration } from '../FieldMigration';
 import { AssetManager } from '../../assets/AssetManager';
-import type { ScenarioV2 } from '../../types/scenario-v2';
+import type { Scenario as ScenarioV2 } from '../../types/scenario-v2';
 
 describe('v2.0 Integration Tests', () => {
   describe('DefineResolver + FieldMigration', () => {

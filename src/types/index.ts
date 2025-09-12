@@ -5,8 +5,8 @@ export * from './layout';
 export * from './timeline';
 
 // v2.0 Native Types (NEW)
-export * from './scenario-v2-native';
+export * from './scenario-v2';
 export * from './plugin-v3';
 
 // v2.0 Demo/Dev convenience
-export type { Scenario as RendererConfig } from './scenario-v2-native';
+export type { Scenario as RendererConfig } from './scenario-v2';

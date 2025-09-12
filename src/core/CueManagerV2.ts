@@ -7,7 +7,7 @@
 // - 메모리 최적화
 // - 트랙별 렌더링 최적화
 
-import type { Scenario, Cue, Track, TimeRange } from '../types/scenario-v2-native';
+import type { Scenario, Cue, Track, TimeRange } from '../types/scenario-v2';
 import { isWithinTimeRange, unionTimeRanges } from '../utils/time-v2';
 
 export interface CueManagerOptions {
@@ -190,7 +190,7 @@ export class CueManagerV2 {
   /**
    * Cue DOM 언마운트 예약
    */
-  private scheduleUnmount(cue: Cue, currentTime: number): void {
+  private scheduleUnmount(cue: Cue, _currentTime: number): void {
     if (this.cleanupTimeouts.has(cue.id)) return;
 
     const timeoutId = window.setTimeout(() => {

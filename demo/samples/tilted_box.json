@@ -62,7 +62,7 @@
                 ]
               },
               {
-                "name": "waveY",
+                "name": "bobY",
                 "compose": "add",
                 "params": {
                   "amplitudePx": 10,

@@ -36,18 +36,34 @@
 - [x] PluginContextV3.ts - 플러그인 v3.0 컨텍스트
 - [x] ChannelComposer.ts - CSS 변수 채널 시스템
 
-**🔴 작업 현황:**
+**✅ 작업 현황 (2025-09-12 업데이트):**
 - [x] **M1**: 타입 시스템 v2.0 전환 ✅ (scenario-v2-native.ts, plugin-v3.ts 생성 완료)
-- [ ] **M2**: ScenarioParser v2.0 네이티브 재구현
+- [x] **M2**: ScenarioParser v2.0 네이티브 재구현 ✅ (ScenarioParserV2.ts, ValidationV2.ts, InheritanceV2.ts 완료)
 - [x] **M3**: 시간 유틸리티 v2.0 (배열 기반) ✅ (time-v2.ts + 36개 테스트 완료)
-- [ ] **M4**: Renderer.ts 코어 v2.0 네이티브
-- [ ] **M5**: PluginChainComposer v2.0 time_offset 기반
-- [ ] **M6**: 데모 통합 및 샘플 v2.0 변환
+- [x] **M4**: Renderer.ts 코어 v2.0 네이티브 ✅ (RendererV2.ts, TimelineControllerV2.ts, CueManagerV2.ts 완료)
+- [x] **M5**: PluginChainComposer v2.0 time_offset 기반 ✅ (PluginChainComposerV2.ts, BuiltinV2.ts + 17개 플러그인 v3.0 완료)
+- [x] **M5.5**: Define 사전 해석 시스템 ✅ - 렌더러가 플러그인에 해석된 값 전달
+- [x] **M6**: 데모 통합 및 샘플 v2.0 변환 ✅ (src/index.ts 완전히 v2.0 네이티브, 샘플 필드명 통일 완료)
+- [x] **M6.5**: 외부 플러그인 로더 통합 ✅ - RendererV2에서 DevPluginRegistry + PluginContextV3 완전 지원
 - [ ] **M7**: 테스트 마이그레이션 및 최적화
 
-**🚧 진행 중:**
-- M1 일부: import 경로 업데이트 (대규모 파일 수정 필요)
-- M2 준비: ScenarioParserV2, ValidationV2, InheritanceV2 파일 생성 예정
+**🎉 새로 완료된 작업들:**
+- **src/index.ts 완전 v2.0 네이티브화**: MotionTextRenderer가 RendererV2 + parseScenario 사용
+- **demo/main.ts v2.0 전용 모드**: v1.3 지원 중단, v2.0만 처리
+- **샘플 필드명 완전 통일**: 모든 v2.0 샘플에서 e_type/text 일관성 확보
+- **RendererV2 외부 플러그인 지원**: DevPluginRegistry + PluginContextV3 완전 통합
+- **Define 해석 동작 검증**: V20SampleValidation 테스트 20개 모두 통과
+
+**🚧 남은 문제점들:**
+- 일부 테스트 환경 이슈 (FontFace undefined in Node.js, CSS variable 테스트 등)
+- v1.3 관련 레거시 코드 완전 제거 필요
+- 성능 최적화 및 메모리 사용량 검증
+
+**✅ 완료된 주요 성과:**
+- **v2.0 네이티브 렌더러 완성**: v2.0 JSON → v2.0 파서 → v2.0 렌더러 (변환 없음)
+- **플러그인 v3.0 완전 지원**: 17개 플러그인 + 외부 로더 + ContextV3
+- **Define 시스템 완전 통합**: 사전 해석으로 런타임 성능 최적화
+- **필드명 v2.0 일관성**: displayTime, domLifetime, time_offset 완전 적용
 
 ### 🚨 주의사항
 - 기존 v1.3 코드를 **완전히 제거**하세요 (deprecated 유지 X)
@@ -375,6 +391,75 @@ Renderer.ts를 v2.0 필드 직접 처리하도록 재구현
 
 ---
 
+### M5.5: Define 사전 해석 시스템 (0.5일)
+
+#### 목표
+렌더러가 플러그인 호출 전에 모든 Define 참조를 해석하여 전달
+
+#### 배경
+Plugin API v3.0의 핵심 개선 사항으로, 플러그인 코드 단순화와 명확한 책임 분리를 위해 도입합니다.
+
+#### 작업 내용
+1. **RendererV2에 Define 해석 메서드 추가**
+   ```typescript
+   // src/core/RendererV2.ts
+   private resolveAllDefines(value: any): any {
+     if (typeof value === 'string' && value.startsWith('define.')) {
+       return this.defineResolver.resolve(value);
+     }
+     if (Array.isArray(value)) {
+       return value.map(v => this.resolveAllDefines(v));
+     }
+     if (typeof value === 'object' && value !== null) {
+       const resolved: any = {};
+       for (const [key, val] of Object.entries(value)) {
+         resolved[key] = this.resolveAllDefines(val);
+       }
+       return resolved;
+     }
+     return value;
+   }
+   ```
+
+2. **플러그인 평가 메서드 수정**
+   ```typescript
+   private evaluatePlugin(spec: PluginSpec, progress: number): Channels {
+     // Define 참조를 사전 해석
+     const resolvedParams = this.resolveAllDefines(spec.params || {});
+     
+     // 내장 플러그인
+     if (isBuiltinPlugin(spec.name)) {
+       return evaluateBuiltinPlugin({
+         ...spec,
+         params: resolvedParams
+       }, progress);
+     }
+     
+     // 외부 플러그인
+     const plugin = this.loadedPlugins.get(spec.name);
+     if (plugin?.animate) {
+       const seekFn = plugin.animate(el, resolvedParams, ctx, duration);
+       return seekFn(progress);
+     }
+   }
+   ```
+
+3. **플러그인 컨텍스트 정리**
+   - PluginContext에서 scenario.define, resolveDefine 제거 (이미 완료)
+   - 플러그인은 해석된 값만 받음
+
+#### 체크리스트
+- [x] RendererV2에 resolveAllDefines 메서드 구현
+- [x] evaluatePlugin에서 Define 사전 해석 적용
+- [x] 플러그인 호출 시 해석된 params 전달
+- [ ] 테스트 작성 (define 참조가 실제 값으로 변환되는지)
+
+#### 산출물
+- RendererV2.ts 업데이트 (Define 사전 해석 로직)
+- 플러그인이 받는 options는 모두 해석된 실제 값
+
+---
+
 ### M6: 데모 및 통합 (1일)
 
 #### 목표
@@ -488,10 +573,11 @@ Renderer.ts를 v2.0 필드 직접 처리하도록 재구현
 - **M3**: 0.5일 (시간 유틸리티)
 - **M4**: 2일 (렌더러 코어)
 - **M5**: 1일 (플러그인)
+- **M5.5**: 0.5일 (Define 사전 해석)
 - **M6**: 1일 (데모 통합)
 - **M7**: 1일 (테스트/최적화)
 
-**총 예상**: 7.5일
+**총 예상**: 8일
 
 ---
 

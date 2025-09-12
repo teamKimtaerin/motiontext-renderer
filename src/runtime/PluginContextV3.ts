@@ -1,24 +1,14 @@
 // Plugin Context v3.0 (Plugin System v3.0)
 // 시나리오 접근, 채널 시스템, 에셋 관리가 통합된 플러그인 컨텍스트
 
-import type { ScenarioFileV1_3 } from '../types/scenario';
+import type { Scenario } from '../types/scenario-v2';
 import type { PluginChannelInterface } from './ChannelComposer';
 
-export interface ScenarioResolver {
+export interface ScenarioInfo {
   /**
-   * Define 값 해석
-   * @param definePath "define.colors.primary" 형태의 경로
-   * @returns 해석된 값 또는 undefined
-   */
-  resolveDefine(definePath: string): any;
-  
-  /**
-   * 시나리오 메타데이터 접근
+   * 시나리오 버전 (읽기 전용)
    */
   readonly version: string;
-  readonly timebase: { unit: string; fps?: number };
-  readonly stage: { baseAspect: string };
-  readonly tracks: any[];
 }
 
 export interface AssetManager {
@@ -132,8 +122,8 @@ export interface PluginContextV3 {
   // DOM 접근 (샌드박스)
   readonly container: HTMLElement; // effectsRoot
   
-  // 시나리오 접근
-  readonly scenario: ScenarioResolver;
+  // 시나리오 정보 (읽기 전용)
+  readonly scenario: ScenarioInfo;
   
   // 에셋 관리
   readonly assets: AssetManager;
@@ -163,40 +153,13 @@ export interface PluginContextV3 {
 }
 
 /**
- * 기본 시나리오 리졸버 구현
+ * 기본 시나리오 정보 구현
  */
-export class DefaultScenarioResolver implements ScenarioResolver {
-  constructor(private scenario: ScenarioFileV1_3) {}
-
-  resolveDefine(definePath: string): any {
-    if (!definePath.startsWith('define.')) {
-      return definePath; // define이 아니면 그대로 반환
-    }
-
-    const path = definePath.slice(7); // 'define.' 제거
-    return this.getNestedValue(this.scenario, path);
-  }
-
-  private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : undefined;
-    }, obj?.define || obj);
-  }
+export class DefaultScenarioInfo implements ScenarioInfo {
+  constructor(private scenario: Scenario) {}
 
   get version(): string {
-    return this.scenario.version || '1.3';
-  }
-
-  get timebase() {
-    return this.scenario.timebase || { unit: 'seconds' };
-  }
-
-  get stage() {
-    return this.scenario.stage || { baseAspect: '16:9' };
-  }
-
-  get tracks() {
-    return this.scenario.tracks || [];
+    return this.scenario.version;
   }
 }
 
@@ -367,7 +330,7 @@ export const defaultUtils: PluginUtils = {
  */
 export function createPluginContextV3(config: {
   container: HTMLElement;
-  scenario: ScenarioFileV1_3;
+  scenario: Scenario;
   baseUrl: string;
   channels?: PluginChannelInterface;
   portal?: PortalSystem;
@@ -376,12 +339,12 @@ export function createPluginContextV3(config: {
   peerDeps?: Record<string, any>;
   onSeek?: (callback: (progress: number) => void) => void;
 }): PluginContextV3 {
-  const scenarioResolver = new DefaultScenarioResolver(config.scenario);
+  const scenarioInfo = new DefaultScenarioInfo(config.scenario);
   const assetManager = new DefaultAssetManager(config.baseUrl);
 
   return {
     container: config.container,
-    scenario: scenarioResolver,
+    scenario: scenarioInfo,
     assets: assetManager,
     channels: config.channels,
     portal: config.portal,

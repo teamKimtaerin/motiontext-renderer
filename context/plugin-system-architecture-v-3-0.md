@@ -190,10 +190,8 @@ export interface PluginContext {
     getAssetType: (path: string) => 'image' | 'video' | 'font' | 'audio';
   };
   
-  // 시나리오 데이터 접근
+  // 시나리오 정보 (읽기 전용)
   scenario: {
-    define: Record<string, any>;
-    resolveDefine: (path: string) => any;
     version: string;
   };
   
@@ -248,17 +246,21 @@ export interface PluginRuntimeModule {
   // 초기화 (선택적)
   init?: (
     element: HTMLElement, 
-    options: any, 
+    options: ResolvedOptions, 
     ctx: PluginContext
   ) => Promise<void> | void;
   
   // 애니메이션 생성 (필수)
   animate: (
     element: HTMLElement,
-    options: any,
+    options: ResolvedOptions,
     ctx: PluginContext,
     duration: number
   ) => TimelineLike | SeekApplier | Promise<TimelineLike | SeekApplier>;
+  
+// options는 렌더러가 Define 참조를 모두 해석한 후 전달하는 실제 값들
+// 예: "define.brand_colors.primary" → "#FFD400" (이미 해석됨)
+export type ResolvedOptions = Record<string, any>;
   
   // 정리 (선택적)
   cleanup?: (element: HTMLElement) => Promise<void> | void;
@@ -281,45 +283,96 @@ export interface TimelineLike {
 export type SeekApplier = (progress: number) => void;
 ```
 
-### Define 시스템 연동
+### Define 시스템 연동 (v3.0)
 
-플러그인에서 시나리오의 define 필드를 참조하는 방법:
+**v3.0의 핵심 변화**: 렌더러가 Define 참조를 사전 해석하여 플러그인에 전달합니다.
 
+#### 시나리오에서의 Define 참조:
+```json
+{
+  "define": {
+    "brand_colors": {
+      "primary": "#FFD400",
+      "secondary": "#FF6B6B"
+    },
+    "custom_fonts": {
+      "heading": {
+        "type": "font",
+        "family": "CustomBrand",
+        "src": "assets/custom-brand.woff2"
+      }
+    }
+  },
+  "cues": [{
+    "pluginChain": [{
+      "name": "enhanced-text",
+      "params": {
+        "color": "define.brand_colors.primary",        // Define 참조
+        "font": "define.custom_fonts.heading",         // Define 참조
+        "intensity": "define.effects.default_power"    // Define 참조
+      }
+    }]
+  }]
+}
+```
+
+#### 플러그인에서의 사용 (v3.0):
 ```javascript
 export default {
   name: "enhanced-text",
   version: "1.0.0",
   
   init(el, options, ctx) {
-    // Define 값 직접 해석
-    const brandColor = ctx.scenario.resolveDefine("define.brand_colors.primary");
-    const customFont = ctx.scenario.resolveDefine("define.custom_fonts.heading");
+    // options는 이미 해석된 실제 값들
+    // options.color = "#FFD400" (이미 해석됨)
+    // options.font = { type: "font", family: "CustomBrand", src: "..." }
+    // options.intensity = 1.5
     
-    // 에셋이면 URL 변환
-    if (customFont?.type === 'font') {
-      const fontUrl = ctx.assets.getUrl(customFont.src);
-      // FontFace는 렌더러가 자동 등록하므로 family 이름만 사용
-      el.style.fontFamily = customFont.family;
+    if (options.font?.type === 'font') {
+      // 에셋 URL은 ctx.assets로 가져오기
+      el.style.fontFamily = options.font.family;  // "CustomBrand"
     }
   },
   
   animate(el, options, ctx, duration) {
-    // 파라미터에서도 define 참조 가능
-    const effectColor = ctx.scenario.resolveDefine(options.color || "#ffffff");
+    // Define 해석 불필요 - 이미 실제 값
+    const effectColor = options.color;  // "#FFD400"
     
     return (progress) => {
-      // CSS 변수 채널 사용 (권한 필요)
+      // CSS 변수 채널 사용
       if (ctx.channels) {
         ctx.channels.set('opacity', progress, 'replace');
         ctx.channels.set('filter', `hue-rotate(${progress * 360}deg)`, 'replace');
       }
       
-      // effectsRoot에 직접 스타일 적용
+      // 직접 스타일 적용
       el.style.color = effectColor;
     };
   }
 };
 ```
+
+#### 렌더러의 Define 해석 처리:
+```typescript
+// RendererV2.ts (내부 구현)
+private evaluatePlugin(spec: PluginSpec, progress: number): Channels {
+  // 1. params의 모든 Define 참조를 사전 해석
+  const resolvedOptions = this.resolveAllDefines(spec.params);
+  
+  // 2. 플러그인에는 해석된 실제 값만 전달
+  const seekFn = plugin.animate(el, resolvedOptions, ctx, duration);
+  return seekFn(progress);
+}
+
+// "define.brand_colors.primary" → "#FFD400"
+// "define.custom_fonts.heading" → { type: "font", family: "CustomBrand", ... }
+```
+
+**v3.0의 장점**:
+- ✅ 플러그인 코드 단순화 (Define 시스템 몰라도 됨)
+- ✅ 명확한 책임 분리 (렌더러=데이터 준비, 플러그인=효과)
+- ✅ 테스트 용이성 (단순 값만 테스트)
+- ✅ 재사용성 향상 (Define 시스템 의존성 없음)
 
 ---
 
@@ -911,8 +964,8 @@ animate(el, options, ctx, duration) {
 **v3.0**:
 ```javascript
 animate(el, options, ctx, duration) {
-  // Define 참조 자동 해석
-  const color = ctx.scenario.resolveDefine(options.color || '#ffffff');
+  // Define 해석이 렌더러에서 이미 완료됨
+  const color = options.color;  // 이미 "#FFD400" 같은 실제 값
   // ...
 }
 ```
@@ -1024,13 +1077,12 @@ export default {
   version: "2.0.0",
   
   async init(el, options, ctx) {
-    // Define 색상 해석
-    this.effectColor = ctx.scenario.resolveDefine(options.color);
+    // options는 이미 해석된 실제 값들
+    this.effectColor = options.color;  // 이미 "#FFD400"
     
-    // 글로우 폰트 적용
-    const glowFont = ctx.scenario.resolveDefine("define.glow_font");
-    if (glowFont?.type === 'font') {
-      el.style.fontFamily = glowFont.family;
+    // 글로우 폰트 적용 (이미 해석된 값)
+    if (options.font?.type === 'font') {
+      el.style.fontFamily = options.font.family;  // "CustomBrand"
     }
     
     // 효과별 초기화

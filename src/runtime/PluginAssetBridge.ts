@@ -10,7 +10,7 @@ import type { AssetManager as PluginAssetManager } from './PluginContextV3';
  */
 export class PluginAssetManagerAdapter implements PluginAssetManager {
   constructor(
-    private coreAssetManager: AssetManager,
+    _coreAssetManager: AssetManager,  // TODO: 향후 코어 AssetManager 통합시 사용
     private pluginBaseUrl: string,
     private capabilities: string[] = []
   ) {}
@@ -90,7 +90,7 @@ export class PluginAssetManagerAdapter implements PluginAssetManager {
    */
   private loadedFonts = new Set<FontFace>();
   
-  private trackLoadedFont(family: string, fontFace: FontFace): void {
+  private trackLoadedFont(_family: string, fontFace: FontFace): void {
     this.loadedFonts.add(fontFace);
   }
 
@@ -280,7 +280,7 @@ export class PluginPortalSystem {
   private originalParent: HTMLElement | null = null;
 
   constructor(
-    private effectsRoot: HTMLElement,
+    _effectsRoot: HTMLElement,  // TODO: effectsRoot 기반 portal 관리시 사용
     private stageContainer: HTMLElement,
     private capabilities: string[] = []
   ) {}

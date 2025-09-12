@@ -1,11 +1,8 @@
-// Public entry for motiontext-renderer (M2.5 minimal slice)
-import type { ScenarioFileV1_3 } from "./types/scenario";
-import { parseScenario } from "./parser/ScenarioParser";
-import { TimelineController } from "./core/TimelineController";
-import { Stage } from "./core/Stage";
-import { TrackManager } from "./core/TrackManager";
-import { Renderer } from "./core/Renderer";
-import gsap from "gsap";
+// MotionText Renderer v2.0 Native - Public API
+import type { Scenario } from "./types/scenario-v2";
+import { parseScenario } from "./parser/ScenarioParserV2";
+import { RendererV2 } from "./core/RendererV2";
+import { AssetManager } from "./assets/AssetManager";
 export { MotionTextController } from "./controller";
 // Public plugin configuration/registration API (for external consumers)
 export { configureDevPlugins as configurePluginSource, getDevPluginConfig } from './loader/dev/DevPluginConfig';
@@ -14,105 +11,74 @@ import { devRegistry } from './loader/dev/DevPluginRegistry';
 // (reserved) type helpers can be added later
 
 export class MotionTextRenderer {
-  private container: HTMLElement;
-  private scenario: ScenarioFileV1_3 | null = null;
-  private media: HTMLVideoElement | null = null;
-  private timeline = new TimelineController();
-  private stage = new Stage();
-  private trackManager = new TrackManager();
-  private renderer: Renderer;
-  private unsub: (() => void) | null = null;
-  private stageBoundsUnsub: (() => void) | null = null;
-  private controlSafeBottomPx = 0;
+  private renderer: RendererV2;
+  private assetManager: AssetManager;
+  private scenario: Scenario | null = null;
 
   constructor(container: HTMLElement) {
-    this.container = container;
-    // Enforce GSAP presence (peer dependency)
-    if (!gsap) {
-      throw new Error("GSAP is required as a peer dependency. Install 'gsap' and ensure it is available to the host app.");
-    }
-    this.stage.setContainer(container);
-    this.renderer = new Renderer(container, this.stage, this.trackManager);
-    this.stageBoundsUnsub = this.stage.onBoundsChange(() => this.renderer.recomputeMountedBases());
-    // Do not override container positioning; demo CSS positions it absolutely.
+    this.renderer = new RendererV2({
+      container,
+      preloadMs: 300,
+      snapToFrame: false,
+      fps: 30,
+      debugMode: true
+    });
+    this.assetManager = new AssetManager();
   }
 
   async loadConfig(config: any) {
-    // Normalize incoming config to Scenario v1.3
+    // Parse v2.0 scenario
     this.scenario = parseScenario(config);
-    this.stage.setScenario(this.scenario);
-    this.trackManager.setScenario(this.scenario);
-    this.renderer.setScenario(this.scenario);
-    this.renderer.remount();
-    if (this.media) {
-      this.renderer.update(this.media.currentTime);
-      // Attach-only start policy: do not auto-start timeline here
+    
+    // Load assets from define section if present
+    if (this.scenario.define) {
+      await this.assetManager.loadAssetsFromDefines(this.scenario.define);
     }
+    
+    // Set scenario to renderer
+    this.renderer.setScenario(this.scenario);
   }
 
   attachMedia(video: HTMLVideoElement) {
-    this.media = video;
-    this.timeline.attachMedia(video);
-    this.stage.setMedia(video);
-    if (this.unsub) {
-      try { this.unsub(); } finally { this.unsub = null; }
-    }
-    this.unsub = this.timeline.onTick((t) => this.renderer.update(t));
-    this.renderer.update(video.currentTime);
-    // If video is already playing at attach time, start timeline loop
-    if (!video.paused) {
-      this.timeline.ensurePlaying();
-    }
+    // Delegate to RendererV2 which uses TimelineControllerV2 for proper sync
+    this.renderer.attachMedia(video);
   }
 
   play() {
-    this.timeline.play();
+    // V2 renderer doesn't manage playback directly
+    // This is handled by the video element
   }
 
   pause() {
-    this.timeline.pause();
+    // V2 renderer doesn't manage playback directly
+    // This is handled by the video element
   }
 
   seek(timeSec: number) {
-    this.timeline.seek(timeSec);
     this.renderer.update(timeSec);
   }
 
-  setRate(rate: number) {
-    this.timeline.setRate(rate);
-  }
-
   dispose() {
-    this.pause();
-    // Timeline 분리를 Stage/Renderer 이전에 처리 (관례상 안전)
-    if (this.media) {
-      this.timeline.detachMedia();
-      this.media = null;
-    }
-    if (this.unsub) this.unsub();
-    this.unsub = null;
-    if (this.stageBoundsUnsub) this.stageBoundsUnsub();
-    this.stageBoundsUnsub = null;
     this.renderer.dispose();
+    this.assetManager.dispose();
     this.scenario = null;
-    this.stage.dispose();
   }
 
   setCaptionsVisible(visible: boolean) {
-    this.container.style.visibility = visible ? "visible" : "hidden";
+    // This would need to be implemented in RendererV2
+    // For now, we can modify container visibility
+    this.renderer['container'].style.visibility = visible ? "visible" : "hidden";
   }
 
   // Allow controller to reserve bottom safe area in pixels (e.g., controller height)
   setControlSafeBottom(px: number) {
-    this.controlSafeBottomPx = Math.max(0, Math.floor(px || 0));
+    const controlSafeBottomPx = Math.max(0, Math.floor(px || 0));
     // Expose to CSS so layout can offset bottom-anchored items
-    this.container.style.setProperty('--mtx-safe-bottom-px', `${this.controlSafeBottomPx}px`);
+    this.renderer['container'].style.setProperty('--mtx-safe-bottom-px', `${controlSafeBottomPx}px`);
   }
-
-  // (Orchestration methods moved to core/Renderer.ts)
 }
 
-export type { ScenarioFileV1_3 };
+export type { Scenario };
 
 // Register a plugin module programmatically (external/custom plugins)
 export function registerExternalPlugin(params: {

@@ -1,69 +1,97 @@
 {
   "name": "cwi-loud",
   "version": "1.0.0",
-  "pluginApi": "2.1",
-  "minRenderer": "1.3.0",
+  "pluginApi": "3.0",
+  "minRenderer": "2.0.0",
   "entry": "index.mjs",
   "targets": ["text"],
-  "capabilities": ["style-vars"],
+  "capabilities": ["style-vars", "dom-manipulation"],
   "preload": [],
   "schema": {
     "speaker": {
       "type": "string",
-      "label": "화자 ID",
-      "description": "화자별 색상을 적용할 때 사용되는 화자 식별자"
+      "default": "",
+      "ui": { "control": "text", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "화자 ID", "en": "Speaker ID" },
+        "description": { "ko": "화자별 색상을 적용할 때 사용되는 화자 식별자", "en": "Speaker identifier for color mapping" }
+      }
     },
     "palette": {
       "type": "object",
-      "label": "색상 팔레트",
-      "description": "화자별 색상 매핑 객체"
+      "default": {},
+      "ui": { "control": "object", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "색상 팔레트", "en": "Color Palette" },
+        "description": { "ko": "화자별 색상 매핑 객체", "en": "Speaker-to-color mapping object" }
+      }
     },
     "color": {
       "type": "string",
-      "label": "고정 색상",
-      "description": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)"
+      "default": "",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "ui": { "control": "color", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "고정 색상", "en": "Fixed Color" },
+        "description": { "ko": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)", "en": "Direct color specification (overrides palette)" }
+      }
     },
     "tremble": {
       "type": "object",
-      "label": "떨림 효과",
-      "description": "진동 효과의 세부 설정",
       "default": { "ampPx": 1.5, "freq": 12 },
+      "ui": { "control": "object", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "떨림 효과", "en": "Tremble Effect" },
+        "description": { "ko": "진동 효과의 세부 설정", "en": "Detailed trembling effect settings" }
+      },
       "properties": {
         "ampPx": {
           "type": "number",
-          "label": "진동 강도",
-          "description": "진동의 픽셀 단위 진폭",
           "default": 1.5,
           "min": 0,
           "max": 10,
-          "step": 0.1
+          "step": 0.1,
+          "ui": { "control": "slider", "unit": "px", "allowDefine": true },
+          "i18n": {
+            "label": { "ko": "진동 강도", "en": "Tremble Intensity" },
+            "description": { "ko": "진동의 픽셀 단위 진폭", "en": "Trembling amplitude in pixels" }
+          }
         },
         "freq": {
           "type": "number",
-          "label": "진동 주파수",
-          "description": "초당 진동 횟수",
           "default": 12,
           "min": 1,
           "max": 30,
-          "step": 1
+          "step": 1,
+          "ui": { "control": "slider", "unit": "Hz", "allowDefine": true },
+          "i18n": {
+            "label": { "ko": "진동 주파수", "en": "Tremble Frequency" },
+            "description": { "ko": "초당 진동 횟수", "en": "Vibrations per second" }
+          }
         }
       }
     },
     "t0": {
       "type": "number",
-      "label": "시작 시간",
-      "description": "큰 소리 효과가 시작되는 상대 시간 (초)",
       "default": 0,
       "min": 0,
-      "step": 0.1
+      "step": 0.1,
+      "ui": { "control": "number", "unit": "s", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "시작 시간", "en": "Start Time" },
+        "description": { "ko": "큰 소리 효과가 시작되는 상대 시간 (초)", "en": "Relative start time for loud effect (seconds)" }
+      }
     },
     "t1": {
       "type": "number",
-      "label": "종료 시간",
-      "description": "큰 소리 효과가 종료되는 상대 시간 (초)",
       "default": 0,
       "min": 0,
-      "step": 0.1
+      "step": 0.1,
+      "ui": { "control": "number", "unit": "s", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "종료 시간", "en": "End Time" },
+        "description": { "ko": "큰 소리 효과가 종료되는 상대 시간 (초)", "en": "Relative end time for loud effect (seconds)" }
+      }
     }
   }
 }

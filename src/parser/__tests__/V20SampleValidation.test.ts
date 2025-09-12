@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DefineResolver } from '../DefineResolver';
 import { FieldMigration } from '../FieldMigration';
-import type { ScenarioV2 } from '../../types/scenario-v2';
+import type { Scenario as ScenarioV2 } from '../../types/scenario-v2';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 

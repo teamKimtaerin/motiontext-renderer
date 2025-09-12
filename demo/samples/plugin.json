@@ -47,7 +47,7 @@
       "track": "effect",
       "root": {
         "id": "glitch-group",
-        "type": "group",
+        "e_type": "group",
         "effectScope": {
           "breakout": {
             "mode": "portal",
@@ -58,8 +58,8 @@
         "children": [
           {
             "id": "glitch-text",
-            "type": "text",
-            "content": "G̸L̷I̶T̴C̵H̸ ̷E̴F̵F̷E̶C̶T̴",
+            "e_type": "text",
+            "text": "G̸L̷I̶T̴C̵H̸ ̷E̴F̵F̷E̶C̶T̴",
             "layout": {
               "position": [
                 0.5,
@@ -97,12 +97,12 @@
       "track": "subtitle",
       "root": {
         "id": "typewriter-group",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "typewriter-text",
-            "type": "text",
-            "content": "타이프라이터 효과로 글자가 하나씩 나타납니다...",
+            "e_type": "text",
+            "text": "타이프라이터 효과로 글자가 하나씩 나타납니다...",
             "layout": {
               "position": [
                 0.5,
@@ -134,12 +134,12 @@
       "track": "effect",
       "root": {
         "id": "wave-group",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "wave-text",
-            "type": "text",
-            "content": "🌊 웨이브 이펙트 🌊",
+            "e_type": "text",
+            "text": "🌊 웨이브 이펙트 🌊",
             "layout": {
               "position": [
                 0.5,
@@ -177,12 +177,12 @@
       "track": "effect",
       "root": {
         "id": "particle-group",
-        "type": "group",
+        "e_type": "group",
         "children": [
           {
             "id": "particle-text",
-            "type": "text",
-            "content": "✨ 파티클 시스템 ✨",
+            "e_type": "text",
+            "text": "✨ 파티클 시스템 ✨",
             "layout": {
               "position": [
                 0.5,

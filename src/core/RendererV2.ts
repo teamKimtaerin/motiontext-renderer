@@ -10,11 +10,10 @@
 
 import type { 
   Scenario, 
-  Node, 
   Cue, 
   ResolvedNodeUnion, 
   TimeRange 
-} from '../types/scenario-v2-native';
+} from '../types/scenario-v2';
 import type { PluginSpec } from '../types/plugin-v3';
 import type { Channels } from '../types/plugin-v3';
 import { 
@@ -22,6 +21,13 @@ import {
   progressInTimeRange, 
   computePluginWindow 
 } from '../utils/time-v2';
+import { DefineResolver } from '../parser/DefineResolver';
+import { devRegistry } from '../loader/dev/DevPluginRegistry';
+import { createPluginContextV3, type PluginContextV3 } from '../runtime/PluginContextV3';
+import { applyNormalizedPosition } from '../layout/LayoutEngine';
+import { TimelineControllerV2, type TimelineOptions, type TickCallback } from './TimelineControllerV2';
+import { Stage } from './Stage';
+import { TrackManager } from './TrackManager';
 
 export interface RendererOptions {
   container: HTMLElement;
@@ -48,6 +54,10 @@ export class RendererV2 {
   private mountedElements = new Map<string, MountedElement>();
   private options: Required<RendererOptions>;
   private lastUpdateTime = 0;
+  private defineResolver: DefineResolver = new DefineResolver();
+  private timeline: TimelineControllerV2;
+  private stage: Stage;
+  private trackManager: TrackManager;
   
   constructor(options: RendererOptions) {
     this.container = options.container;
@@ -58,6 +68,25 @@ export class RendererV2 {
       debugMode: false,
       ...options
     };
+    
+    // Initialize TimelineController
+    const timelineOptions: TimelineOptions = {
+      autoStart: true,
+      snapToFrame: this.options.snapToFrame,
+      fps: this.options.fps,
+      debugMode: this.options.debugMode
+    };
+    this.timeline = new TimelineControllerV2(timelineOptions);
+    
+    // Register update callback
+    this.timeline.onTick(this.onTimelineUpdate.bind(this));
+    
+    // Initialize Stage
+    this.stage = new Stage();
+    this.stage.setContainer(this.container);
+    
+    // Initialize TrackManager
+    this.trackManager = new TrackManager();
     
     this.setupContainer();
   }
@@ -74,37 +103,61 @@ export class RendererV2 {
     this.scenario = scenario;
     this.unmountAll(); // 기존 요소들 정리
     
+    // DefineResolver 초기화 - scenario의 define 섹션으로 새로 생성
+    if (scenario.define) {
+      this.defineResolver = new DefineResolver(scenario.define);
+    }
+    
+    // Stage에 시나리오 설정
+    this.stage.setScenario(scenario);
+    
+    // TrackManager에 시나리오 설정
+    this.trackManager.setScenario(scenario);
+    
     if (this.options.debugMode) {
       console.log('[RendererV2] Scenario loaded:', {
         version: scenario.version,
         cueCount: scenario.cues.length,
-        trackCount: scenario.tracks.length
+        trackCount: scenario.tracks.length,
+        container: {
+          width: this.container.clientWidth,
+          height: this.container.clientHeight,
+          styles: {
+            position: this.container.style.position,
+            overflow: this.container.style.overflow,
+            visibility: getComputedStyle(this.container).visibility,
+            display: getComputedStyle(this.container).display
+          }
+        }
       });
     }
   }
 
   /**
-   * 현재 시간에 따른 렌더링 업데이트
+   * TimelineController에서 호출되는 업데이트 콜백
    * @param currentTime - 현재 재생 시간 (초)
    */
-  update(currentTime: number): void {
+  private onTimelineUpdate: TickCallback = (currentTime) => {
     if (!this.scenario) return;
     
     this.lastUpdateTime = currentTime;
     
-    // 프레임 스냅 적용
-    const snapTime = this.options.snapToFrame 
-      ? this.snapToFrame(currentTime) 
-      : currentTime;
-    
     // Cue별 처리
     for (const cue of this.scenario.cues) {
-      this.processCue(cue, snapTime);
+      this.processCue(cue, currentTime);
     }
     
     if (this.options.debugMode) {
-      this.logDebugInfo(snapTime);
+      this.logDebugInfo(currentTime);
     }
+  };
+
+  /**
+   * 현재 시간에 따른 렌더링 업데이트 (수동 호출용)
+   * @param currentTime - 현재 재생 시간 (초)
+   */
+  update(currentTime: number): void {
+    this.onTimelineUpdate(currentTime);
   }
 
   /**
@@ -147,8 +200,8 @@ export class RendererV2 {
     const isActive = isWithinTimeRange(currentTime, [displayStart, displayEnd]);
     
     if (isActive) {
-      this.ensureMounted(node, cue, nodeId);
-      this.updateNode(node, currentTime, nodeId);
+      this.ensureMounted(node, cue, nodeId, track);
+      this.updateNode(node, currentTime, nodeId, track);
     } else {
       this.unmountNode(nodeId);
     }
@@ -164,7 +217,7 @@ export class RendererV2 {
   /**
    * 노드가 마운트되어 있는지 확인하고 필요시 마운트
    */
-  private ensureMounted(node: ResolvedNodeUnion, cue: Cue, nodeId: string): void {
+  private ensureMounted(node: ResolvedNodeUnion, cue: Cue, nodeId: string, track: any): void {
     if (this.mountedElements.has(nodeId)) return;
     
     const element = this.createElement(node);
@@ -177,20 +230,37 @@ export class RendererV2 {
     
     this.container.appendChild(element);
     
+    // 기본 스타일 적용 (레이아웃 + 트랙 기본값)
+    this.applyBaseStyle(element, node, track);
+    
     if (this.options.debugMode) {
-      console.log(`[RendererV2] Mounted node: ${nodeId}`);
+      console.log(`[RendererV2] Mounted node: ${nodeId}`, {
+        element: element,
+        nodetype: node.e_type,
+        text: node.e_type === 'text' ? (node as any).text : undefined,
+        layout: node.layout,
+        displayTime: node.displayTime,
+        trackDefaults: track?.defaultStyle,
+        styles: {
+          position: element.style.position,
+          left: element.style.left,
+          top: element.style.top,
+          transform: element.style.transform,
+          fontSize: element.style.fontSize,
+          color: element.style.color,
+          visibility: element.style.visibility,
+          display: element.style.display
+        }
+      });
     }
   }
 
   /**
    * 노드 업데이트 (플러그인 효과 적용)
    */
-  private updateNode(node: ResolvedNodeUnion, currentTime: number, nodeId: string): void {
+  private updateNode(node: ResolvedNodeUnion, currentTime: number, nodeId: string, _track: any): void {
     const mounted = this.mountedElements.get(nodeId);
     if (!mounted) return;
-    
-    // 기본 스타일 적용
-    this.applyBaseStyle(mounted.element, node);
     
     // 플러그인 체인 처리
     if (node.pluginChain && node.pluginChain.length > 0) {
@@ -234,14 +304,66 @@ export class RendererV2 {
   }
 
   /**
+   * 모든 Define 참조를 재귀적으로 해석
+   */
+  private resolveAllDefines(value: unknown): unknown {
+    if (typeof value === 'string' && value.startsWith('define.')) {
+      try {
+        // Define 참조 문자열 해석을 위해 임시 시나리오 생성
+        const tempScenario = {
+          version: '2.0' as const,
+          timebase: { unit: 'seconds' as const },
+          stage: { baseAspect: '16:9' as const },
+          tracks: [],
+          cues: [],
+          temp: value
+        };
+        const resolved = this.defineResolver.resolveScenario(tempScenario);
+        return (resolved as any).temp;
+      } catch (error) {
+        if (this.options.debugMode) {
+          console.warn(`[RendererV2] Failed to resolve define "${value}":`, error);
+        }
+        return value; // 해석 실패 시 원본 값 반환
+      }
+    }
+    
+    if (Array.isArray(value)) {
+      return value.map(v => this.resolveAllDefines(v));
+    }
+    
+    if (typeof value === 'object' && value !== null) {
+      const resolved: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        resolved[key] = this.resolveAllDefines(val);
+      }
+      return resolved;
+    }
+    
+    return value;
+  }
+
+  /**
    * 플러그인 평가 (내장 + 외부)
    */
   private evaluatePlugin(plugin: PluginSpec, progress: number): Channels {
+    // Define 참조를 사전 해석
+    const resolvedParams = this.resolveAllDefines(plugin.params || {});
+    
+    // 해석된 params로 플러그인 스펙 생성
+    const resolvedPlugin: PluginSpec = {
+      ...plugin,
+      params: resolvedParams as Record<string, any>
+    };
+    
     // 내장 플러그인 처리
-    const builtinChannels = this.evaluateBuiltinPlugin(plugin, progress);
+    const builtinChannels = this.evaluateBuiltinPlugin(resolvedPlugin, progress);
     if (builtinChannels) return builtinChannels;
     
-    // 외부 플러그인 처리 (향후 확장)
+    // 외부 플러그인 처리 (DevPluginRegistry)
+    const externalChannels = this.evaluateExternalPlugin(resolvedPlugin, progress);
+    if (externalChannels) return externalChannels;
+    
     console.warn(`[RendererV2] Unknown plugin: ${plugin.name}`);
     return {};
   }
@@ -279,6 +401,58 @@ export class RendererV2 {
       default:
         return null;
     }
+  }
+
+  /**
+   * 외부 플러그인 평가 (DevPluginRegistry)
+   */
+  private evaluateExternalPlugin(plugin: PluginSpec, progress: number): Channels | null {
+    const registeredPlugin = devRegistry.resolve(plugin.name);
+    if (!registeredPlugin) return null;
+
+    // Plugin API v3.0 지원 (evalChannels 함수)
+    if (typeof registeredPlugin.module?.evalChannels === 'function') {
+      try {
+        // PluginContextV3 생성
+        const context = this.createPluginContext(registeredPlugin.baseUrl);
+        const channels = registeredPlugin.module.evalChannels(plugin, progress, context);
+        return channels || {};
+      } catch (error) {
+        if (this.options.debugMode) {
+          console.warn(`[RendererV2] External plugin "${plugin.name}" evalChannels failed:`, error);
+        }
+        return {};
+      }
+    }
+
+    // 향후 다른 Plugin API 버전 지원 가능성 확장
+    return null;
+  }
+
+  /**
+   * PluginContextV3 생성
+   */
+  private createPluginContext(baseUrl: string): PluginContextV3 {
+    if (!this.scenario) {
+      throw new Error('Scenario not loaded');
+    }
+
+    // effectsRoot DOM을 플러그인 컨테이너로 사용
+    // 실제 구현에서는 현재 처리 중인 요소의 effectsRoot를 사용해야 함
+    const container = this.container; // 임시로 메인 컨테이너 사용
+
+    return createPluginContextV3({
+      container,
+      scenario: this.scenario,
+      baseUrl,
+      renderer: {
+        version: '2.0',
+        currentTime: this.lastUpdateTime,
+        duration: 0, // 미구현
+        timeScale: 1, // 미구현
+        fps: this.options.fps,
+      },
+    });
   }
 
   /**
@@ -383,7 +557,6 @@ export class RendererV2 {
     
     // 공통 속성
     element.dataset.nodeId = node.id;
-    element.style.position = 'absolute';
     
     return element;
   }
@@ -391,17 +564,35 @@ export class RendererV2 {
   /**
    * 기본 스타일 적용
    */
-  private applyBaseStyle(element: HTMLElement, node: ResolvedNodeUnion): void {
-    if (!node.style) return;
+  private applyBaseStyle(element: HTMLElement, node: ResolvedNodeUnion, track?: any): void {
+    // Apply layout positioning first
+    if (node.layout) {
+      applyNormalizedPosition(element, node.layout, 'cc');
+    }
     
-    // 기본적인 스타일 적용
-    const style = node.style as any;
+    // Merge styles: track defaults → node styles (node takes precedence)
+    const trackDefaults = track?.defaultStyle || {};
+    const nodeStyle = node.style || {};
+    const mergedStyle = { ...trackDefaults, ...nodeStyle } as any;
     
-    if (style.fontSize) element.style.fontSize = style.fontSize;
-    if (style.color) element.style.color = style.color;
-    if (style.fontFamily) element.style.fontFamily = style.fontFamily;
-    if (style.fontWeight) element.style.fontWeight = style.fontWeight;
-    if (style.textAlign) element.style.textAlign = style.textAlign;
+    // Apply merged styles
+    if (mergedStyle.fontSizeRel) {
+      // Convert relative size to pixels based on container size
+      const container = this.container;
+      const containerHeight = container.clientHeight || 720; // fallback to 720p
+      element.style.fontSize = `${mergedStyle.fontSizeRel * containerHeight}px`;
+    }
+    if (mergedStyle.color) element.style.color = mergedStyle.color;
+    if (mergedStyle.fontFamily) element.style.fontFamily = mergedStyle.fontFamily;
+    if (mergedStyle.fontWeight) element.style.fontWeight = String(mergedStyle.fontWeight);
+    if (mergedStyle.align) element.style.textAlign = mergedStyle.align;
+    
+    // Apply default text styling for text nodes without explicit style
+    if (node.e_type === 'text' && !mergedStyle.fontSizeRel) {
+      element.style.fontSize = '2rem'; // Default visible size
+      element.style.color = element.style.color || '#ffffff'; // Default white text
+      element.style.fontWeight = element.style.fontWeight || 'bold';
+    }
   }
 
   /**
@@ -411,10 +602,6 @@ export class RendererV2 {
     return time >= start && time <= end;
   }
 
-  private snapToFrame(time: number): number {
-    if (!this.options.snapToFrame || !this.options.fps) return time;
-    return Math.round(time * this.options.fps) / this.options.fps;
-  }
 
   private backOutEasing(t: number): number {
     const c1 = 1.70158;
@@ -423,7 +610,7 @@ export class RendererV2 {
   }
 
   private getTrack(trackId: string) {
-    return this.scenario?.tracks.find(track => track.id === trackId);
+    return this.trackManager.getTrackById(trackId);
   }
 
   private unmountNode(nodeId: string): void {
@@ -454,6 +641,27 @@ export class RendererV2 {
   private setupContainer(): void {
     this.container.style.position = 'relative';
     this.container.style.overflow = 'hidden';
+    
+    // Ensure container has dimensions
+    if (this.container.clientWidth === 0 || this.container.clientHeight === 0) {
+      this.container.style.width = this.container.style.width || '100%';
+      this.container.style.height = this.container.style.height || '100%';
+      this.container.style.minHeight = this.container.style.minHeight || '400px';
+    }
+    
+    if (this.options.debugMode) {
+      console.log('[RendererV2] Container setup:', {
+        width: this.container.clientWidth,
+        height: this.container.clientHeight,
+        styles: {
+          position: this.container.style.position,
+          overflow: this.container.style.overflow,
+          width: this.container.style.width,
+          height: this.container.style.height,
+          minHeight: this.container.style.minHeight
+        }
+      });
+    }
   }
 
   private logDebugInfo(currentTime: number): void {
@@ -465,9 +673,40 @@ export class RendererV2 {
   }
 
   /**
+   * 비디오 미디어 연결
+   * @param media - 비디오 엘리먼트
+   */
+  attachMedia(media: HTMLVideoElement): void {
+    this.timeline.attachMedia(media);
+    this.stage.setMedia(media);
+    
+    if (this.options.debugMode) {
+      console.log('[RendererV2] Media attached:', {
+        duration: media.duration,
+        readyState: media.readyState,
+        videoWidth: media.videoWidth,
+        videoHeight: media.videoHeight
+      });
+    }
+  }
+
+  /**
+   * 미디어 분리
+   */
+  detachMedia(): void {
+    this.timeline.detachMedia();
+    
+    if (this.options.debugMode) {
+      console.log('[RendererV2] Media detached');
+    }
+  }
+
+  /**
    * 정리
    */
   dispose(): void {
+    this.timeline.dispose();
+    this.stage.dispose();
     this.unmountAll();
     this.scenario = null;
   }

@@ -90,7 +90,7 @@ export class AssetManager {
    * @param asset 에셋 정의
    */
   private async loadSingleAsset(key: string, asset: DefineAsset): Promise<void> {
-    const resolvedUrl = this.resolveUrl(asset.url);
+    const resolvedUrl = this.resolveUrl(asset.url || asset.src);
 
     switch (asset.type) {
       case 'font':

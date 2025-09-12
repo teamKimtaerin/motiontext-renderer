@@ -8,7 +8,7 @@
 // - 트랙 참조 유효성
 // - Define 참조 해결 후 검증
 
-import type { Scenario, Node } from '../types/scenario-v2-native';
+import type { Scenario, Node } from '../types/scenario-v2';
 import { validateTimeRange } from '../utils/time-v2';
 
 export class ValidationError extends Error {

@@ -14,7 +14,7 @@ import type {
   Track, 
   TimeRange, 
   ResolvedNodeUnion 
-} from '../types/scenario-v2-native';
+} from '../types/scenario-v2';
 import type { Layout, Style } from '../types/layout';
 
 /**

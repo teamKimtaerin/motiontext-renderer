@@ -9,7 +9,7 @@
 // - 상속 시스템 적용
 
 import { DefineResolver } from './DefineResolver';
-import type { Scenario } from '../types/scenario-v2-native';
+import type { Scenario } from '../types/scenario-v2';
 import { validateScenario } from './ValidationV2';
 import { applyInheritance } from './InheritanceV2';
 
@@ -36,9 +36,10 @@ export function parseScenario(input: unknown): Scenario {
     );
   }
 
-  // DefineResolver로 모든 define 참조 해결  
+  // DefineResolver로 모든 define 참조 해결
   const resolver = new DefineResolver(raw.define as any);
-  const resolved = raw as unknown as Scenario;
+  const resolvedRaw = resolver.resolveScenario(raw as any);
+  const resolved = resolvedRaw as unknown as Scenario;
 
   // v2.0 검증 (시간 배열, ID, 참조 등)
   validateScenario(resolved);

@@ -2,7 +2,7 @@
 // v1.3/v2.0 자동 감지 및 호환성 레이어
 
 import type { ScenarioFileV1_3 } from '../types/scenario';
-import type { ScenarioV2 } from '../types/scenario-v2';
+import type { Scenario as ScenarioV2 } from '../types/scenario-v2';
 import { V13ToV20Migrator, type MigrationOptions } from '../migration/V13ToV20Migrator';
 
 export type CompatibleScenario = ScenarioFileV1_3 | ScenarioV2;

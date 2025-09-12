@@ -1,4 +1,4 @@
-import type { DefineSection, ScenarioV2 } from '../types/scenario-v2';
+import type { DefineSection, Scenario as ScenarioV2 } from '../types/scenario-v2';
 
 /**
  * DefineResolver

@@ -1,4 +1,4 @@
-import type { ScenarioFileV1_3, Track } from '../types/scenario';
+import type { Scenario, Track } from '../types/scenario-v2';
 
 export interface GroupItem {
   el: HTMLElement;
@@ -6,9 +6,9 @@ export interface GroupItem {
 }
 
 export class TrackManager {
-  private scenario: ScenarioFileV1_3 | null = null;
+  private scenario: Scenario | null = null;
 
-  setScenario(scenario: ScenarioFileV1_3) {
+  setScenario(scenario: Scenario) {
     this.scenario = scenario;
   }
 

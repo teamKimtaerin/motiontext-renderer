@@ -7,7 +7,7 @@
 // - time_offset: [start, end] 플러그인 오프셋
 // - domLifetime: [start, end] DOM 생존 시간
 
-import type { TimeRange } from '../types/scenario-v2-native';
+import type { TimeRange } from '../types/scenario-v2';
 
 // ============================================================================
 // Core Time Functions
