@@ -10,6 +10,12 @@ export default defineConfig(({ command, mode }) => {
       server: {
         host: true,
         port: 3000,
+        https: false, // HTTP 모드 (HTTPS 인증서 문제 우회)
+        headers: {
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Resource-Policy': 'same-origin', // 추가 보안 헤더
+        },
       },
       resolve: {
         alias: {

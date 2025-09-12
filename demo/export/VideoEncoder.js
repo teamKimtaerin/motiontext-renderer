@@ -1,417 +1,420 @@
 /**
- * Video Encoder System
- * 캡처된 프레임들을 MP4 비디오로 인코딩하는 시스템
- * WebCodecs API 우선, 미지원시 Canvas-based MP4 생성
+ * 🎬 Simplified Video Encoder System
+ * MediaRecorder API 기반 실시간 비디오 생성 (WebCodecs 완전 제거)
+ * 브라우저 표준 API만 사용하여 최대 호환성 보장
  */
 export class VideoEncoder {
   constructor() {
-    this.isWebCodecsSupported = this.checkWebCodecsSupport();
     this.mediaRecorder = null;
     this.recordedChunks = [];
-    this.forceEncodingMode = null; // 'auto', 'webcodecs', 'mediarecorder'
+    this.canvas = null;
+    this.context = null;
+    this.stream = null;
+    this.isRecording = false;
+    
+    // 🎯 지원되는 MIME 타입 우선순위 (최대 호환성 기반)
+    this.supportedMimeTypes = [
+      'video/webm',                     // 가장 기본적이고 널리 지원됨
+      'video/webm;codecs=vp8',         // VP8만 (오디오 없음)
+      'video/webm;codecs=vp9',         // VP9만 (오디오 없음)  
+      'video/webm;codecs=vp8,opus',    // VP8 + Opus
+      'video/mp4',                      // 기본 MP4
+      'video/webm;codecs=vp9,opus'     // VP9 + Opus (마지막)
+    ];
   }
 
   /**
-   * WebCodecs API 지원 여부 확인 (강화된 검증)
-   * @returns {boolean}
+   * 🎬 실시간 녹화 시작 (Canvas 기반)
+   * @param {HTMLCanvasElement} sourceCanvas - 녹화할 캔버스
+   * @param {Object} options - 녹화 옵션
+   * @returns {Promise<void>}
    */
-  checkWebCodecsSupport() {
+  async startRecording(sourceCanvas, options = {}) {
+    const {
+      width = 1280,
+      height = 720,
+      fps = 30,
+      videoBitsPerSecond = 5000000, // 5Mbps
+      audioBitsPerSecond = 128000   // 128Kbps
+    } = options;
+
     try {
-      if (typeof window === 'undefined') return false;
+      console.log('🎬 Starting MediaRecorder-based recording...', { width, height, fps });
       
-      // 기본 API 존재 확인
-      if (!('VideoEncoder' in window) ||
-          !('VideoDecoder' in window) ||
-          !('EncodedVideoChunk' in window) ||
-          !('VideoFrame' in window)) {
-        return false;
+      // 1. 기존 녹화 정리
+      if (this.isRecording) {
+        console.warn('⚠️ Previous recording still active, cleaning up...');
+        this.cleanup();
       }
       
-      // VideoEncoder 인스턴스 생성 및 메서드 확인
-      const testEncoder = new VideoEncoder({
-        output: () => {},
-        error: () => {}
+      // 2. 캔버스 설정 및 검증
+      if (!sourceCanvas) {
+        throw new Error('Source canvas is required');
+      }
+      
+      this.canvas = sourceCanvas;
+      this.context = this.canvas.getContext('2d');
+      
+      if (!this.context) {
+        throw new Error('Failed to get canvas 2D context');
+      }
+      
+      // 캔버스 크기 설정
+      this.canvas.width = width;
+      this.canvas.height = height;
+      console.log(`🖼️ Canvas configured: ${this.canvas.width}x${this.canvas.height}`);
+      
+      // 3. 캔버스 스트림 생성 및 활성화
+      if (!this.canvas.captureStream) {
+        throw new Error('Canvas.captureStream is not supported in this browser');
+      }
+      
+      // Canvas에 테스트 콘텐츠 그려서 스트림 활성화
+      console.log('🎨 Drawing test content to activate canvas stream...');
+      this.context.fillStyle = '#000000';
+      this.context.fillRect(0, 0, width, height);
+      this.context.fillStyle = '#ffffff';
+      this.context.font = `${Math.min(width, height) / 10}px Arial`;
+      this.context.textAlign = 'center';
+      this.context.textBaseline = 'middle';
+      this.context.fillText('준비 중...', width / 2, height / 2);
+      
+      // 스트림 생성
+      this.stream = this.canvas.captureStream(fps);
+      
+      if (!this.stream) {
+        throw new Error('Failed to create canvas stream');
+      }
+      
+      // 스트림 상태 상세 검증
+      const videoTracks = this.stream.getVideoTracks();
+      console.log(`🎥 Canvas stream created: ${videoTracks.length} video tracks`);
+      
+      if (videoTracks.length === 0) {
+        throw new Error('Canvas stream has no video tracks');
+      }
+      
+      // 각 비디오 트랙 상태 확인
+      videoTracks.forEach((track, index) => {
+        console.log(`📹 Video track ${index}:`, {
+          readyState: track.readyState,
+          enabled: track.enabled,
+          muted: track.muted,
+          label: track.label
+        });
+        
+        if (track.readyState !== 'live') {
+          console.warn(`⚠️ Video track ${index} is not live: ${track.readyState}`);
+        }
       });
       
-      // configure 메서드 존재 확인
-      if (typeof testEncoder.configure !== 'function') {
-        console.warn('WebCodecs: VideoEncoder.configure method not available');
-        return false;
+      // 스트림 활성화를 위한 약간의 대기
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // 4. MIME 타입 선택 및 검증
+      const mimeType = this.findSupportedMimeType();
+      console.log(`🎯 Selected MIME type: ${mimeType}`);
+      
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        console.warn(`⚠️ MIME type ${mimeType} may not be fully supported`);
       }
       
-      // 기본 설정 테스트
+      // 5. MediaRecorder 초기화 (fallback 전략)
+      const audioTracks = this.stream.getAudioTracks();
+      console.log(`🔊 Audio tracks: ${audioTracks.length}, Video tracks: ${videoTracks.length}`);
+      
+      let mediaRecorder = null;
+      const attemptOptions = [
+        // 시도 1: 기본 옵션만
+        { mimeType: mimeType },
+        // 시도 2: 비트레이트 포함
+        { 
+          mimeType: mimeType,
+          videoBitsPerSecond: videoBitsPerSecond
+        },
+        // 시도 3: 최소 옵션
+        {}
+      ];
+      
+      for (let i = 0; i < attemptOptions.length; i++) {
+        const options = attemptOptions[i];
+        try {
+          console.log(`📝 MediaRecorder attempt ${i + 1}:`, options);
+          mediaRecorder = new MediaRecorder(this.stream, options);
+          console.log('✅ MediaRecorder created successfully');
+          break;
+        } catch (error) {
+          console.warn(`⚠️ MediaRecorder attempt ${i + 1} failed:`, error);
+          if (i === attemptOptions.length - 1) {
+            throw new Error(`All MediaRecorder initialization attempts failed. Last error: ${error.message}`);
+          }
+        }
+      }
+      
+      this.mediaRecorder = mediaRecorder;
+      this.recordedChunks = [];
+      
+      // 6. MediaRecorder 이벤트 핸들러 (Promise 기반)
+      const recordingPromise = new Promise((resolve, reject) => {
+        const startTimeout = setTimeout(() => {
+          console.error('⏰ MediaRecorder start timeout after 10 seconds');
+          reject(new Error('MediaRecorder start timeout after 10 seconds'));
+        }, 10000); // 5초 → 10초로 증가
+        
+        this.mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            this.recordedChunks.push(event.data);
+            console.log(`📦 Chunk recorded: ${event.data.size} bytes (total: ${this.recordedChunks.length})`);
+          }
+        };
+        
+        this.mediaRecorder.onstart = () => {
+          clearTimeout(startTimeout);
+          console.log('🎬 MediaRecorder started successfully');
+          this.isRecording = true;
+          resolve();
+        };
+        
+        this.mediaRecorder.onstop = () => {
+          console.log('⏹️ MediaRecorder stopped');
+          this.isRecording = false;
+        };
+        
+        this.mediaRecorder.onerror = (event) => {
+          clearTimeout(startTimeout);
+          console.error('❌ MediaRecorder error:', event);
+          this.isRecording = false;
+          reject(new Error(`MediaRecorder error: ${event.error?.message || 'Unknown error'}`));
+        };
+      });
+      
+      // 7. 녹화 시작 및 상태 모니터링
+      console.log('▶️ Starting MediaRecorder...');
+      console.log(`📊 MediaRecorder initial state: ${this.mediaRecorder.state}`);
+      
+      // MediaRecorder 상태 변화 추적
+      const originalState = this.mediaRecorder.state;
+      const stateChangeHandler = () => {
+        console.log(`🔄 MediaRecorder state changed: ${originalState} → ${this.mediaRecorder.state}`);
+      };
+      this.mediaRecorder.addEventListener('start', stateChangeHandler);
+      this.mediaRecorder.addEventListener('stop', stateChangeHandler);
+      this.mediaRecorder.addEventListener('pause', stateChangeHandler);
+      this.mediaRecorder.addEventListener('resume', stateChangeHandler);
+      
+      // 녹화 시작
       try {
-        testEncoder.configure({
-          codec: 'avc1.42E01E',
-          width: 640,
-          height: 480,
-          bitrate: 1000000,
-          framerate: 30
+        this.mediaRecorder.start(100); // 100ms 간격으로 청크 생성
+        console.log('📡 MediaRecorder.start() called, waiting for onstart event...');
+      } catch (startError) {
+        console.error('❌ MediaRecorder.start() failed immediately:', startError);
+        throw startError;
+      }
+      
+      // 녹화 시작 완료까지 대기
+      await recordingPromise;
+      
+      console.log('✅ Recording initialization completed successfully');
+      console.log(`📊 Final MediaRecorder state: ${this.mediaRecorder.state}`);
+      
+    } catch (error) {
+      console.error('❌ Failed to start recording:', error);
+      throw new Error(`Recording start failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * 🎬 캔버스에 프레임 그리기 (실시간 업데이트)
+   * @param {string|HTMLVideoElement|HTMLCanvasElement} source - 그릴 소스
+   * @param {number} currentTime - 현재 시간 (디버깅용)
+   * @returns {Promise<void>}
+   */
+  async drawFrame(source, currentTime = 0) {
+    if (!this.canvas || !this.context) {
+      console.warn('⚠️ Canvas not initialized for drawing');
+      return;
+    }
+
+    try {
+      // 캔버스 클리어
+      this.context.fillStyle = '#000000';
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      if (typeof source === 'string') {
+        // Base64 이미지 데이터 URL인 경우
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = () => {
+            this.context.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+            resolve();
+          };
+          img.onerror = reject;
+          img.src = source;
         });
-        testEncoder.close();
-        return true;
-      } catch (configError) {
-        console.warn('WebCodecs: Configuration test failed:', configError);
-        testEncoder.close();
-        return false;
+      } else if (source instanceof HTMLVideoElement) {
+        // 비디오 요소인 경우
+        this.context.drawImage(source, 0, 0, this.canvas.width, this.canvas.height);
+      } else if (source instanceof HTMLCanvasElement) {
+        // 캔버스 요소인 경우
+        this.context.drawImage(source, 0, 0, this.canvas.width, this.canvas.height);
+      } else {
+        console.warn('⚠️ Unsupported source type for drawing');
+      }
+      
+      // 디버깅: 현재 시간 표시 (선택적)
+      if (currentTime > 0) {
+        this.context.fillStyle = '#ffffff';
+        this.context.font = '16px Arial';
+        this.context.fillText(`Time: ${currentTime.toFixed(1)}s`, 10, 30);
       }
       
     } catch (error) {
-      console.warn('WebCodecs: Support check failed:', error);
-      return false;
+      console.error('❌ Failed to draw frame:', error);
     }
   }
 
   /**
-   * 인코딩 모드 설정
-   * @param {string} mode - 'auto', 'webcodecs', 'mediarecorder'
+   * 🎬 녹화 중지 및 비디오 Blob 생성
+   * @returns {Promise<Blob>} - 완성된 비디오 Blob
    */
-  setEncodingMode(mode) {
-    this.forceEncodingMode = mode;
-    console.log(`Encoding mode set to: ${mode}`);
-  }
-
-  /**
-   * 프레임 배열을 MP4로 인코딩
-   * @param {string[]} frameDataUrls - Base64 인코딩된 이미지 데이터 URL 배열
-   * @param {Object} options - 인코딩 옵션
-   * @param {Function} onProgress - 진행률 콜백
-   * @returns {Promise<Blob>} - MP4 비디오 Blob
-   */
-  async encodeFramesToVideo(frameDataUrls, options = {}, onProgress = null) {
-    const {
-      fps = 30,
-      width = 1920,
-      height = 1080,
-      bitrate = 5000000, // 5Mbps
-      codec = 'avc1.42E01E', // H.264 Baseline
-      quality = 0.8
-    } = options;
-
-    console.log(`Starting video encoding: ${frameDataUrls.length} frames at ${fps}fps`);
-
-    // 인코딩 모드 결정
-    const shouldUseWebCodecs = this.shouldUseWebCodecs();
-    
-    if (shouldUseWebCodecs) {
-      try {
-        console.log('Attempting WebCodecs encoding...');
-        return await this.encodeWithWebCodecs(frameDataUrls, { fps, width, height, bitrate, codec }, onProgress);
-      } catch (webCodecsError) {
-        console.warn('WebCodecs encoding failed, falling back to MediaRecorder:', webCodecsError.message);
-        
-        // 강제 WebCodecs 모드가 아닌 경우에만 폴백
-        if (this.forceEncodingMode === 'webcodecs') {
-          throw new Error(`WebCodecs 인코딩 실패: ${webCodecsError.message}`);
-        }
-        
-        // 사용자에게 폴백 알림
-        if (onProgress) {
-          onProgress({
-            current: 0,
-            total: frameDataUrls.length,
-            progress: 0,
-            stage: 'encoding',
-            fallbackMessage: 'WebCodecs 실패, MediaRecorder로 전환 중...'
-          });
-        }
-        
-        // MediaRecorder로 폴백
-        return await this.encodeWithMediaRecorder(frameDataUrls, { fps, width, height, quality }, onProgress);
-      }
-    } else {
-      console.log('Using MediaRecorder encoding...');
-      return await this.encodeWithMediaRecorder(frameDataUrls, { fps, width, height, quality }, onProgress);
+  async stopRecording() {
+    if (!this.mediaRecorder || !this.isRecording) {
+      throw new Error('Recording is not active');
     }
-  }
 
-  /**
-   * 인코딩 방식 결정 로직
-   * @returns {boolean} - WebCodecs 사용 여부
-   */
-  shouldUseWebCodecs() {
-    if (this.forceEncodingMode === 'mediarecorder') {
-      return false;
-    }
-    if (this.forceEncodingMode === 'webcodecs') {
-      return true; // 지원되지 않아도 강제 시도
-    }
-    // 'auto' 모드: 지원 여부에 따라 결정
-    return this.isWebCodecsSupported;
-  }
-
-  /**
-   * WebCodecs API를 사용한 인코딩 (Chrome/Edge 전용)
-   * @param {string[]} frameDataUrls 
-   * @param {Object} config 
-   * @param {Function} onProgress 
-   * @returns {Promise<Blob>}
-   */
-  async encodeWithWebCodecs(frameDataUrls, config, onProgress) {
-    return new Promise(async (resolve, reject) => {
-      const { fps, width, height, bitrate, codec } = config;
-      const encodedChunks = [];
-      let frameIndex = 0;
-
-      try {
-        // VideoEncoder 설정
-        const encoder = new VideoEncoder({
-          output: (chunk, metadata) => {
-            encodedChunks.push(new Uint8Array(chunk.byteLength));
-            chunk.copyTo(encodedChunks[encodedChunks.length - 1]);
-            
-            // 진행률 업데이트
-            if (onProgress) {
-              onProgress({
-                current: encodedChunks.length,
-                total: frameDataUrls.length,
-                progress: encodedChunks.length / frameDataUrls.length,
-                stage: 'encoding'
-              });
-            }
-          },
-          error: (error) => {
-            console.error('VideoEncoder error:', error);
-            reject(new Error(`Video encoding failed: ${error.message}`));
-          }
-        });
-
-        // 인코더 구성
-        encoder.configure({
-          codec: codec,
-          width: width,
-          height: height,
-          bitrate: bitrate,
-          framerate: fps,
-          hardwareAcceleration: 'prefer-hardware',
-          bitrateMode: 'variable'
-        });
-
-        // 각 프레임을 순차적으로 인코딩
-        for (const frameDataUrl of frameDataUrls) {
-          const bitmap = await this.createImageBitmap(frameDataUrl);
-          const videoFrame = new VideoFrame(bitmap, {
-            timestamp: (frameIndex * 1000000) / fps, // 마이크로초 단위
-            duration: 1000000 / fps
-          });
-
-          encoder.encode(videoFrame);
-          videoFrame.close();
-          bitmap.close();
-          frameIndex++;
-        }
-
-        // 인코딩 완료 대기
-        await encoder.flush();
-        encoder.close();
-
-        // 인코딩된 청크들을 Blob으로 결합
-        const totalLength = encodedChunks.reduce((sum, chunk) => sum + chunk.length, 0);
-        const combinedArray = new Uint8Array(totalLength);
-        let offset = 0;
-        
-        for (const chunk of encodedChunks) {
-          combinedArray.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        const videoBlob = new Blob([combinedArray], { type: 'video/mp4' });
-        console.log(`WebCodecs encoding completed: ${videoBlob.size} bytes`);
-        resolve(videoBlob);
-
-      } catch (error) {
-        console.error('WebCodecs encoding error:', error);
-        reject(new Error(`WebCodecs encoding failed: ${error.message}`));
-      }
-    });
-  }
-
-  /**
-   * MediaRecorder를 사용한 인코딩 (fallback, 모든 브라우저 지원)
-   * @param {string[]} frameDataUrls 
-   * @param {Object} config 
-   * @param {Function} onProgress 
-   * @returns {Promise<Blob>}
-   */
-  async encodeWithMediaRecorder(frameDataUrls, config, onProgress) {
-    return new Promise(async (resolve, reject) => {
-      const { fps, width, height, quality } = config;
-      
-      try {
-        // Canvas 스트림 생성
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        const stream = canvas.captureStream(fps);
-
-        // MediaRecorder 설정
-        const options = {
-          mimeType: 'video/webm;codecs=vp9', // WebM VP9 (광범위한 지원)
-          videoBitsPerSecond: 5000000 // 5Mbps
-        };
-
-        // 지원되지 않는 경우 fallback
-        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-          options.mimeType = 'video/webm'; // 기본 WebM
-        }
-
-        this.recordedChunks = [];
-        this.mediaRecorder = new MediaRecorder(stream, options);
-
-        this.mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            this.recordedChunks.push(event.data);
-          }
-        };
-
-        this.mediaRecorder.onstop = () => {
-          const videoBlob = new Blob(this.recordedChunks, { type: options.mimeType });
-          console.log(`MediaRecorder encoding completed: ${videoBlob.size} bytes`);
-          resolve(videoBlob);
-        };
-
-        this.mediaRecorder.onerror = (error) => {
-          console.error('MediaRecorder error:', error);
-          reject(new Error(`MediaRecorder encoding failed: ${error.message}`));
-        };
-
-        // 녹화 시작
-        this.mediaRecorder.start(1000); // 1초마다 데이터 청크 생성
-
-        // 각 프레임을 Canvas에 그리기
-        const frameInterval = 1000 / fps;
-        for (let i = 0; i < frameDataUrls.length; i++) {
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = frameDataUrls[i];
-          });
-
-          // Canvas에 이미지 그리기
-          ctx.clearRect(0, 0, width, height);
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // 프레임 레이트에 맞춰 대기
-          if (i < frameDataUrls.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, frameInterval));
-          }
-
-          // 진행률 업데이트
-          if (onProgress) {
-            onProgress({
-              current: i + 1,
-              total: frameDataUrls.length,
-              progress: (i + 1) / frameDataUrls.length,
-              stage: 'encoding'
-            });
-          }
-        }
-
-        // 녹화 중지
-        this.mediaRecorder.stop();
-        stream.getTracks().forEach(track => track.stop());
-
-      } catch (error) {
-        console.error('MediaRecorder encoding error:', error);
-        reject(new Error(`MediaRecorder encoding failed: ${error.message}`));
-      }
-    });
-  }
-
-  /**
-   * 데이터 URL에서 ImageBitmap 생성
-   * @param {string} dataUrl 
-   * @returns {Promise<ImageBitmap>}
-   */
-  async createImageBitmap(dataUrl) {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = async () => {
+      // MediaRecorder 중지 이벤트 대기
+      this.mediaRecorder.onstop = () => {
         try {
-          const bitmap = await createImageBitmap(img);
-          resolve(bitmap);
+          console.log(`📦 Processing ${this.recordedChunks.length} recorded chunks...`);
+          
+          // Blob 생성
+          const mimeType = this.mediaRecorder.mimeType || 'video/webm';
+          const videoBlob = new Blob(this.recordedChunks, { type: mimeType });
+          
+          console.log(`✅ Video Blob created: ${videoBlob.size} bytes, type: ${mimeType}`);
+          
+          // 리소스 정리
+          this.cleanup();
+          
+          resolve(videoBlob);
         } catch (error) {
+          console.error('❌ Failed to create video blob:', error);
           reject(error);
         }
       };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = dataUrl;
+      
+      // 타임아웃 보호
+      setTimeout(() => {
+        if (this.isRecording) {
+          console.warn('⚠️ Recording stop timeout, forcing stop');
+          this.cleanup();
+          reject(new Error('Recording stop timeout'));
+        }
+      }, 5000);
+      
+      // 녹화 중지
+      console.log('⏹️ Stopping MediaRecorder...');
+      this.mediaRecorder.stop();
     });
   }
 
   /**
-   * 비디오 다운로드를 위한 Blob URL 생성
-   * @param {Blob} videoBlob 
-   * @param {string} filename 
-   * @returns {string} - Blob URL
+   * 🔍 지원되는 MIME 타입 찾기
+   * @returns {string} - 지원되는 첫 번째 MIME 타입
    */
-  createDownloadUrl(videoBlob, filename = 'exported-video.mp4') {
-    const url = URL.createObjectURL(videoBlob);
+  findSupportedMimeType() {
+    for (const mimeType of this.supportedMimeTypes) {
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        return mimeType;
+      }
+    }
     
-    // 자동 다운로드 링크 생성
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    // 메모리 해제를 위해 URL 정리 (지연)
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 10000);
-    
-    return url;
+    // 모든 타입이 지원되지 않으면 기본값 사용
+    console.warn('⚠️ No preferred MIME type supported, using default');
+    return 'video/webm'; // 최종 fallback
   }
 
   /**
-   * 인코딩 지원 정보 반환
-   * @returns {Object}
+   * 🔊 스트림에 오디오 트랙이 있는지 확인
+   * @returns {boolean}
    */
-  getSupportInfo() {
+  hasAudioTrack() {
+    if (!this.stream) return false;
+    return this.stream.getAudioTracks().length > 0;
+  }
+
+  /**
+   * 📊 녹화 상태 정보
+   * @returns {Object} - 현재 녹화 상태
+   */
+  getRecordingStatus() {
     return {
-      webCodecs: this.isWebCodecsSupported,
-      mediaRecorder: typeof MediaRecorder !== 'undefined',
-      supportedMimeTypes: this.getSupportedMimeTypes()
+      isRecording: this.isRecording,
+      chunksCount: this.recordedChunks.length,
+      totalSize: this.recordedChunks.reduce((total, chunk) => total + chunk.size, 0),
+      mimeType: this.mediaRecorder?.mimeType || null,
+      state: this.mediaRecorder?.state || 'inactive'
     };
   }
 
   /**
-   * 지원되는 MIME 타입들 반환
-   * @returns {string[]}
+   * 🧹 리소스 정리
    */
-  getSupportedMimeTypes() {
-    const types = [
-      'video/mp4;codecs=avc1.42E01E',
-      'video/mp4;codecs=avc1.42001E',
-      'video/mp4',
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm'
-    ];
-
-    return types.filter(type => {
-      if (typeof MediaRecorder !== 'undefined') {
-        return MediaRecorder.isTypeSupported(type);
-      }
-      return false;
-    });
-  }
-
-  /**
-   * 리소스 정리
-   */
-  dispose() {
+  cleanup() {
+    console.log('🧹 Cleaning up VideoEncoder resources...');
+    
+    if (this.stream) {
+      // 모든 트랙 중지
+      this.stream.getTracks().forEach(track => {
+        track.stop();
+        console.log(`🛑 Stopped track: ${track.kind}`);
+      });
+      this.stream = null;
+    }
+    
     if (this.mediaRecorder) {
-      if (this.mediaRecorder.state !== 'inactive') {
+      if (this.mediaRecorder.state === 'recording') {
         this.mediaRecorder.stop();
       }
       this.mediaRecorder = null;
     }
+    
     this.recordedChunks = [];
+    this.canvas = null;
+    this.context = null;
+    this.isRecording = false;
+    
+    console.log('✅ VideoEncoder cleanup completed');
+  }
+
+  /**
+   * 🔧 지원 기능 확인
+   * @returns {Object} - 브라우저 지원 기능 정보
+   */
+  static getSupportInfo() {
+    const support = {
+      mediaRecorder: typeof MediaRecorder !== 'undefined',
+      canvasCapture: typeof HTMLCanvasElement !== 'undefined' && 
+                     HTMLCanvasElement.prototype.captureStream,
+      supportedMimeTypes: []
+    };
+    
+    if (support.mediaRecorder) {
+      const testTypes = [
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9,opus',  
+        'video/webm',
+        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+        'video/mp4'
+      ];
+      
+      support.supportedMimeTypes = testTypes.filter(type => 
+        MediaRecorder.isTypeSupported(type)
+      );
+    }
+    
+    return support;
   }
 }
 

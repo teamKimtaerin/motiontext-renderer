@@ -62,7 +62,6 @@ const exportProgress = document.getElementById('export-progress') as HTMLElement
 const exportResolution = document.getElementById('export-resolution') as HTMLSelectElement;
 const exportFps = document.getElementById('export-fps') as HTMLSelectElement;
 const exportQuality = document.getElementById('export-quality') as HTMLSelectElement;
-const exportCaptureMode = document.getElementById('export-capture-mode') as HTMLSelectElement;
 const exportEncoder = document.getElementById('export-encoder') as HTMLSelectElement;
 const exportStartTime = document.getElementById('export-start-time') as HTMLInputElement;
 const exportEndTime = document.getElementById('export-end-time') as HTMLInputElement;
@@ -250,6 +249,10 @@ const sampleConfigs: Record<string, RendererConfig> = {
 // Initialize demo application
 async function initDemo() {
   updateStatus('렌더러 준비됨');
+  
+  // 🚨 플러그인 모드를 로컬로 강제 설정 (서버 의존성 제거)
+  console.log('🔧 Setting plugin mode to LOCAL (no server dependency)');
+  configureDevPlugins({ mode: 'local', localBase: './samples/' });
   
   // Initialize AI Editor
   initAIEditor();
@@ -735,13 +738,31 @@ function updateExportEstimates() {
   const duration = Math.max(0.1, endTime - startTime);
   
   // File size estimate
-  const fileSize = offlineExporter.estimateFileSize(width, height, fps, duration);
-  estimatedSize.textContent = fileSize;
+  try {
+    const fileSize = offlineExporter.estimateFileSize(width, height, fps, duration);
+    estimatedSize.textContent = fileSize;
+  } catch (error) {
+    console.warn('⚠️ File size estimation failed:', error);
+    estimatedSize.textContent = '예상 크기 계산 불가';
+  }
   
   // Time estimate (rough calculation)
   const frameCount = Math.ceil(duration * fps);
   const estimatedSeconds = Math.max(30, frameCount * 0.2); // ~200ms per frame
-  estimatedTime.textContent = offlineExporter.formatTime(estimatedSeconds * 1000);
+  
+  try {
+    estimatedTime.textContent = offlineExporter.formatTime(estimatedSeconds * 1000);
+  } catch (error) {
+    console.warn('⚠️ Time formatting failed:', error);
+    // Fallback: 간단한 시간 포맷팅
+    const minutes = Math.floor(estimatedSeconds / 60);
+    const seconds = Math.round(estimatedSeconds % 60);
+    if (minutes > 0) {
+      estimatedTime.textContent = `약 ${minutes}분 ${seconds}초`;
+    } else {
+      estimatedTime.textContent = `약 ${seconds}초`;
+    }
+  }
 }
 
 /**
@@ -755,18 +776,18 @@ async function startExport() {
   const height = parseInt(resolution[1]);
   const fps = parseInt(exportFps.value);
   const quality = parseFloat(exportQuality.value);
-  const captureMode = exportCaptureMode.value;
   const encodingMode = exportEncoder.value;
   const startTime = parseFloat(exportStartTime.value) || 0;
   const endTime = parseFloat(exportEndTime.value) || video.duration;
   
-  // 캡처 모드 설정
-  offlineExporter.setCaptureMode(captureMode);
-  
-  // 인코딩 모드 설정 (Frame Capture 모드에서만 사용)
-  if (captureMode === 'frame' && offlineExporter.videoEncoder) {
-    offlineExporter.videoEncoder.setEncodingMode(encodingMode);
-  }
+  // 📋 내보내기 설정 정보 출력
+  console.log(`📋 Export settings:`, {
+    sample: sampleSelector.value,
+    resolution: `${width}x${height}`,
+    fps: fps,
+    encoder: encodingMode,
+    timeRange: `${startTime}s - ${endTime}s`
+  });
   
   // Validate settings
   if (startTime >= endTime) {
@@ -800,10 +821,17 @@ async function startExport() {
       startTime,
       endTime,
       filename: 'motiontext-export',
-      downloadAutomatically: true
+      downloadAutomatically: true,
+      playbackSpeed: 1.0, // 🚀 실시간 재생 속도
+      showTimestamp: false // 디버깅용 (필요시 true로 변경)
     };
     
-    console.log('Starting export with options:', options);
+    console.log('🚀 Starting real-time export with options:', {
+      fps: options.fps,
+      resolution: `${options.width}x${options.height}`,
+      duration: `${options.startTime}s-${options.endTime || 'end'}s`,
+      playbackSpeed: options.playbackSpeed
+    });
     
     await offlineExporter.exportVideo(options, (progress) => {
       updateProgressUI(progress);
@@ -833,10 +861,11 @@ function updateProgressUI(progress: any) {
   progressFill.style.width = `${percentage}%`;
   progressPercentage.textContent = `${percentage}%`;
   
-  // Stage messages
+  // Stage messages (최적화 모드 지원)
   const stageMessages = {
     preparation: '준비 중...',
-    capturing: '프레임 캡처 중...',
+    analyzing: '🔍 시나리오 분석 중...',
+    capturing: progress.details?.mode === 'optimized' ? '🚀 스마트 캡처 중...' : '프레임 캡처 중...',
     encoding: '비디오 인코딩 중...',
     finalizing: '마무리 중...',
     completed: '완료!',
@@ -856,10 +885,23 @@ function updateProgressUI(progress: any) {
   }
   
   if (progress.details) {
-    if (progress.details.currentFrame && progress.details.totalFrames) {
-      progressCurrent.textContent = `${progress.details.currentFrame}/${progress.details.totalFrames} 프레임`;
-    } else if (progress.details.encodedFrames && progress.details.totalFrames) {
-      progressCurrent.textContent = `${progress.details.encodedFrames}/${progress.details.totalFrames} 인코딩됨`;
+    // 최적화 모드 전용 정보 표시
+    if (progress.details.mode === 'optimized') {
+      if (progress.details.keyframes && progress.details.reductionPercent) {
+        progressCurrent.textContent = `키프레임 ${progress.details.keyframes}개 (${progress.details.reductionPercent}% 최적화)`;
+      } else if (progress.details.currentFrame && progress.details.totalFrames) {
+        const memoryInfo = progress.details.memoryUsed ? ` | 메모리: ${progress.details.memoryUsed}` : '';
+        progressCurrent.textContent = `🚀 ${progress.details.currentFrame}/${progress.details.totalFrames} 키프레임${memoryInfo}`;
+      } else if (progress.details.batchCompleted !== undefined) {
+        progressCurrent.textContent = `배치 ${progress.details.batchCompleted + 1} 완료`;
+      }
+    } else {
+      // 기존 표준 모드
+      if (progress.details.currentFrame && progress.details.totalFrames) {
+        progressCurrent.textContent = `${progress.details.currentFrame}/${progress.details.totalFrames} 프레임`;
+      } else if (progress.details.encodedFrames && progress.details.totalFrames) {
+        progressCurrent.textContent = `${progress.details.encodedFrames}/${progress.details.totalFrames} 인코딩됨`;
+      }
     }
     
     if (progress.details.estimatedTimeLeft) {
