@@ -1,0 +1,110 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": {
+    "baseAspect": "16:9",
+    "safeArea": { "top": 0.06, "bottom": 0.12, "left": 0.06, "right": 0.06 }
+  },
+  "tracks": [
+    { "id": "subtitle", "type": "subtitle", "layer": 10, "overlapPolicy": "push", "safeArea": { "bottom": 0.10 },
+      "defaultStyle": { "color": "#ffffff", "fontWeight": 800, "fontSizeRel": 0.05, "stroke": { "widthRel": 0.0025, "color": "#000000" } } },
+    { "id": "free", "type": "free", "layer": 200, "overlapPolicy": "ignore",
+      "defaultStyle": { "color": "#ffffff", "fontWeight": 800, "fontSizeRel": 0.05, "stroke": { "widthRel": 0.0025, "color": "#000000" } } }
+  ],
+  "cues": [
+    {
+      "id": "sub-flow",
+      "track": "subtitle",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "flow", "position": { "x": 0.5, "y": 0.86 }, "anchor": "bc", "gapRel": 0.02 },
+        "children": [
+          { "e_type": "text", "text": "[SUB] flow + safeAreaClamp #1 (inside)", "absStart": 1, "absEnd": 6,
+            "layout": { "safeAreaClamp": true } },
+          { "e_type": "text", "text": "[SUB] flow + safeAreaClamp #2 (overlap)", "absStart": 2.5, "absEnd": 7,
+            "layout": { "safeAreaClamp": true } }
+        ]
+      }
+    },
+    {
+      "id": "sub-abs-push",
+      "track": "subtitle",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "absolute", "position": { "x": 0.5, "y": 0.70 }, "anchor": "cc" },
+        "children": [
+          { "e_type": "text", "text": "[ABS] push A", "absStart": 3, "absEnd": 8,
+            "layout": { "position": { "x": 0.48, "y": 0.00 }, "anchor": "cc", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "[ABS] push B", "absStart": 3.5, "absEnd": 8.5,
+            "layout": { "position": { "x": 0.52, "y": 0.00 }, "anchor": "cc", "safeAreaClamp": true } }
+        ]
+      }
+    },
+    {
+      "id": "free-grid",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "grid", "position": { "x": 0.5, "y": 0.35 }, "anchor": "cc", "gapRel": 0.02 },
+        "children": [
+          { "e_type": "text", "text": "GRID-1", "absStart": 1, "absEnd": 8 },
+          { "e_type": "text", "text": "GRID-2", "absStart": 1, "absEnd": 8 },
+          { "e_type": "text", "text": "GRID-3", "absStart": 1, "absEnd": 8 },
+          { "e_type": "text", "text": "GRID-4", "absStart": 1, "absEnd": 8 }
+        ]
+      }
+    },
+    {
+      "id": "free-flow-ignore",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "flow", "position": { "x": 0.85, "y": 0.15 }, "anchor": "tr", "gapRel": 0.01 },
+        "children": [
+          { "e_type": "text", "text": "IGNORE: has pos (top-right)", "absStart": 1, "absEnd": 5,
+            "layout": { "position": { "x": 0.0, "y": 0.0 }, "anchor": "tr" } },
+          { "e_type": "text", "text": "IGNORE: no pos (center)", "absStart": 1.2, "absEnd": 5.2 }
+        ]
+      }
+    },
+    {
+      "id": "size-clamp",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "absolute", "position": { "x": 0.5, "y": 0.92 }, "anchor": "bc" },
+        "children": [
+          { "e_type": "text", "text": "SIZE-CLAMP 80% x 25% (will exceed safe area)", "absStart": 2, "absEnd": 9,
+            "layout": { "position": { "x": 0.5, "y": 0.0 }, "anchor": "bc", "size": { "width": 0.8, "height": 0.25 }, "safeAreaClamp": true } }
+        ]
+      }
+    }
+    ,
+    {
+      "id": "edge-tests",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "layout": { "mode": "absolute", "position": { "x": 0.5, "y": 0.5 }, "anchor": "cc" },
+        "children": [
+          { "e_type": "text", "text": "TOP-LEFT inside", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.35, "y": 0.35 }, "anchor": "tl", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "TOP-LEFT clamped", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.05, "y": 0.05 }, "anchor": "tl", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "TOP-RIGHT inside", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.65, "y": 0.35 }, "anchor": "tr", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "TOP-RIGHT clamped", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.95, "y": 0.05 }, "anchor": "tr", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "BOTTOM-LEFT inside", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.35, "y": 0.65 }, "anchor": "bl", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "BOTTOM-LEFT clamped", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.05, "y": 0.95 }, "anchor": "bl", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "BOTTOM-RIGHT inside", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.65, "y": 0.65 }, "anchor": "br", "safeAreaClamp": true } },
+          { "e_type": "text", "text": "BOTTOM-RIGHT clamped", "absStart": 0, "absEnd": 9,
+            "layout": { "position": { "x": 0.95, "y": 0.95 }, "anchor": "br", "safeAreaClamp": true } }
+        ]
+      }
+    }
+  ]
+}
