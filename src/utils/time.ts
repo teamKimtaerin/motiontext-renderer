@@ -1,5 +1,10 @@
 // Time helpers: snapping to frame, relative window calculations (t0, t1).
 // Spec reference: context/명령파일(JSON) 스펙 v1 3.md
+//
+// ⚠️ DEPRECATED - v1.3 기반 시간 함수
+// v2.0 프로젝트에서는 time-v2.ts 사용 권장
+// - time-v2.ts: [start, end] 배열 기반 함수들
+// - 더 나은 타입 안전성과 일관된 API 제공
 
 import type { PluginSpec } from '../types/plugin';
 
