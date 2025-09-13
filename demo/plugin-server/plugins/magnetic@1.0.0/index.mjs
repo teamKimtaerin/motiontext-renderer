@@ -27,7 +27,8 @@ export function animate(el, options, ctx, duration) {
       elasticity = 0.8
     } = options;
 
-    const tl = ctx.gsap.timeline();
+    // Build a timeline but keep it paused; Renderer drives progress
+    const tl = ctx.gsap.timeline({ paused: true });
     const chars = el.querySelectorAll('.magnetic-char');
 
     if (chars.length === 0) return (p) => {};

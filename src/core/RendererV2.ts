@@ -736,6 +736,10 @@ export class RendererV2 {
         );
 
         state.seekFunction = seekFn;
+        // Safety: if plugin returned a GSAP-like timeline, pause it.
+        if (seekFn && typeof seekFn === 'object' && typeof (seekFn as any).pause === 'function') {
+          try { (seekFn as any).pause(0); } catch {}
+        }
       }
 
       state.initialized = true;
