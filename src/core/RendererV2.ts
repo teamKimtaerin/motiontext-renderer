@@ -265,6 +265,12 @@ export class RendererV2 {
     if (this.mountedElements.has(nodeId)) return;
     
     const element = this.createElement(node);
+    // Annotate element with the composite node key (cueId:nodeId)
+    try {
+      (element as any).dataset = (element as any).dataset || {};
+      element.dataset.nodeKey = nodeId;
+      element.dataset.cueId = cue.id;
+    } catch {}
     this.mountedElements.set(nodeId, {
       node,
       element,
@@ -575,7 +581,12 @@ export class RendererV2 {
       return {};
     }
 
-    const nodeId = element.dataset.nodeId!;
+    // Prefer composite node key if present; fallback to legacy nodeId (node-only)
+    const nodeId = (element.dataset.nodeKey || element.dataset.nodeId)!;
+    if (!nodeId) {
+      console.warn(`[RendererV2] Missing nodeKey/nodeId on element for plugin ${plugin.name}`);
+      return {};
+    }
     
     if (this.options.debugMode) {
       console.log(`[RendererV2] DOM plugin "${plugin.name}" element structure:`, {
@@ -762,7 +773,12 @@ export class RendererV2 {
    * DOM 플러그인 정리 (노드 언마운트 시)
    */
   private cleanupDomPlugin(nodeId: string, pluginName?: string): void {
-    const nodeStates = this.domPluginStates.get(nodeId);
+    let nodeStates = this.domPluginStates.get(nodeId);
+    // Backward compatibility: prior to fix, keys used bare node.id. Fallback to that.
+    if (!nodeStates) {
+      const fallbackId = nodeId.includes(':') ? nodeId.split(':')[1] : undefined;
+      if (fallbackId) nodeStates = this.domPluginStates.get(fallbackId);
+    }
     if (!nodeStates) return;
 
     if (pluginName) {
@@ -954,6 +970,7 @@ export class RendererV2 {
     this.moveContentToEffectsRoot(node, originalElement, effectsRoot);
     
     // 4. 메타데이터 저장
+    // Keep legacy nodeId (node-local id) for compatibility; composite is set in ensureMounted
     originalElement.dataset.nodeId = node.id;
     baseWrapper.dataset.baseWrapper = 'true';
     effectsRoot.dataset.effectsRoot = 'true';

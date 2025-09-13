@@ -189,7 +189,7 @@ const sampleConfigs: Record<string, RendererConfig> = {
 async function initDemo() {
   // Configure MotionTextRenderer for demo environment
   configureMotionTextRenderer({
-    debugMode: true,   // Enable debug logs to test inheritance system
+    debugMode: false,   // Enable debug logs to test inheritance system
     pluginServer: {
       mode: 'auto',
       serverBase: 'http://localhost:3300'
