@@ -124,11 +124,22 @@ function validateNodeTimeArrays(node: Node, path: string): void {
       const plugin = node.pluginChain[i];
       const pluginPath = `${path}.pluginChain[${i}]`;
       
-      if (typeof plugin !== 'string' && plugin.time_offset) {
-        try {
-          validateTimeRange(plugin.time_offset);
-        } catch (error) {
-          throw new ValidationError(`${pluginPath}.time_offset: ${error instanceof Error ? error.message : 'Invalid time range'}`);
+      if (typeof plugin !== 'string' && (plugin as any).time_offset) {
+        const off = (plugin as any).time_offset;
+        // 새 규칙: 숫자(초) 또는 백분율 문자열("50%") 허용
+        if (!Array.isArray(off) || off.length !== 2) {
+          throw new ValidationError(`${pluginPath}.time_offset must be [start, end] array`);
+        }
+        for (let k = 0; k < 2; k++) {
+          const v = off[k];
+          const ok = (
+            typeof v === 'number' && Number.isFinite(v)
+          ) || (
+            typeof v === 'string' && /^\s*-?\d+(?:\.\d+)?%?\s*$/.test(v)
+          );
+          if (!ok) {
+            throw new ValidationError(`${pluginPath}.time_offset[${k}] must be a number (seconds) or percentage string like '50%'`);
+          }
         }
       }
     }

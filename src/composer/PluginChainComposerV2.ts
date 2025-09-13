@@ -12,7 +12,7 @@ import type { TimeRange } from '../types/scenario-v2';
 import {
   isWithinTimeRange,
   progressInTimeRange,
-  computePluginWindow
+  computePluginWindowFromBase
 } from '../utils/time-v2';
 
 export interface ComposerOptions {
@@ -140,8 +140,10 @@ export class PluginChainComposerV2 {
     context?: PluginEvaluationContext
   ): PluginEvaluationResult {
     // time_offset 기반 플러그인 실행 창 계산
-    const timeOffset = (plugin.time_offset as TimeRange) || [0, 0];
-    const pluginWindow = computePluginWindow(displayTime, timeOffset);
+    // base_time 우선순위: plugin.base_time → displayTime
+    const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
+    const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+    const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
     
     const isActive = isWithinTimeRange(currentTime, pluginWindow);
     const progress = isActive ? progressInTimeRange(currentTime, pluginWindow) : 0;
@@ -279,8 +281,9 @@ export function isPluginActive(
   currentTime: number,
   displayTime: TimeRange
 ): boolean {
-  const timeOffset = (plugin.time_offset as TimeRange) || [0, 0];
-  const pluginWindow = computePluginWindow(displayTime, timeOffset);
+  const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
+  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+  const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
   return isWithinTimeRange(currentTime, pluginWindow);
 }
 
@@ -296,8 +299,9 @@ export function getPluginProgress(
   currentTime: number,
   displayTime: TimeRange
 ): number {
-  const timeOffset = (plugin.time_offset as TimeRange) || [0, 0];
-  const pluginWindow = computePluginWindow(displayTime, timeOffset);
+  const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
+  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+  const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
   
   if (!isWithinTimeRange(currentTime, pluginWindow)) {
     return 0;

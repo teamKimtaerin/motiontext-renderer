@@ -193,7 +193,7 @@ export function generatePreviewScenario(
                 {
                   name: pluginName,
                   params: settings.pluginParams,
-                  time_offset: [0, 1],
+                  time_offset: ['0%', '100%'],
                 },
               ],
             },
@@ -223,7 +223,7 @@ export function generateLoopedScenario(
     {
       name: pluginName,
       params: settings.pluginParams,
-      time_offset: [0.0, 1.0],
+      time_offset: ['0%', '100%'],
     }
   ];
   

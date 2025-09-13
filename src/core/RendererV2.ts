@@ -16,10 +16,10 @@ import type {
 } from '../types/scenario-v2';
 import type { PluginSpec, TimelineLike, SeekApplier } from '../types/plugin-v3';
 import type { Channels } from '../types/plugin-v3';
-import { 
-  isWithinTimeRange, 
-  progressInTimeRange, 
-  computePluginWindow 
+import {
+  isWithinTimeRange,
+  progressInTimeRange,
+  computePluginWindowFromBase
 } from '../utils/time-v2';
 import { DefineResolver } from '../parser/DefineResolver';
 import { devRegistry } from '../loader/dev/DevPluginRegistry';
@@ -316,9 +316,9 @@ export class RendererV2 {
     // 플러그인 체인 처리
     if (node.pluginChain && node.pluginChain.length > 0) {
       const channels = this.processPluginChain(
-        node.pluginChain as PluginSpec[], 
-        currentTime, 
-        node.displayTime,
+        node,
+        node.pluginChain as PluginSpec[],
+        currentTime,
         mounted.element
       );
       
@@ -330,19 +330,24 @@ export class RendererV2 {
    * 플러그인 체인 처리
    */
   private processPluginChain(
+    node: ResolvedNodeUnion,
     pluginChain: PluginSpec[],
     currentTime: number,
-    displayTime: TimeRange,
     element: HTMLElement
   ): Channels {
     const channels: Channels = {};
     
     for (const plugin of pluginChain) {
-      // time_offset 적용하여 플러그인 실행 창 계산
-      const pluginWindow = computePluginWindow(
-        displayTime, 
-        (plugin.time_offset as TimeRange) || [0, 0]
-      );
+      // base_time 우선순위: plugin.base_time → node.base_time → node.displayTime
+      const rawBase: any = (plugin as any).base_time ?? (node as any).base_time ?? node.displayTime;
+      const baseTime = this.resolveAllDefines(rawBase) as TimeRange;
+
+      // time_offset은 절대 초 또는 백분율('%') 허용
+      const rawOffset = (plugin as any).time_offset ?? ['0%', '100%'];
+      const resolvedOffset = this.resolveAllDefines(rawOffset) as [unknown, unknown];
+
+      // 실행 창 계산
+      const pluginWindow = computePluginWindowFromBase(baseTime, resolvedOffset);
       
       if (isWithinTimeRange(currentTime, pluginWindow)) {
         const progress = progressInTimeRange(currentTime, pluginWindow);

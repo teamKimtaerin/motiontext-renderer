@@ -98,6 +98,59 @@ export function computePluginWindow(
 }
 
 // ============================================================================
+// Extended: Percentage/Absolute offset with explicit base_time
+// ============================================================================
+
+/**
+ * 문자열 혹은 숫자 오프셋 값을 base_time 기준 절대 시간으로 변환
+ * - "50%" → baseStart + baseDuration * 0.5
+ * - 2.5 (number) → baseStart + 2.5 (초)
+ * - "-1.0" (string, % 없음) → baseStart + (-1.0)
+ */
+function resolveOffsetToAbsolute(bound: unknown, baseStart: number, baseDuration: number): number {
+  if (typeof bound === 'string') {
+    const s = bound.trim();
+    if (s.endsWith('%')) {
+      const n = parseFloat(s.slice(0, -1));
+      const pct = Number.isFinite(n) ? n / 100 : 0;
+      return baseStart + baseDuration * pct;
+    }
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? baseStart + n : baseStart;
+  }
+  if (typeof bound === 'number') {
+    // 절대 초(오프셋), 음수 허용
+    return baseStart + bound;
+  }
+  // 안전 폴백: 시작 시간
+  return baseStart;
+}
+
+/**
+ * base_time을 기준으로 time_offset을 해석하여 절대 실행 창을 계산
+ * - time_offset 요소는 절대 초(number) 또는 백분율 문자열("50%") 둘 다 허용
+ * - base_time이 [start,end]이며, 백분율은 base_time 길이에 대한 비율
+ * - 값이 제공되지 않으면 전체(base_time 전체)를 의미하도록 ['0%','100%']를 권장
+ */
+export function computePluginWindowFromBase(
+  baseTime: TimeRange,
+  timeOffset: [unknown, unknown] = ['0%', '100%']
+): TimeRange {
+  if (!Array.isArray(baseTime) || baseTime.length !== 2) {
+    throw new TypeError('baseTime must be [start, end] array');
+  }
+  const [bStart, bEnd] = baseTime;
+  if (!Number.isFinite(bStart) || !Number.isFinite(bEnd)) {
+    throw new TypeError('baseTime values must be finite numbers');
+  }
+  const bDur = bEnd - bStart;
+  const [o0, o1] = Array.isArray(timeOffset) ? timeOffset : ['0%', '100%'];
+  const abs0 = resolveOffsetToAbsolute(o0, bStart, bDur);
+  const abs1 = resolveOffsetToAbsolute(o1, bStart, bDur);
+  return [abs0, abs1];
+}
+
+// ============================================================================
 // Time Range Utilities
 // ============================================================================
 

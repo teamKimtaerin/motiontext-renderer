@@ -39,11 +39,11 @@
     "animations": {
       "slide_in": {
         "name": "slideInLeft",
-        "time_offset": [0, 0.6]
+        "time_offset": ["0%", "60%"]
       },
       "fade_out": {
         "name": "fadeOut",
-        "time_offset": [0.8, 1.0]
+        "time_offset": ["80%", "100%"]
       }
     },
     "layout": {

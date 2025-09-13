@@ -7,6 +7,11 @@
 ### Breaking Changes
 - **필드명 변경**: `hintTime` → `domLifetime`, `absStart/absEnd` → `displayTime`, `relStart/relEnd` → `time_offset`
 - **시간 표현 통일**: 모든 시간은 `[start, end]` 배열 형태로 통일
+- **time_offset 철학 변경 (중요)**:
+  - `time_offset`은 이제 노드의 `displayTime`과 독립적인 기준인 `base_time`을 사용합니다.
+  - 오프셋 요소는 두 가지 표기만 허용합니다: 절대 초(number; 음수 허용) 또는 퍼센트 문자열(`"50%"`).
+  - 퍼센트(`%`)는 `base_time` 길이에 대한 비율입니다. `base_time`이 없으면 노드의 `displayTime`을 기준으로 사용합니다.
+  - 숫자는 초 단위 절대 오프셋으로 해석됩니다(기준은 `base_time` 시작 시각).
 - **노드 ID 의무화**: 모든 노드에 `id` 필드 필수
 - **Define 시스템**: 중복 제거 및 에셋 관리를 위한 변수 시스템 도입
 - **상속 시스템**: 체계적인 값 우선순위 및 상속 규칙 정립
@@ -105,7 +110,7 @@
     "common_timing": [2.0, 5.0],
     "fade_effect": {
       "name": "fadeIn",
-      "time_offset": [0, 0.5],
+      "time_offset": ["0%", "50%"],
       "params": { "startOpacity": 0.0 }
     }
   }
@@ -375,7 +380,7 @@ function calculateDomLifetime(cue: Cue): [number, number] {
   "pluginChain": [
     {
       "name": "fadeIn",
-      "time_offset": [0, 0.5],
+      "time_offset": ["0%", "50%"],
       "params": { "startOpacity": 0.0 }
     }
   ]
@@ -814,7 +819,7 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
   "pluginChain": [
     {
       "name": "fadeIn",
-      "time_offset": [0, 0.5],
+      "time_offset": ["0%", "50%"],
       "params": { 
         "startOpacity": 0.0,
         "endOpacity": 1.0
@@ -826,7 +831,7 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
     },
     {
       "name": "slideUp", 
-      "time_offset": [0.2, 0.8],
+      "time_offset": ["20%", "80%"],
       "params": {
         "distance": "20%",
         "easing": "back.out(1.7)"
@@ -845,19 +850,34 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
 #### `name` (string, required)
 플러그인 이름. 로더에서 플러그인을 식별하는 데 사용.
 
-#### `time_offset` (array, required)
-플러그인 실행 시점 오프셋 `[start, end]`.
+#### `base_time` (array, optional)
+플러그인 오프셋의 기준 시간 구간 `[start, end]` (초). 생략 시 현재 노드의 `displayTime`이 기준이 됩니다.
 
-**절대 시간으로 변환**:
-```typescript
-const pluginStart = nodeDisplayTime[0] + time_offset[0];
-const pluginEnd = nodeDisplayTime[1] + time_offset[1];
+#### `time_offset` (array, required)
+플러그인 실행 오프셋 `[start, end]`. 각 항목은 다음 두 표기 중 하나를 사용합니다:
+- 숫자(number): 기준 시작 시각(`base_time[0]`)으로부터의 "초" 단위 절대 오프셋 (음수 허용)
+- 퍼센트 문자열(`"50%"`): `base_time` 길이에 대한 비율
+
+**절대 시간으로 변환 규칙**:
+```ts
+// base_time = [b0, b1], duration = (b1 - b0)
+// bound 가 퍼센트면 b0 + duration * (pct/100)
+// bound 가 숫자면   b0 + seconds
 ```
 
-**상대값 지원**: `%` 접미사 사용 가능.
+예시:
 ```json
 {
-  "time_offset": ["0%", "50%"]  // 노드 전체 구간의 0%~50%
+  "base_time": [2.0, 6.0],
+  "time_offset": ["0%", "50%"]   // 최종 실행 창: [2.0, 4.0]
+}
+{
+  "base_time": [2.0, 6.0],
+  "time_offset": [-1.0, 2.0]      // 최종 실행 창: [1.0, 4.0]
+}
+// base_time 미지정 → node.displayTime 사용
+{
+  "time_offset": ["80%", "100%"] // 노드 구간의 80%~100%
 }
 ```
 
@@ -891,6 +911,17 @@ const pluginEnd = nodeDisplayTime[1] + time_offset[1];
 
 #### `priority` (number, optional)
 같은 시간대의 플러그인들 사이의 실행 우선순위. 높을수록 나중에 실행.
+
+---
+
+## ⛳ 퍼센트 표기 원칙 (요약)
+
+- 시나리오에서 "비율"을 표현할 때는 `%` 접미사를 붙인 문자열을 사용합니다.
+- 숫자 리터럴은 단위가 있는 "절대값"으로 해석됩니다.
+- 시간 관련 필드에서 이 원칙이 우선 적용됩니다:
+  - `displayTime`: 절대 초 배열, 단 자식 노드에서는 부모 대비 `%` 상대 표기 허용
+  - `base_time`: 절대 초 배열
+  - `time_offset`: 각 원소가 초(숫자) 또는 퍼센트 문자열(기준은 `base_time`)
 
 ---
 
@@ -1136,8 +1167,8 @@ v1.3 시나리오를 v2.0으로 마이그레이션하는 자동 변환 규칙입
 |------|------|------|
 | `hintTime` | `domLifetime: [start, end]` | 배열 형태로 변환 |
 | `absStart`, `absEnd` | `displayTime: [start, end]` | 배열로 통합 |
-| `relStart`, `relEnd` | `time_offset: [start, end]` | 배열로 통합 |
-| 플러그인 `t0`, `t1` | `time_offset: [start, end]` | 매개변수 통일 |
+| `relStart`, `relEnd` | `time_offset: [start, end]` | 퍼센트 문자열 권장(`"0%"~"100%"`) |
+| 플러그인 `t0`, `t1` | `time_offset: [start, end]` | 초 단위(숫자) 또는 퍼센트 문자열 |
 
 #### 자동 변환 스크립트
 
@@ -1195,14 +1226,16 @@ function migrateNode(node: NodeV13): NodeV20 {
     newNode.pluginChain = node.pluginChain.map(plugin => {
       const newPlugin = { ...plugin };
 
-      // relStart/relEnd → time_offset 변환
+      // relStart/relEnd → time_offset 변환 (퍼센트 문자열)
       if (plugin.relStart !== undefined || plugin.relEnd !== undefined) {
-        newPlugin.time_offset = [plugin.relStart || 0, plugin.relEnd || 0];
+        const s = plugin.relStart ?? 0;
+        const e = plugin.relEnd ?? 0;
+        newPlugin.time_offset = [`${s * 100}%`, `${e * 100}%`];
         delete newPlugin.relStart;
         delete newPlugin.relEnd;
       }
 
-      // 매개변수 내 t0/t1 → time_offset 변환
+      // 매개변수 내 t0/t1 → time_offset 변환 (초 단위)
       if (plugin.params?.t0 !== undefined || plugin.params?.t1 !== undefined) {
         newPlugin.time_offset = [plugin.params.t0 || 0, plugin.params.t1 || 0];
         delete newPlugin.params.t0;
@@ -1279,7 +1312,7 @@ function migrateNode(node: NodeV13): NodeV20 {
     "main_timing": [1.0, 8.0],
     "entrance_effect": {
       "name": "slideUpFade",
-      "time_offset": [0, 0.8],
+      "time_offset": ["0%", "80%"],
       "params": {
         "distance": "30px",
         "startOpacity": 0.0,
@@ -1347,7 +1380,7 @@ function migrateNode(node: NodeV13): NodeV20 {
             "pluginChain": [
               {
                 "name": "slideUpFade",
-                "time_offset": [0, 0.6],
+                "time_offset": ["0%", "60%"],
                 "params": {
                   "distance": "20px",
                   "delay": 0.2
@@ -1386,7 +1419,7 @@ function migrateNode(node: NodeV13): NodeV20 {
         "pluginChain": [
           {
             "name": "fadeIn",
-            "time_offset": [0, 0.5]
+            "time_offset": ["0%", "50%"]
           }
         ],
         "effectScope": {

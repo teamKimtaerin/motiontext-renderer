@@ -21,7 +21,7 @@
     "cue3_timing": [10, 13],
     "fade_in": {
       "name": "fadeIn",
-      "time_offset": [0, 0.3]
+      "time_offset": ["0%", "30%"]
     }
   },
   "tracks": [
