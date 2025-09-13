@@ -140,6 +140,15 @@ export function generatePreviewScenario(
         id: 'preview-track',
         type: 'free',
         layer: 1,
+        defaultConstraints: {
+          mode: 'flow',
+          direction: 'vertical',
+          maxWidth: 1.0,
+          maxHeight: 1.0,
+          anchor: 'cc',
+          constraintMode: 'flexible',
+          breakoutEnabled: true
+        }
       },
     ],
     cues: [
@@ -152,11 +161,20 @@ export function generatePreviewScenario(
           id: 'preview-group',
           e_type: 'group',
           layout: {
+            mode: 'absolute',
             position: { x: normalizedX, y: normalizedY },
             anchor: 'cc',
             size: {
-              width: relW,
-              height: relH,
+              width: Math.max(0.3, relW),  // 최소 30% 너비 보장
+              height: Math.max(0.3, relH), // 최소 30% 높이 보장
+            },
+            // Center children inside the preview group
+            childrenLayout: {
+              mode: 'flow',
+              direction: 'vertical',
+              align: 'center',
+              justify: 'center',
+              gap: 0
             },
           },
           children: [
@@ -164,6 +182,7 @@ export function generatePreviewScenario(
               id: 'preview-text',
               e_type: 'text',
               text: settings.text,
+              // layout 제거 - flow 모드 정렬에 완전히 의존
               style: {
                 fontSize: '1.5rem',
                 fontFamily: 'Arial, sans-serif',
@@ -219,6 +238,15 @@ export function generateLoopedScenario(
         id: 'free',
         type: 'free',
         layer: 1,
+        defaultConstraints: {
+          mode: 'flow',
+          direction: 'vertical',
+          maxWidth: 1.0,
+          maxHeight: 1.0,
+          anchor: 'cc',
+          constraintMode: 'flexible',
+          breakoutEnabled: true
+        }
       },
     ],
     cues: [
@@ -228,22 +256,41 @@ export function generateLoopedScenario(
         displayTime: [0, duration],
         domLifetime: [0, duration + 0.5],
         root: {
-          id: 'looped-text',
-          e_type: 'text',
-          text: settings.text,
+          id: 'looped-group',
+          e_type: 'group',
           displayTime: [0, duration],
           layout: {
+            mode: 'absolute',
             position: { x: normalizedX, y: normalizedY },
             anchor: 'cc',
-            size: { width: relW, height: relH },
+            size: { 
+              width: Math.max(0.3, relW),  // 최소 30% 너비 보장
+              height: Math.max(0.3, relH)  // 최소 30% 높이 보장
+            },
+            // Center children inside the looped group
+            childrenLayout: {
+              mode: 'flow',
+              direction: 'vertical',
+              align: 'center',
+              justify: 'center',
+              gap: 0
+            },
           },
-          style: {
-            fontSize: '1.7rem',
-            fontFamily: 'Arial, sans-serif',
-            color: '#ffffff',
-            textAlign: 'center'
-          },
-          pluginChain: pluginChain,
+          children: [
+            {
+              id: 'looped-text',
+              e_type: 'text',
+              text: settings.text,
+              // layout 제거 - flow 모드 정렬에 완전히 의존
+              style: {
+                fontSize: '1.7rem',
+                fontFamily: 'Arial, sans-serif',
+                color: '#ffffff',
+                textAlign: 'center'
+              },
+              pluginChain: pluginChain,
+            }
+          ]
         },
       },
     ],

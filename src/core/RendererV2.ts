@@ -24,7 +24,7 @@ import {
 import { DefineResolver } from '../parser/DefineResolver';
 import { devRegistry } from '../loader/dev/DevPluginRegistry';
 import { createPluginContextV3, type PluginContextV3 } from '../runtime/PluginContextV3';
-import { applyNormalizedPosition, applyLayoutWithConstraints } from '../layout/LayoutEngine';
+import { applyLayoutWithConstraints } from '../layout/LayoutEngine';
 import { getDefaultTrackConstraints } from '../layout/DefaultConstraints';
 import { TimelineControllerV2, type TimelineOptions, type TickCallback } from './TimelineControllerV2';
 import { Stage } from './Stage';
@@ -225,10 +225,11 @@ export class RendererV2 {
    * 개별 노드 처리 (재귀)
    */
   private processNode(
-    node: ResolvedNodeUnion, 
-    cue: Cue, 
+    node: ResolvedNodeUnion,
+    cue: Cue,
     track: any,
-    currentTime: number
+    currentTime: number,
+    parentNodeId?: string
   ): void {
     const nodeId = `${cue.id}:${node.id}`;
     
@@ -237,7 +238,7 @@ export class RendererV2 {
     const isActive = isWithinTimeRange(currentTime, [displayStart, displayEnd]);
     
     if (isActive) {
-      this.ensureMounted(node, cue, nodeId, track);
+      this.ensureMounted(node, cue, nodeId, track, parentNodeId);
       this.updateNode(node, currentTime, nodeId, track);
     } else {
       this.unmountNode(nodeId);
@@ -246,7 +247,7 @@ export class RendererV2 {
     // group 노드의 children 재귀 처리
     if (node.e_type === 'group' && node.children) {
       for (const child of node.children) {
-        this.processNode(child, cue, track, currentTime);
+        this.processNode(child, cue, track, currentTime, nodeId);
       }
     }
   }
@@ -254,7 +255,13 @@ export class RendererV2 {
   /**
    * 노드가 마운트되어 있는지 확인하고 필요시 마운트
    */
-  private ensureMounted(node: ResolvedNodeUnion, cue: Cue, nodeId: string, track: any): void {
+  private ensureMounted(
+    node: ResolvedNodeUnion,
+    cue: Cue,
+    nodeId: string,
+    track: any,
+    parentNodeId?: string
+  ): void {
     if (this.mountedElements.has(nodeId)) return;
     
     const element = this.createElement(node);
@@ -264,8 +271,15 @@ export class RendererV2 {
       cueId: cue.id,
       mountTime: this.lastUpdateTime
     });
-    
-    this.container.appendChild(element);
+    // Determine parent DOM element (group nesting support)
+    let parentEl: HTMLElement | null = null;
+    if (parentNodeId) {
+      const parentMounted = this.mountedElements.get(parentNodeId);
+      parentEl = parentMounted?.element || null;
+    }
+
+    // Fallback to root container when no valid parent
+    (parentEl || this.container).appendChild(element);
     
     // 기본 스타일 적용 (레이아웃 + 트랙 기본값)
     this.applyBaseStyle(element, node, track);

@@ -52,6 +52,14 @@ export interface Layout {
   overflow?: 'clip' | 'visible'; // default clip (subtitle)
   safeAreaClamp?: boolean;
   override?: LayoutOverrideSpec;
+  // Group이 자식들을 배치하는 방식 (그룹 자체 positioning과 독립적)
+  childrenLayout?: {
+    mode?: 'flow' | 'grid' | 'stack';
+    direction?: 'horizontal' | 'vertical';
+    gap?: number; // normalized
+    align?: 'start' | 'center' | 'end';
+    justify?: 'start' | 'center' | 'end' | 'space-between';
+  };
 }
 
 export interface StyleStroke {

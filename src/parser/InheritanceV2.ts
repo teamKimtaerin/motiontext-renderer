@@ -15,8 +15,7 @@ import type {
   TimeRange, 
   ResolvedNodeUnion 
 } from '../types/scenario-v2';
-import type { Style, Layout } from '../types/layout';
-import { getDefaultTrackConstraints, mergeConstraints } from '../layout/DefaultConstraints';
+import type { Style } from '../types/layout';
 
 // 상속 우선순위 설정
 type InheritancePriority = 'direct' | 'parent' | 'track' | 'system';
@@ -34,9 +33,15 @@ const INHERITANCE_RULES: Record<string, FieldInheritanceRule> = {
     priority: ['direct', 'parent', 'system'],
     systemDefault: [-Infinity, Infinity]
   },
-  layout: {
-    priority: ['direct', 'parent', 'track'], // layout은 이제 track constraints와 병합됨
-    merge: true, // layout과 constraints 병합
+  // layout 제거 - 각 요소의 고유한 위치/크기이므로 상속하지 않음
+  
+  // 선택적 상속 가능한 layout 속성들
+  anchor: {
+    priority: ['direct', 'parent', 'track'], // anchor만 선택적 상속
+    systemDefault: undefined
+  },
+  safeAreaClamp: {
+    priority: ['direct', 'parent'],
     systemDefault: undefined
   },
   style: {
@@ -199,9 +204,9 @@ function inheritField(
 ): any {
   const rule = INHERITANCE_RULES[fieldName] || DEFAULT_INHERITANCE_RULE;
   
-  // 특수 필드 처리 (layout, pluginChain 등)
-  if (fieldName === 'layout' || fieldName === 'pluginChain') {
-    // 이러한 필드들은 일반적으로 상속되지 않음
+  // 특수 필드 처리 (pluginChain 등)
+  if (fieldName === 'pluginChain') {
+    // pluginChain은 각 노드별 고유하므로 상속되지 않음
     return (node as any)[fieldName] || rule.systemDefault;
   }
   
@@ -222,6 +227,8 @@ function inheritField(
         // 특정 필드에 대한 트랙 기본값 처리
         if (fieldName === 'style') {
           value = track?.defaultStyle;
+        } else if (fieldName === 'anchor' && track?.defaultConstraints?.anchor) {
+          value = track.defaultConstraints.anchor;
         }
         // 다른 필드들은 향후 확장 가능
         break;
@@ -249,9 +256,8 @@ function inheritField(
   if (rule.merge) {
     if (fieldName === 'style') {
       return mergeStyles(...values.filter(v => v !== undefined));
-    } else if (fieldName === 'layout') {
-      return mergeLayouts(values.filter(v => v !== undefined), track);
     }
+    // layout 병합 제거 - layout은 더이상 상속하지 않음
   }
   
   // 일반 필드는 첫 번째 값 (가장 높은 우선순위) 반환
@@ -276,58 +282,6 @@ function mergeStyles(...styles: Style[]): Style {
   return merged;
 }
 
-/**
- * 레이아웃 병합 유틸리티 (track constraints 포함)
- * @param layouts - 병합할 레이아웃 배열 (나중 것이 우선)
- * @param track - 트랙 정보 (constraints 제공)
- * @returns 병합된 레이아웃
- */
-function mergeLayouts(layouts: Layout[], track?: Track): Layout {
-  let merged: Layout = {};
-  
-  // Track의 defaultConstraints를 기본값으로 사용
-  if (track?.defaultConstraints) {
-    // track constraints를 layout 형태로 변환
-    const trackLayout = constraintsToLayout(track.defaultConstraints);
-    merged = { ...trackLayout };
-  } else if (track?.type) {
-    // track type 기반 기본 constraints 적용
-    const defaultConstraints = getDefaultTrackConstraints(track.type);
-    const trackLayout = constraintsToLayout(defaultConstraints);
-    merged = { ...trackLayout };
-  }
-  
-  // 명시적 layout들을 순서대로 병합 (나중 것이 우선)
-  for (const layout of layouts) {
-    if (layout) {
-      merged = { ...merged, ...layout };
-    }
-  }
-  
-  return merged;
-}
-
-/**
- * LayoutConstraints를 Layout으로 변환
- */
-function constraintsToLayout(constraints: any): Layout {
-  const layout: Layout = {};
-  
-  if (constraints.mode) layout.mode = constraints.mode;
-  if (constraints.anchor) layout.anchor = constraints.anchor;
-  if (constraints.gap) layout.gapRel = constraints.gap;
-  if (constraints.padding) layout.padding = constraints.padding;
-  
-  // constraints의 maxWidth/maxHeight를 size로 변환
-  if (constraints.maxWidth !== undefined || constraints.maxHeight !== undefined) {
-    layout.size = {
-      width: constraints.maxWidth,
-      height: constraints.maxHeight
-    };
-  }
-  
-  return layout;
-}
 
 
 /**

@@ -119,71 +119,78 @@
 
 ## src/ 모듈 책임
 
-다음은 핵심 파일 역할과 사용 상태입니다. (상태: 사용 중/레거시/테스트 전용/보류)
+다음은 핵심 파일의 역할입니다. (레거시/테스트/보류 항목만 표기)
 
 ### composer
 - PluginChainComposer.ts — v1.3 기반 합성기. 상태: 레거시(테스트/참고용).
-- PluginChainComposerV2.ts — v2.0 time_offset + 채널 시스템 합성기. 상태: 사용 중.
+- PluginChainComposerV2.ts — v2.0 time_offset 기반 플러그인 창 계산 → 진행도 평가 → 채널 병합(ComposeMode 적용) 및 디버그 로깅/최대 활성 개수 제한 제공.
 
 ### core
-- RendererV2.ts — v2.0 네이티브 렌더러. 상태: 사용 중(퍼블릭 엔트리에서 사용).
-- TimelineControllerV2.ts — v2.0 타임라인 제어(rVFC 루프). 상태: 사용 중.
-- CueManagerV2.ts — domLifetime 기반 DOM 생명주기 관리. 상태: 사용 중.
+- RendererV2.ts — v2.0 네이티브 렌더러: 타임라인 tick에 맞춰 큐/노드 마운트·업데이트·정리, 채널 적용과 DOM/채널 플러그인 호출, Define 참조 해석, 디버그 로깅을 조율.
+- TimelineControllerV2.ts — requestVideoFrameCallback 기반 타임라인 루프; attach/detach, fps/snapToFrame 옵션, 업데이트 콜백 관리.
+- CueManagerV2.ts — 각 큐의 domLifetime 창을 바탕으로 DOM 생성/보존/지연 정리와 메모리 제한 가드 수행.
 - Renderer.ts, TimelineController.ts — v1.3 구현. 상태: 레거시(테스트/참고).
 - Composition.ts, SeekSync.ts — 시간/합성 유틸(플레이스홀더). 상태: 보류/문서용.
-- Stage.ts — 콘텐츠 박스 계산 및 바운드 이벤트. 상태: 사용 중.
-- TrackManager.ts — 트랙 겹침/기본 스타일. 상태: 사용 중.
-- CueGraph.ts — 트리 활성 창 계산. 상태: 현재 직접 참조 없음(정리 검토).
+- Stage.ts — 비디오 비율 또는 stage 설정으로 overlay content rect 계산, resize/fullscreen/metadata 이벤트로 bounds 변경 알림 및 컨테이너 스타일 갱신.
+- TrackManager.ts — 트랙 overlap 정책(push/stack) 오프셋 계산과 트랙 기본 스타일 제공.
+- CueGraph.ts — Cue 트리 활성 창 계산 유틸. 상태: 현재 직접 참조 없음(정리 검토).
 - NodeRuntime.ts — 노드 수명주기/override. 상태: 레거시.
 
 ### layout
-- LayoutEngine.ts — flow/grid/absolute/path, safeAreaClamp 포함. 상태: 사용 중.
-- utils/anchors.ts — 앵커 유틸. 상태: 사용 중.
+- LayoutEngine.ts — flow/grid/absolute/path 레이아웃 계산; anchor, position/size/transform/override/safeAreaClamp 처리.
+- utils/anchors.ts — anchor 기준 좌표/이동 계산 유틸.
 
 ### controller
-- MotionTextController.ts — 플레이어 UI 오버레이. 상태: 사용 중(퍼블릭 export).
-- index.ts — 배럴. 상태: 사용 중.
+- MotionTextController.ts — YouTube 스타일 컨트롤 UI(재생/일시정지, 음량, 전체화면, 자막 토글, 진행 바/시간 표시)와 스타일 주입/이벤트 바인딩 제공.
+- index.ts — 컨트롤러 배럴(export) 엔트리.
 
 ### loader
-- PluginLoader.ts, ManifestValidator.ts, Integrity.ts, AssetFetcher.ts, CacheStore.ts — 플러그인/자산 로딩 구성요소. 상태: 부분 사용(Dev/향후 보안 로더 고도화 대상).
+- PluginLoader.ts — manifest → 무결성 검증 → preload 자산 → entry fetch+Blob import → 플러그인 인터페이스 획득 파이프라인.
+- ManifestValidator.ts — manifest 스키마/필수 필드(name/version/minRenderer/capabilities/schema) 검증.
+- Integrity.ts — SHA‑384 해시 및 선택적 ed25519 서명 검증 유틸 초안.
+- AssetFetcher.ts — preload 자산 fetch + URL 해석 및 무결성 보조.
+- CacheStore.ts — 메모리+localStorage 기반 캐시(`plugin@version` 키 전략).
 - SandboxContext.ts — 샌드박스 컨텍스트(Dev 전용 v1.3 경로). 상태: 레거시(Dev).
 
 #### loader/dev (개발용)
-- DevPluginRegistry.ts — 외부 플러그인 레지스트리. 상태: 사용 중(퍼블릭 API에서 등록).
-- DevPluginLoader.ts, LocalPluginLoader.ts — Dev 로딩 경로. 상태: 사용/보조.
-- PreloadFromScenario(.ts/.V2.ts), DevPluginConfig.ts — Dev 원점 설정/사전 로드. 상태: 사용 중.
+- DevPluginRegistry.ts — 외부 플러그인 등록/조회 레지스트리(퍼블릭 API에서 사용).
+- DevPluginLoader.ts, LocalPluginLoader.ts — 개발 환경에서 manifest 또는 로컬 경로로부터 동적 import → 레지스트리 등록 유틸.
+- PreloadFromScenario(.ts/.V2.ts), DevPluginConfig.ts — 데모에서 플러그인 원점(server/local/auto) 설정과 사전 로드 지원.
 
 ### parser
-- ScenarioParserV2.ts — v2.0 네이티브 파서. 상태: 사용 중(엔트리에서 사용).
+- ScenarioParserV2.ts — v2.0 네이티브 파서(엔트리에서 사용); 스키마 검증, 기본값 채움, 친절한 오류 메시지 제공.
 - ScenarioParser.ts — v1.3 파서. 상태: 테스트/마이그레이션용.
-- DefineResolver.ts, CompatibilityLayer.ts, FieldMigration.ts, InheritanceV2.ts, ValidationV2.ts — 보조/이행 유틸. 상태: 사용 중.
+- DefineResolver.ts, CompatibilityLayer.ts, FieldMigration.ts, InheritanceV2.ts, ValidationV2.ts — 정의 해석/호환성/필드 변환/상속/검증 보조 유틸.
 
 ### runtime
-- ChannelComposer.ts — 채널 기반 합성 보조. 상태: 사용 중.
-- PluginContextV3.ts, PluginAssetBridge.ts — 플러그인 컨텍스트/자산 브리지. 상태: 사용 중.
-- PortalManager.ts, DomMount.ts, DomSeparation.ts — DOM 구성/분리/포털. 상태: 사용 중.
-- StyleApply.ts, CssVars.ts — 스타일 적용과 CSS 변수. 상태: 사용 중.
-- plugins/Builtin.ts, plugins/BuiltinV2.ts — 내장 플러그인 평가기. 상태: 사용 중.
+- ChannelComposer.ts — 채널 상태/우선순위/합성 규칙 관리 및 최종 CSS 변수 값 산출.
+- PluginContextV3.ts — 플러그인 v3.0 컨텍스트 생성(시나리오/에셋/채널/포털/오디오/유틸/peerDeps 바인딩).
+- PluginAssetBridge.ts — 플러그인에서 사용할 에셋 접근(폰트/이미지/오디오 프리로드 등) 어댑터.
+- DomMount.ts — 노드/플러그인 effectsRoot DOM 생성과 안전한 장착.
+- DomSeparation.ts — baseWrapper/effectsRoot 분리 및 CSS 변수 기반 transform/opacity 적용 헬퍼.
+- StyleApply.ts, CssVars.ts — 채널→CSS 변환, 텍스트/그룹 스타일 적용과 공통 CSS 변수 명세.
+- plugins/Builtin.ts, plugins/BuiltinV2.ts — 기본 제공 이펙트(fade/slide/scale/pop/shake 등) 채널 평가기.
+- PortalManager.ts — breakout/portal 관리 스텁. 상태: 보류(M8에서 구현 예정).
 
 ### assets
-- AssetManager.ts — Define 섹션 기반 에셋 로드/프리로드, FontFace 등록. 상태: 사용 중(엔트리에서 사용).
+- AssetManager.ts — Define 섹션에서 에셋 추출 → 폰트/이미지/비디오/오디오 등록·프리로드, FontFace 동적 로드.
 
 ### migration
-- V13ToV20Migrator.ts — v1.3 → v2.0 자동 마이그레이션 도구. 상태: 사용 중(테스트/스크립트에서 활용).
+- V13ToV20Migrator.ts — v1.3 → v2.0 자동 마이그레이션(Define 추출, 노드 ID 생성, 경고/검증 포함). 테스트/스크립트에서 활용.
 
 ### types
-- scenario-v2.ts — v2.0 네이티브 타입. 상태: 사용 중.
-- plugin-v3.ts — 플러그인 v3.0 타입. 상태: 사용 중.
+- scenario-v2.ts — v2.0 네이티브 타입 집합.
+- plugin-v3.ts — 플러그인 v3.0 타입(채널/권한 등).
 - scenario.ts, plugin.ts — v1.3/구 API 타입. 상태: 레거시/호환.
-- layout.ts, timeline.ts, index.ts — 공통 타입 및 배럴. 상태: 사용 중.
+- layout.ts, timeline.ts, index.ts — 공통 타입 및 배럴 export.
 
 ### utils
-- time-v2.ts — v2.0 시간 유틸([start,end], time_offset 등). 상태: 사용 중.
+- time-v2.ts — v2.0 시간 유틸([start,end] 구간/오프셋/진행도/겹침/union/프레임 스냅핑).
 - time.ts — v1.3 시간 유틸. 상태: 레거시(테스트/호환).
-- math.ts, json.ts, logging.ts — 공통 유틸. 상태: 사용 중.
+- math.ts, json.ts, logging.ts — 수치/JSON/로깅 공통 유틸.
 
 ### entry
-- index.ts — 퍼블릭 엔트리. v2.0 파서/렌더러 사용, 외부 플러그인 등록 API(export) 제공. 상태: 사용 중.
+- index.ts — 퍼블릭 엔트리: `parseScenario`(v2.0) + `RendererV2` 조합, 글로벌 설정 및 외부 플러그인 등록/글롭 등록 API 제공.
 
 ---
 
@@ -209,11 +216,10 @@
 - 실행(제안): `pnpm plugin:server` 스크립트로 `node demo/plugin-server/server.js` 실행.
 - 보안: M7 무결성/서명 검증 미포함(개발용). 프로덕션 사용 금지.
 
-### 데모 프론트 분리 포인트
+### 데모 프론트 포인트
 - `demo/devPlugins.ts`: Dev 로더 초기화 및 사전 로드 진입점. `configureDevPlugins({ mode, serverBase, localBase })`로 원점 설정.
   - 환경변수(선택): `VITE_PLUGIN_MODE`(`server|local|auto`), `VITE_PLUGIN_ORIGIN`, `VITE_PLUGIN_LOCAL_BASE`
   - 기본값: `auto` 모드에서 서버 우선 시도 후 실패 시 로컬 폴더에서 직접 import 폴백
-- `demo/ui/safeAreaDev.ts`(선택): Safe Area 데모 패널 로직 분리로 `main.ts` 슬림화.
 
 ---
 

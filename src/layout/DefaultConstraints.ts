@@ -93,7 +93,7 @@ export function shouldBreakout(
 ): boolean {
   return (
     constraints.constraintMode === 'breakout' ||
-    (constraints.breakoutEnabled && hasEffectScope)
+    (!!constraints.breakoutEnabled && hasEffectScope)
   );
 }
 

@@ -205,6 +205,11 @@ export function applyLayoutWithConstraints(
       applyNormalizedPosition(el, layout, defaultAnchor, opts);
       break;
   }
+
+  // Group의 자식 레이아웃 적용 (그룹 자체 positioning과 독립적)
+  if (layout?.childrenLayout) {
+    applyChildrenLayout(el, layout.childrenLayout);
+  }
 }
 
 /**
@@ -229,12 +234,22 @@ function applyFlowContainerWithConstraints(
   
   // Anchor-based alignment
   const anchor = layout?.anchor || constraints?.anchor || defaultAnchor;
+  
+  // Cross-axis alignment (수평 정렬)
   const alignMap: Record<string, string> = {
     tl: 'flex-start', tc: 'center', tr: 'flex-end',
     cl: 'flex-start', cc: 'center', cr: 'flex-end',
     bl: 'flex-start', bc: 'center', br: 'flex-end',
   };
   el.style.alignItems = alignMap[anchor] || 'center';
+  
+  // Main-axis alignment (수직 정렬 - flow direction 기준)
+  const justifyMap: Record<string, string> = {
+    tl: 'flex-start', tc: 'flex-start', tr: 'flex-start',
+    cl: 'center', cc: 'center', cr: 'center',
+    bl: 'flex-end', bc: 'flex-end', br: 'flex-end',
+  };
+  el.style.justifyContent = justifyMap[anchor] || 'center';
   
   // Gap from constraints or layout
   const gap = constraints?.gap || layout?.gapRel || 0;
@@ -390,4 +405,57 @@ export function applyGridContainer(
     br: 'end',
   };
   (el.style as any).justifyItems = hmap[anchor] || 'center';
+}
+
+/**
+ * Apply children layout to element (for group elements)
+ * This allows groups to control how their children are arranged independently of their own positioning
+ */
+function applyChildrenLayout(
+  el: HTMLElement, 
+  childrenLayout: NonNullable<Layout['childrenLayout']>
+): void {
+  const { mode = 'flow', direction = 'horizontal', gap = 0, align = 'center', justify = 'center' } = childrenLayout;
+  
+  switch (mode) {
+    case 'flow':
+      // Set up flexbox for children
+      el.style.display = 'flex';
+      el.style.flexDirection = direction === 'horizontal' ? 'row' : 'column';
+      
+      // Alignment
+      const alignItems = align === 'start' ? 'flex-start' : align === 'end' ? 'flex-end' : 'center';
+      const justifyContent = justify === 'start' ? 'flex-start' : justify === 'end' ? 'flex-end' : 
+                            justify === 'space-between' ? 'space-between' : 'center';
+      
+      el.style.alignItems = alignItems;
+      el.style.justifyContent = justifyContent;
+      
+      // Gap
+      if (gap && el.parentElement) {
+        const containerSize = direction === 'horizontal' ? 
+          (el.parentElement.clientWidth || 0) : (el.parentElement.clientHeight || 0);
+        const gapProp = direction === 'horizontal' ? 'columnGap' : 'rowGap';
+        el.style[gapProp] = `${Math.round(containerSize * gap)}px`;
+      }
+      break;
+      
+    case 'grid':
+      el.style.display = 'grid';
+      el.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
+      
+      if (gap && el.parentElement) {
+        const containerSize = el.parentElement.clientHeight || 0;
+        const gapPx = Math.round(containerSize * gap);
+        (el.style as any).rowGap = `${gapPx}px`;
+        (el.style as any).columnGap = `${gapPx}px`;
+      }
+      break;
+      
+    case 'stack':
+    default:
+      // Stack children on top of each other (default behavior)
+      // No special CSS needed, children will use their own positioning
+      break;
+  }
 }
