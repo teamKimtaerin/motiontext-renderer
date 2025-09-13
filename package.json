@@ -1,6 +1,6 @@
 {
   "name": "motiontext-renderer",
-  "version": "0.3.2",
+  "version": "1.0.0",
   "description": "Web-based animated caption/subtitle renderer with plugin system",
   "type": "module",
   "main": "./dist/index.cjs",
