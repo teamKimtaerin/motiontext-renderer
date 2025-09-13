@@ -1,0 +1,131 @@
+{
+  "version": "1.3",
+  "timebase": {
+    "unit": "seconds"
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "tracks": [
+    {
+      "id": "title",
+      "type": "free",
+      "layer": 2,
+      "defaultStyle": {
+        "fontSize": "32px",
+        "fontFamily": "'Arial Black', sans-serif",
+        "fontWeight": "bold",
+        "color": "#ffdd00",
+        "textShadow": "3px 3px 6px rgba(0,0,0,0.9)",
+        "stroke": { "widthRel": 0.002, "color": "#000000" },
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "subtitle",
+      "type": "subtitle",
+      "layer": 1,
+      "defaultStyle": {
+        "fontSize": "20px",
+        "fontFamily": "Arial, sans-serif",
+        "color": "#ffffff",
+        "textShadow": "2px 2px 4px rgba(0,0,0,0.8)",
+        "stroke": { "widthRel": 0.002, "color": "#000000" },
+        "textAlign": "center"
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "title-cue",
+      "track": "title",
+      "hintTime": 1,
+      "root": {
+        "id": "title-group",
+        "type": "group",
+        "children": [
+          {
+            "id": "title-text",
+            "type": "text",
+            "absStart": 1,
+            "absEnd": 4,
+            "content": "🎬 애니메이션 테스트",
+            "layout": {
+              "position": [0.5, 0.2],
+              "transform": {
+                "scale": [1.2, 1.2],
+                "anchor": [0.5, 0.5]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "subtitle-cue-1",
+      "track": "subtitle",
+      "hintTime": 4,
+      "root": {
+        "id": "subtitle-group-1",
+        "type": "group",
+        "children": [
+          {
+            "id": "subtitle-text-1",
+            "type": "text",
+            "absStart": 4,
+            "absEnd": 8,
+            "content": "다양한 애니메이션 효과를 지원합니다",
+            "layout": {
+              "position": [0.5, 0.8]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "moving-text-cue",
+      "track": "title",
+      "hintTime": 8,
+      "root": {
+        "id": "moving-group",
+        "type": "group",
+        "children": [
+          {
+            "id": "moving-text",
+            "type": "text",
+            "absStart": 8,
+            "absEnd": 12,
+            "content": "← 움직이는 텍스트 →",
+            "layout": {
+              "position": [0.1, 0.5],
+              "transform": {
+                "anchor": [0.5, 0.5]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fade-cue",
+      "track": "subtitle",
+      "hintTime": 12,
+      "root": {
+        "id": "fade-group",
+        "type": "group",
+        "children": [
+          {
+            "id": "fade-text",
+            "type": "text",
+            "absStart": 12,
+            "absEnd": 16,
+            "content": "페이드 인/아웃 효과 테스트",
+            "layout": {
+              "position": [0.5, 0.7]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

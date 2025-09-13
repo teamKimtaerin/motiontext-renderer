@@ -4,22 +4,21 @@
  * MotionText Renderer Plugin API v2.1
  */
 
-export default {
-  name: "fadein",
-  version: "1.0.0",
-  
-  init(el, options, ctx) {
-    // effectsRoot(el)에 초기 설정 적용
-    if (!ctx.gsap) {
-      console.error('GSAP is required for Fade In Stagger effect');
-      return;
-    }
+export const name = "fadein";
+export const version = "1.0.0";
 
-    // 텍스트를 글자별로 분리
-    splitTextIntoCharacters(el, ctx.gsap);
-  },
+export function init(el, options, ctx) {
+  // effectsRoot(el)에 초기 설정 적용
+  if (!ctx.gsap) {
+    console.error('GSAP is required for Fade In Stagger effect');
+    return;
+  }
 
-  animate(el, options, ctx, duration) {
+  // 텍스트를 글자별로 분리
+  splitTextIntoCharacters(el, ctx.gsap);
+}
+
+export function animate(el, options, ctx, duration) {
     if (!ctx.gsap || !el) {
       return (p) => {}; // 빈 함수 반환
     }
@@ -78,19 +77,18 @@ export default {
 
     // 상대 타임라인 반환 (호스트가 진행 제어)
     return tl;
-  },
+}
 
-  cleanup(el) {
-    if (el && window.gsap) {
-      window.gsap.killTweensOf(el.querySelectorAll('.fade-char'));
-      // DOM 구조 복원
-      const originalText = Array.from(el.querySelectorAll('.fade-char'))
-        .map(char => char.textContent)
-        .join('');
-      el.innerHTML = originalText;
-    }
+export function cleanup(el) {
+  if (el && window.gsap) {
+    window.gsap.killTweensOf(el.querySelectorAll('.fade-char'));
+    // DOM 구조 복원
+    const originalText = Array.from(el.querySelectorAll('.fade-char'))
+      .map(char => char.textContent)
+      .join('');
+    el.innerHTML = originalText;
   }
-};
+}
 
 /**
  * 텍스트를 글자별로 분리하여 DOM 구조 생성

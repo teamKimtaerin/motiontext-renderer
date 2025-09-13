@@ -1,0 +1,36 @@
+{
+  "version": "1.3",
+  "timebase": { "unit": "seconds" },
+  "stage": { "baseAspect": "16:9" },
+  "tracks": [
+    { "id": "free", "type": "free", "layer": 210,
+      "defaultStyle": { "color": "#ffffff", "stroke": { "widthRel": 0.002, "color": "#000000" } } }
+  ],
+  "cues": [
+    {
+      "id": "tilted-30deg",
+      "track": "free",
+      "root": {
+        "e_type": "group",
+        "children": [
+          {
+            "e_type": "text",
+            "text": "기울어진 텍스트 30°",
+            "absStart": 0,
+            "absEnd": 6,
+            "layout": {
+              "position": { "x": 0.65, "y": 0.55 },
+              "anchor": "cc",
+              "transform": { "rotate": { "deg": 30 } }
+            },
+            "pluginChain": [
+              { "name": "fadeIn", "relStartPct": 0.0, "relEndPct": 0.2 },
+              { "name": "pop",    "relStartPct": 0.0, "relEndPct": 0.3, "compose": "multiply", "params": { "maxScale": 1.15 } },
+              { "name": "waveY",  "relStartPct": 0.1, "relEndPct": 0.9, "compose": "add", "params": { "amplitudePx": 10, "frequency": 1.5 } }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

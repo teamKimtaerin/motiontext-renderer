@@ -1,11 +1,12 @@
 {
   "name": "pulse",
   "version": "1.0.0",
-  "pluginApi": "2.1",
-  "minRenderer": "1.3.0",
+  "type": "hybrid",
+  "pluginApi": "3.0",
+  "minRenderer": "2.0.0",
   "entry": "index.mjs",
   "targets": ["text"],
-  "capabilities": ["channels-eval"],
+  "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
   "schema": {

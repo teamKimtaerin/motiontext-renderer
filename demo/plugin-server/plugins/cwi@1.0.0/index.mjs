@@ -111,10 +111,10 @@ function buildColorTimeline(gsap, span, fromCss = WHITE90, toCss = '#FFD400', t0
   return tl;
 }
 
-export default {
-  name: 'cwi',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'cwi';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     const host = el.parentElement; // effectsRoot is child of host text element
     if (!host) return;
     // Wrap text content in a span so we can transform without touching host/base transform
@@ -151,8 +151,9 @@ export default {
       tremble: Object.assign({ ampPx: 1.5, freq: 12 }, opts?.tremble || {}),
       speaker: opts?.speaker
     };
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const state = el.__cwi;
     if (!state) return () => {};
     const span = state.span;
@@ -224,10 +225,10 @@ export default {
       span.style.transform = `translate(0px, ${ty}px) scale(${s}, ${s})`;
       span.style.opacity = '1';
     };
-  },
-  cleanup(el) {
+}
+
+export function cleanup(el) {
     if (el && el.__cwi) {
       el.__cwi = undefined;
     }
-  }
-};
+}

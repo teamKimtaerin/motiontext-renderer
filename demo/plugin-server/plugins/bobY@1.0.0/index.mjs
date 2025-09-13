@@ -1,7 +1,7 @@
-export default {
-  name: 'bobY',
-  version: '1.0.0',
-  animate(el, opts, ctx, duration) {
+export const name = 'bobY';
+export const version = '1.0.0';
+
+export function animate(el, opts, ctx, duration) {
     const amp = Number(opts?.amplitudePx ?? 8);
     const cycles = Math.max(1, Number(opts?.cycles ?? 1));
     if (ctx?.gsap) {
@@ -16,8 +16,7 @@ export default {
       const ty = Math.sin(p * Math.PI * 2 * cycles) * amp;
       el.style.transform = `translateY(${ty}px)`;
     };
-  },
-};
+}
 
 export function evalChannels(spec, p, ctx) {
   const amp = Number(spec?.params?.amplitudePx ?? 8);

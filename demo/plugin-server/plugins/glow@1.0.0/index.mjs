@@ -7,10 +7,10 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default {
-  name: 'glow',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'glow';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     // create a radial gradient glow layer
     const color = opts?.color ?? '#00ffff';
     const intensity = Number(opts?.intensity ?? 0.4);
@@ -39,8 +39,9 @@ export default {
       const rgba3 = hexToRgba(color, Math.min(1, base * 0.6));
       parent.style.textShadow = `0 0 6px ${rgba1}, 0 0 12px ${rgba2}, 0 0 18px ${rgba3}`;
     }
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const pulse = !!opts?.pulse;
     const cycles = Math.max(1, Number(opts?.cycles ?? 8));
     const intensity = Number(opts?.intensity ?? 0.4);
@@ -95,9 +96,9 @@ export default {
         }
       }
     };
-  },
-  cleanup(el) {
+}
+
+export function cleanup(el) {
     const glow = el.querySelector('[data-glow]');
     if (glow && glow.parentElement === el) el.removeChild(glow);
-  }
-};
+}

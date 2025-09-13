@@ -1,6 +1,7 @@
 // Dev plugin preloader for demo
 import type { RendererConfig } from '../src/types';
 import { preloadFromScenario } from '../src/loader/dev/PreloadFromScenario';
+import { preloadFromScenarioV2 } from '../src/loader/dev/PreloadFromScenarioV2';
 import { configureDevPlugins, getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import { devRegistry } from '../src/loader/dev/DevPluginRegistry';
 
@@ -21,7 +22,13 @@ export async function preloadPluginsForScenario(scenario: RendererConfig) {
   // Proactively register local plugins via Vite glob when in local/auto mode.
   // This avoids HTTP fetch of local files and enables pure name@version resolution.
   try { await ensureLocalPluginsRegistered(); } catch { /* noop */ }
-  await preloadFromScenario(scenario as any);
+  
+  // Use v2.0 preloader for v2.0 scenarios
+  if ((scenario as any).version === '2.0') {
+    await preloadFromScenarioV2(scenario as any);
+  } else {
+    await preloadFromScenario(scenario as any);
+  }
 }
 
 // Register all local plugins found under demo/plugin-server/plugins via Vite glob

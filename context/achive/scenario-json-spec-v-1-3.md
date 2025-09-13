@@ -1,4 +1,17 @@
-# 시나리오(JSON) 스펙 v1.3
+# 시나리오(JSON) 스펙 v1.3 ⚠️ 레거시
+
+**⚠️ 중요 알림**: 이 문서는 v1.3 레거시 스펙입니다. **v2.0 최신 스펙을 사용하세요**: [`context/scenario-json-spec-v-2-0.md`](./scenario-json-spec-v-2-0.md)
+
+**v2.0 주요 개선사항:**
+- Define 시스템으로 중복 제거 및 에셋 관리 통합  
+- 시간 필드 통일: `time_offset: [start, end]` 배열 형태
+- 노드 ID 의무화로 편집 도구 지원 강화
+- 상속 시스템으로 체계적인 값 우선순위 규칙
+- 플러그인 API v3.0 호환성
+
+---
+
+# 시나리오(JSON) 스펙 v1.3 (레거시)
 
 ## **0) 철학 요약**
 
@@ -27,6 +40,7 @@
     resizeThrottleMs?: number,    // 리사이즈 반응(기본 80)
     snapToFrame?: boolean         // true면 t0/t1 프레임 스냅
   },
+  definitions?: Record<string, any>, // (선택) 공통 데이터 정의 (palette, 상수 등)
   tracks: Track[],
   wordStream?: WordStream,        // (선택) ASR/align 결과 대량 입력
   bindings?: BindingRule[],       // (선택) wordStream을 트리에 바인딩하는 규칙
@@ -267,6 +281,15 @@ type BindingRule = {
     "safeArea": { "top": 0.06, "bottom": 0.16, "left": 0.06, "right": 0.06 }
   },
   "behavior": { "preloadMs": 300, "resizeThrottleMs": 80, "snapToFrame": false },
+
+  "definitions": {
+    "speakerPalette": {
+      "SPEAKER_01": "#4AA3FF",
+      "SPEAKER_02": "#FF4D4D", 
+      "SPEAKER_03": "#FFD400",
+      "SPEAKER_04": "#FF8A00"
+    }
+  },
 
   "tracks": [
     {

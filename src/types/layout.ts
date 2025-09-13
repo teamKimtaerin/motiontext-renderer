@@ -52,6 +52,14 @@ export interface Layout {
   overflow?: 'clip' | 'visible'; // default clip (subtitle)
   safeAreaClamp?: boolean;
   override?: LayoutOverrideSpec;
+  // Group이 자식들을 배치하는 방식 (그룹 자체 positioning과 독립적)
+  childrenLayout?: {
+    mode?: 'flow' | 'grid' | 'stack';
+    direction?: 'horizontal' | 'vertical';
+    gap?: number; // normalized
+    align?: 'start' | 'center' | 'end';
+    justify?: 'start' | 'center' | 'end' | 'space-between';
+  };
 }
 
 export interface StyleStroke {
@@ -91,4 +99,26 @@ export interface EffectScopeBreakout {
 
 export interface EffectScope {
   breakout?: EffectScopeBreakout;
+}
+
+// ============================================================================
+// Layout Constraints System (Flutter-like)
+// ============================================================================
+
+export type ConstraintMode = 'strict' | 'flexible' | 'breakout';
+export type FlowDirection = 'vertical' | 'horizontal';
+
+export interface LayoutConstraints {
+  mode?: LayoutMode; // flow, grid, absolute
+  direction?: FlowDirection; // for flow mode
+  maxWidth?: number; // normalized (0-1)
+  maxHeight?: number; // normalized (0-1)
+  minWidth?: number; // normalized (0-1)
+  minHeight?: number; // normalized (0-1)
+  gap?: number; // normalized gap for flow/grid
+  padding?: Vec2Rel; // internal padding
+  anchor?: Anchor; // default anchor for children
+  constraintMode?: ConstraintMode; // how strict the constraints are
+  breakoutEnabled?: boolean; // allow children to escape via portal
+  safeArea?: { top?: number; bottom?: number; left?: number; right?: number };
 }

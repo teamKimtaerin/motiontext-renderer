@@ -59,6 +59,22 @@ export class Renderer {
     this.buildNodeTrackMap();
   }
 
+  private resolveDefinitions(params: any): any {
+    if (!this.scenario?.definitions || !params) return params;
+
+    const resolved = { ...params };
+    for (const [key, value] of Object.entries(params)) {
+      if (typeof value === 'string' && value.startsWith('definitions.')) {
+        const path = value.slice('definitions.'.length);
+        const resolvedValue = this.scenario.definitions[path];
+        if (resolvedValue !== undefined) {
+          resolved[key] = resolvedValue;
+        }
+      }
+    }
+    return resolved;
+  }
+
   // O(1) optimization for findCueTrackIdForNode
   private buildNodeTrackMap() {
     this.nodeTrackMap.clear();
@@ -275,7 +291,11 @@ export class Renderer {
                 (el as any).__effectsRoot || el
               );
               try {
-                return reg.module.evalChannels(spec, p, ctx) || {};
+                const resolvedSpec = {
+                  ...spec,
+                  params: this.resolveDefinitions(spec.params),
+                };
+                return reg.module.evalChannels(resolvedSpec, p, ctx) || {};
               } catch {
                 return {};
               }
@@ -309,9 +329,10 @@ export class Renderer {
             if (!ap) {
               // ctx per plugin (baseUrl-specific)
               const ctx = createDevContext(reg.baseUrl, effectsRoot);
+              const resolvedParams = this.resolveDefinitions(spec.params);
               try {
                 if (typeof runtime.init === 'function')
-                  runtime.init(effectsRoot, spec.params, ctx);
+                  runtime.init(effectsRoot, resolvedParams, ctx);
               } catch (_err) {
                 /* noop */
               }
@@ -319,7 +340,7 @@ export class Renderer {
               try {
                 out = runtime.animate(
                   effectsRoot,
-                  spec.params,
+                  resolvedParams,
                   ctx,
                   Math.max(0, w1 - w0)
                 );

@@ -4,17 +4,18 @@
  * - 플러그인 manifest.json을 기반으로 RendererConfig 생성
  */
 
-// 최소 RendererConfig 타입 (시나리오 v1.3 하위셋)
+// RendererConfig 타입 (시나리오 v2.0)
 export interface RendererConfig {
-  version: '1.3';
-  timebase: { unit: 'seconds' | 'tc'; fps?: number };
+  version: '2.0';
+  timebase: { unit: 'seconds'; fps?: number };
   stage: { baseAspect: '16:9' | '9:16' | 'auto'; backgroundColor?: string; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } };
   behavior?: { preloadMs?: number; resizeThrottleMs?: number; snapToFrame?: boolean };
   tracks: Array<{ id: string; type: 'subtitle' | 'free'; layer: number; defaultStyle?: any; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } }>;
   cues: Array<{
     id: string;
     track: string;
-    hintTime?: { start?: number; end?: number };
+    displayTime?: [number, number];
+    domLifetime?: [number, number];
     root: any;
   }>;
 }
@@ -121,14 +122,14 @@ export function generatePreviewScenario(
   settings: PreviewSettings,
   duration: number = 3
 ): RendererConfig {
-  // 위치를 0-1 범위로 정규화 (640x360 기준)
-  const normalizedX = Math.max(0, Math.min(1, settings.position.x / 640))
-  const normalizedY = Math.max(0, Math.min(1, settings.position.y / 360))
+  // Center position (always use center for preview)
+  const normalizedX = 0.5;
+  const normalizedY = 0.5;
   const relW = Math.max(0, Math.min(1, settings.size.width / 640));
   const relH = Math.max(0, Math.min(1, settings.size.height / 360));
   
   return {
-    version: '1.3',
+    version: '2.0',
     timebase: { unit: 'seconds' },
     stage: { 
       baseAspect: '16:9',
@@ -139,39 +140,60 @@ export function generatePreviewScenario(
         id: 'preview-track',
         type: 'free',
         layer: 1,
+        defaultConstraints: {
+          mode: 'flow',
+          direction: 'vertical',
+          maxWidth: 1.0,
+          maxHeight: 1.0,
+          anchor: 'cc',
+          constraintMode: 'flexible',
+          breakoutEnabled: true
+        }
       },
     ],
     cues: [
       {
         id: 'preview-cue',
         track: 'preview-track',
-        hintTime: { start: 0 },
+        displayTime: [0, duration],
+        domLifetime: [0, duration + 0.5],
         root: {
+          id: 'preview-group',
           e_type: 'group',
           layout: {
+            mode: 'absolute',
             position: { x: normalizedX, y: normalizedY },
-            anchor: 'tl',
+            anchor: 'cc',
             size: {
-              width: relW,
-              height: relH,
+              width: Math.max(0.3, relW),  // 최소 30% 너비 보장
+              height: Math.max(0.3, relH), // 최소 30% 높이 보장
+            },
+            // Center children inside the preview group
+            childrenLayout: {
+              mode: 'flow',
+              direction: 'vertical',
+              align: 'center',
+              justify: 'center',
+              gap: 0
             },
           },
           children: [
             {
+              id: 'preview-text',
               e_type: 'text',
               text: settings.text,
-              absStart: 0,
-              absEnd: duration,
+              // layout 제거 - flow 모드 정렬에 완전히 의존
               style: {
-                fontSizeRel: 0.06,
+                fontSize: '1.5rem',
                 fontFamily: 'Arial, sans-serif',
                 color: '#ffffff',
-                align: 'center',
+                textAlign: 'center',
               },
               pluginChain: [
                 {
                   name: pluginName,
                   params: settings.pluginParams,
+                  time_offset: ['0%', '100%'],
                 },
               ],
             },
@@ -190,9 +212,9 @@ export function generateLoopedScenario(
   settings: PreviewSettings,
   duration: number = 3
 ): RendererConfig {
-  // 위치를 0-1 범위로 정규화 (640x360 기준)
-  const normalizedX = Math.max(0, Math.min(1, settings.position.x / 640))
-  const normalizedY = Math.max(0, Math.min(1, settings.position.y / 360))
+  // Center position (always use center for preview)
+  const normalizedX = 0.5;
+  const normalizedY = 0.5;
   const relW = Math.max(0, Math.min(1, settings.size.width / 640));
   const relH = Math.max(0, Math.min(1, settings.size.height / 360));
   
@@ -201,13 +223,12 @@ export function generateLoopedScenario(
     {
       name: pluginName,
       params: settings.pluginParams,
-      relStartPct: 0.0,
-      relEndPct: 1.0,
+      time_offset: ['0%', '100%'],
     }
   ];
   
   const scenario = {
-    version: '1.3',
+    version: '2.0',
     timebase: { unit: 'seconds' },
     stage: { 
       baseAspect: '16:9'
@@ -217,29 +238,59 @@ export function generateLoopedScenario(
         id: 'free',
         type: 'free',
         layer: 1,
+        defaultConstraints: {
+          mode: 'flow',
+          direction: 'vertical',
+          maxWidth: 1.0,
+          maxHeight: 1.0,
+          anchor: 'cc',
+          constraintMode: 'flexible',
+          breakoutEnabled: true
+        }
       },
     ],
     cues: [
       {
         id: 'preview-cue',
         track: 'free',
+        displayTime: [0, duration],
+        domLifetime: [0, duration + 0.5],
         root: {
-          e_type: 'text',
-          text: settings.text,
-          absStart: 0,
-          absEnd: duration,
+          id: 'looped-group',
+          e_type: 'group',
+          displayTime: [0, duration],
           layout: {
+            mode: 'absolute',
             position: { x: normalizedX, y: normalizedY },
             anchor: 'cc',
-            size: { width: relW, height: relH },
+            size: { 
+              width: Math.max(0.3, relW),  // 최소 30% 너비 보장
+              height: Math.max(0.3, relH)  // 최소 30% 높이 보장
+            },
+            // Center children inside the looped group
+            childrenLayout: {
+              mode: 'flow',
+              direction: 'vertical',
+              align: 'center',
+              justify: 'center',
+              gap: 0
+            },
           },
-          style: {
-            fontSizeRel: 0.07,
-            fontFamily: 'Arial, sans-serif',
-            color: '#ffffff',
-            align: 'center'
-          },
-          pluginChain: pluginChain,
+          children: [
+            {
+              id: 'looped-text',
+              e_type: 'text',
+              text: settings.text,
+              // layout 제거 - flow 모드 정렬에 완전히 의존
+              style: {
+                fontSize: '1.7rem',
+                fontFamily: 'Arial, sans-serif',
+                color: '#ffffff',
+                textAlign: 'center'
+              },
+              pluginChain: pluginChain,
+            }
+          ]
         },
       },
     ],

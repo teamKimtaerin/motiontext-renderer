@@ -8,11 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **MotionText Renderer**는 동영상 위에 정교한 자막과 애니메이션 효과를 렌더링하는 TypeScript 라이브러리입니다.
 
-### 📊 현재 상태 (2025-09-07)
-- **✅ M1-M4 완료**: 타입 시스템, 시간 유틸리티, 파서, 플러그인 체인 합성
+### 📊 현재 상태 (2025-09-13)
+- **✅ M1-M6 완료**: 타입 시스템, 시간 유틸리티, 파서, 플러그인 체인 합성, v2.0 네이티브 렌더러
 - **🧪 120개 테스트 통과**: 모든 핵심 모듈 검증 완료
-- **🎬 8개 데모 샘플**: 기본 텍스트부터 복잡한 애니메이션까지
+- **🎬 17개 플러그인**: 내장 플러그인 + 외부 플러그인 로더 시스템
 - **🎮 커스텀 컨트롤러**: YouTube 스타일 UI/UX 구현
+- **⚡ v2.0 Native**: v2.0 JSON을 직접 처리하는 네이티브 렌더러 완성
 
 ---
 
@@ -20,151 +21,144 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 핵심 모듈 (완료 ✅)
 
-#### 1. 타입 시스템 (M1)
+#### 1. v2.0 Native 타입 시스템
 ```typescript
-// src/types/scenario.ts - v1.3 JSON 스펙 타입 정의
+// src/types/scenario-v2.ts - v2.0 JSON 스펙 타입 정의
 interface Scenario {
-  version: "1.3";
+  version: "2.0";
   timebase: { unit: "seconds", fps?: number };
   stage: { baseAspect: "16:9" | "9:16" | "auto" };
   tracks: Track[];
   cues: Cue[];
+  define?: DefineSection; // Define 시스템
 }
+
+// v2.0의 시간 배열 기반 설계
+displayTime: [number, number]; // [start, end]
+domLifetime?: [number, number]; // DOM 생명주기
+time_offset?: [number, number]; // 플러그인 상대 시간
 ```
 
-#### 2. 시간 유틸리티 (M2)
+#### 2. v2.0 시간 유틸리티 (M3)
 ```typescript
-// src/utils/time.ts - 시간 창 계산 및 진행도 관리
-computeRelativeWindow(absStart, absEnd, spec) // 상대→절대 시간 변환
-progress(now, t0, t1) // 0~1 진행도 계산
+// src/utils/time-v2.ts - 배열 기반 시간 계산
+isWithinTimeRange(time: number, range: [number, number]): boolean
+progressInTimeRange(time: number, range: [number, number]): number
+computePluginWindow(displayTime: [number, number], offset: [number, number]): [number, number]
 ```
 
-#### 3. 파서/검증 (M3)
+#### 3. v2.0 Native 파서/검증 (M2)
 ```typescript
-// src/parser/ScenarioParser.ts - 견고한 JSON 검증
-parseScenario(json): Scenario // 스키마 검증 + 기본값 + 오류 처리
-- 46개 테스트로 모든 케이스 검증
-- absStart < absEnd, 트랙 참조, 필수 필드 체크
-- 친절한 경로 기반 오류 메시지
+// src/parser/ScenarioParserV2.ts - v2.0 전용 파서
+parseScenario(json): Scenario // 스키마 검증 + DefineResolver 통합
+- DefineResolver를 통한 "define.key" 참조 해석
+- InheritanceV2로 스타일/시간 상속 처리
+- ValidationV2로 v2.0 필드 검증
 ```
 
-#### 4. 플러그인 체인 (M4)
+#### 4. v2.0 Native 렌더러 코어 (M4)
 ```typescript
-// src/composer/PluginChainComposer.ts - 시간 창 기반 합성
-composeActive(chain, now, absStart, absEnd, evalFn)
-- 3가지 합성 모드: replace(기본)/add/multiply
-- 22개 테스트로 합성 로직 검증
+// src/core/RendererV2.ts - v2.0 네이티브 렌더러
+class RendererV2 {
+  // v2.0 필드 직접 처리 (변환 없음)
+  private processNode(node: ResolvedNodeUnion, currentTime: number) {
+    const [start, end] = node.displayTime ?? [-Infinity, Infinity];
+    const active = isWithinTimeRange(currentTime, [start, end]);
+    // ...
+  }
+}
 
-// src/runtime/plugins/Builtin.ts - 내장 플러그인
-fadeIn/fadeOut: 투명도 애니메이션
-pop: backOut 이징 스케일 효과
-waveY: 사인파 상하 움직임
-shakeX: 빠른 좌우 진동
+// src/core/TimelineControllerV2.ts - requestVideoFrameCallback 동기화
+// src/core/CueManagerV2.ts - domLifetime 기반 DOM 생명주기
 ```
 
-#### 5. 스타일 적용 (M4)
+#### 5. Plugin API v3.0 (M5)
 ```typescript
-// src/runtime/StyleApply.ts - CSS 변환 최적화
-buildTransform(base, channels) // 효율적 CSS transform 생성
-applyChannels(element, baseTransform, channels) // DOM 적용
-- 불필요한 변환 생략으로 성능 최적화
+// src/composer/PluginChainComposerV2.ts - time_offset 기반 합성
+composeActivePlugins(chain: PluginSpec[], currentTime: number, displayTime: [number, number])
+
+// src/runtime/plugins/BuiltinV2.ts - 17개 내장 플러그인
+fadeIn, fadeOut, pop, waveY, shakeX, // 기본 애니메이션
+cwi-color, cwi-loud, cwi-whisper, cwi-bouncing, // CWI 시리즈
+elastic, flames, glitch, glow, magnetic, pulse, rotation, scalepop, slideup, spin, typewriter
 ```
 
-#### 6. 레이아웃 엔진 (일부 구현)
+#### 6. 외부 플러그인 시스템 (M6.5)
 ```typescript
-// src/layout/LayoutEngine.ts - 정규화 좌표→픽셀 변환
-- 앵커 기반 위치 계산 (tl/tc/tr/cl/cc/cr/bl/bc/br)
-- rotate/scale/skew 변환 파이프라인
-- M5에서 size/overflow/translate/safeArea 완전 구현 예정
+// src/loader/dev/DevPluginRegistry.ts + DevPluginLoader.ts
+// 3가지 모드: server/local/auto
+// PluginContextV3로 assets.getUrl() 지원
+configurePluginSource({ mode: 'auto', serverBase: 'http://localhost:3300' });
+registerExternalPlugin({ name, version, module, baseUrl });
 ```
 
-#### 7. 데모 & 컨트롤러
+#### 7. Define 사전 해석 시스템 (M5.5)
 ```typescript
-// src/controller/ - YouTube 스타일 UI
-- 재생/일시정지/시킹/볼륨/전체화면 컨트롤
-- 키보드 조작 (Space/←/→/ESC)
-- 오토 히드 & 커서 숨김
-- 자막 토글 기능
+// RendererV2에서 플러그인 호출 전 Define 참조 완전 해석
+resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
+// 플러그인은 해석된 값만 받아서 코드 단순화
 ```
 
 ---
 
 ## 🧪 테스트 현황
 
-**총 120개 테스트 모두 통과 ✅**
+**총 120개+ 테스트 모두 통과 ✅**
 
 | 모듈 | 테스트 수 | 검증 영역 |
 |------|----------|----------|
-| `time.test.ts` | 20개 | 시간 창 계산, 진행도, 프레임 스냅 |
-| `ScenarioParser.test.ts` | 46개 | JSON 스키마, 기본값, 오류 처리 |
-| `PluginChainComposer.test.ts` | 22개 | 시간 필터링, 합성 모드 |
-| `Builtin.test.ts` | 19개 | 5개 내장 플러그인 동작 |
-| `StyleApply.test.ts` | 13개 | CSS transform 생성 |
+| `time-v2.test.ts` | 36개 | v2.0 시간 배열 계산, 진행도 |
+| `V20Integration.test.ts` | 25개 | v2.0 통합 시나리오 |
+| `V20SampleValidation.test.ts` | 20개 | Define 시스템 + 샘플 검증 |
+| `PluginChainComposerV2.test.ts` | 28개 | v2.0 플러그인 합성 |
+| `기타 모듈` | 30개+ | 파서, 레이아웃, DOM 처리 |
 
 ---
 
 ## 🎬 데모 샘플
 
-**8개 시나리오로 기능 검증**
+**v2.0 샘플로 전환 완료**
 
-1. **basic.json** - 단순 텍스트 렌더링
-2. **animated.json** - fadeIn 플러그인 체인
-3. **animated_subtitle.json** - 자막 체인 (fadeIn/pop/waveY)
-4. **animated_free_mixed.json** - free 트랙 다위치 배치
-5. **tilted_box.json** - 초기 30° 기울기 + 체인
-6. **plugin.json** - 플러그인 합성 데모
-7. **m5_layout_features.json** - M5 레이아웃 기능 프리뷰
-8. **기타** - 다양한 시간 창 및 합성 케이스
+1. **basic.json** - v2.0 기본 텍스트 렌더링
+2. **animated_subtitle.json** - v2.0 자막 체인 (fadeIn/pop/waveY)
+3. **plugin_showcase.json** - 17개 플러그인 데모
+4. **cwi_demo_full.json** - CWI 시리즈 완전 데모
+5. **with_assets_v20.json** - Define 시스템 + 에셋 관리
+6. **m5_layout_features.json** - 레이아웃 엔진 기능
 
 ---
 
 ## ⚠️ 핵심 설계 원칙
 
-### 시간 기반 활성화
-- **절대 시간**: 모든 요소는 `absStart` ~ `absEnd`로 활성화
-- **상대 시간**: 플러그인은 `relStart/relEnd` 또는 `relStartPct/relEndPct`
-- **마스터 클록**: `video.mediaTime` (requestVideoFrameCallback)
+### v2.0 Native Architecture
+- **No v1.3**: v1.3 코드 완전 제거, v2.0만 지원
+- **배열 기반 시간**: 모든 시간 필드는 `[start, end]` 형태
+- **Define 시스템**: "define.key" 참조를 런타임에 해석
+- **Plugin API v3.0**: 단순화된 플러그인 인터페이스
+
+### 렌더러와 플러그인 책임 분리
+- **렌더러**: baseWrapper 제어 (레이아웃, 위치, DOM 생명주기)
+- **플러그인**: effectsRoot 제어 (애니메이션, 시각 효과)
+- **Define 해석**: 렌더러가 사전 해석 후 플러그인에 전달
 
 ### 플러그인 계약
-- **타임라인 소유권**: 렌더러가 동기화 담당, 플러그인은 상대 Timeline만 반환
-- **채널 추상화**: `tx/ty/sx/sy/rot/opacity` 독립적 변환
-- **합성 모드**: replace(last-wins)/add(누적)/multiply(배수)
-
-### 보안 모델 (M7에서 구현 예정)
-- **무결성 검증**: SHA-384 해시, 선택적 ed25519 서명
-- **샌드박스**: 플러그인은 컨테이너 DOM만 접근, Portal API로 탈출
-- **동적 로딩**: fetch → 검증 → Blob URL → import 순서
+- **상대 진행도**: 플러그인은 0~1 progress만 받음
+- **해석된 파라미터**: Define 참조는 렌더러가 사전 해석
+- **샌드박스**: effectsRoot 하위만 조작 가능
 
 ---
 
 ## 🚀 다음 마일스톤
 
-### M5: 완전한 레이아웃 엔진 (진행 예정)
-- translate/size/overflow/transformOrigin 파이프라인
-- safeAreaClamp (stage/track 세이프 에어리어 병합)  
-- flow/grid 레이아웃 모드
-- overlapPolicy (push/stack/ignore)
+### M7: 테스트 마이그레이션 및 최적화 (진행 예정)
+- 모든 테스트를 v2.0 기준으로 재작성
+- 성능 최적화 (시간 배열 캐싱, DOM 업데이트 최소화)
+- v1.3 레거시 코드 완전 제거
 
-### M6: 타임라인 컨트롤러 (진행 예정)
-- requestVideoFrameCallback 기반 동기화
-- seek/pause/play/rate API
-- snapToFrame 옵션
-- 드리프트 없는 배속 재생
-
-### M7: 보안 로더 (진행 예정)
-- ManifestValidator + AssetFetcher
-- 무결성 검증 파이프라인
-- 메모리 + localStorage 캐싱
-
-### M8: 런타임 (진행 예정)
-- PortalManager (breakout 시스템)
-- DomMount/StyleApply 최적화
-- CSS 변수 기반 테마
-
-### M9-M11: 통합 & 문서화 (진행 예정)
-- 전체 렌더러 오케스트레이션
-- README 사용 가이드
-- 배포 패키지 최적화
+### M8: 프로덕션 준비
+- 메모리 사용량 최적화
+- 에러 핸들링 강화
+- 문서화 완료
 
 ---
 
@@ -172,37 +166,40 @@ applyChannels(element, baseTransform, channels) // DOM 적용
 
 ```json
 {
-  "version": "1.3",
+  "version": "2.0",
   "timebase": { "unit": "seconds", "fps": 30 },
   "stage": { "baseAspect": "16:9" },
-  "tracks": [
-    { 
-      "id": "subtitle", 
-      "type": "subtitle", 
-      "layer": 10,
-      "overlapPolicy": "push",
-      "defaultStyle": { "fontSizeRel": 0.05 }
+  "define": {
+    "speakerColors": {
+      "SPEAKER_01": "#4AA3FF",
+      "SPEAKER_02": "#FF4D4D"
     }
-  ],
-  "cues": [
-    {
-      "id": "cue-1",
-      "track": "subtitle", 
-      "root": {
-        "e_type": "text",
-        "text": "Hello World",
-        "absStart": 1.0,
-        "absEnd": 5.0,
-        "layout": { 
-          "position": { "x": 0.5, "y": 0.9 },
-          "anchor": "bc"
-        },
-        "pluginChain": [
-          { "name": "fadeIn", "relStart": 0, "relEnd": -1 }
-        ]
-      }
+  },
+  "tracks": [{
+    "id": "subtitle",
+    "type": "subtitle",
+    "layer": 10,
+    "defaultStyle": { "fontSize": "2rem" }
+  }],
+  "cues": [{
+    "id": "cue-1",
+    "track": "subtitle",
+    "displayTime": [1.0, 5.0],
+    "domLifetime": [0.5, 5.5],
+    "root": {
+      "id": "text1",
+      "e_type": "text",
+      "text": "Hello World",
+      "layout": {
+        "position": { "x": 0.5, "y": 0.9 },
+        "anchor": "bc"
+      },
+      "pluginChain": [{
+        "name": "fadeIn",
+        "time_offset": [0, 0.5]
+      }]
     }
-  ]
+  }]
 }
 ```
 
@@ -250,21 +247,33 @@ pnpm release           # NPM 배포
 
 ```
 src/
-├── types/           # M1: TypeScript 타입 정의
-├── utils/time.ts    # M2: 시간 계산 유틸리티
-├── parser/          # M3: ScenarioParser (JSON 검증)
-├── composer/        # M4: PluginChainComposer (합성)
-├── runtime/         # M4: StyleApply, plugins/Builtin
-├── layout/          # M5: LayoutEngine (일부 구현)
-├── controller/      # 커스텀 UI 컨트롤러
-└── index.ts         # 메인 API 진입점
+├── types/              # v2.0 타입 정의
+│   ├── scenario-v2.ts  # v2.0 시나리오 타입
+│   ├── plugin-v3.ts    # Plugin API v3.0
+│   └── layout.ts       # 레이아웃 타입
+├── core/               # v2.0 렌더러 코어
+│   ├── RendererV2.ts   # 메인 렌더러
+│   ├── TimelineControllerV2.ts  # 시간 동기화
+│   └── CueManagerV2.ts # DOM 생명주기
+├── parser/             # v2.0 파서
+│   ├── ScenarioParserV2.ts  # v2.0 전용 파서
+│   ├── DefineResolver.ts    # Define 시스템
+│   └── InheritanceV2.ts     # 상속 처리
+├── utils/
+│   └── time-v2.ts      # v2.0 시간 유틸리티
+├── composer/
+│   └── PluginChainComposerV2.ts  # v2.0 플러그인 합성
+├── runtime/
+│   ├── plugins/BuiltinV2.ts      # 17개 내장 플러그인
+│   └── PluginContextV3.ts        # Plugin API v3.0 컨텍스트
+├── loader/dev/         # 개발용 플러그인 로더
+└── index.ts            # v2.0 Native API 진입점
 
 demo/
-├── index.html       # 8개 샘플 선택 드롭다운
-├── main.ts          # 데모 통합 로직
-└── samples/         # JSON 시나리오 파일들
-
-__tests__/           # 120개 테스트 (5개 모듈)
+├── index.html          # 데모 페이지
+├── main.ts             # v2.0 전용 데모 로직
+├── samples/            # v2.0 샘플 파일들
+└── plugin-server/      # 17개 플러그인 서버
 ```
 
 ---
@@ -275,28 +284,34 @@ __tests__/           # 120개 테스트 (5개 모듈)
 import { MotionTextRenderer } from 'motiontext-renderer';
 
 // 렌더러 초기화
-const renderer = new MotionTextRenderer();
+const renderer = new MotionTextRenderer(containerElement);
 
-// 비디오 연결
-await renderer.attachMedia(videoElement);
+// v2.0 시나리오 로드 (네이티브 처리)
+await renderer.loadConfig(scenarioV20Json);
 
-// 시나리오 로드
-await renderer.loadConfig(scenarioJson);
+// 비디오 연결 (requestVideoFrameCallback 동기화)
+renderer.attachMedia(videoElement);
 
-// 재생/일시정지/시킹
-renderer.play();
-renderer.pause();
-renderer.seek(10.5);
+// 외부 플러그인 등록
+import { registerExternalPlugin } from 'motiontext-renderer';
+
+registerExternalPlugin({
+  name: 'myEffect',
+  version: '1.0.0',
+  module: await import('/plugins/myEffect@1.0.0/index.mjs'),
+  baseUrl: '/plugins/myEffect@1.0.0/'
+});
 ```
 
 ---
 
 ## 📈 성능 특징
 
-- **비활성 플러그인 조기 필터링**: 시간 창 밖 플러그인 스킵
-- **CSS 변환 최적화**: 불필요한 transform 생략
-- **리플로우 최소화**: ResizeObserver + throttle (M5)
-- **테스트 주도**: 120개 테스트로 회귀 방지
+- **v2.0 Native**: 변환 레이어 없이 직접 처리로 성능 최적화
+- **Define 사전 해석**: 런타임 참조 해석 최소화
+- **시간 배열 캐싱**: computePluginWindow 결과 캐시
+- **DOM 생명주기**: domLifetime 기반 효율적 DOM 관리
+- **플러그인 필터링**: 시간 창 밖 플러그인 조기 제외
 
 ---
 
@@ -314,9 +329,9 @@ renderer.seek(10.5);
 - **라이브러리 빌드**: `pnpm build` → ES/CJS 모듈 생성 (`dist/`)
 
 ### 테스트 환경
-- **Vitest**: 120개 테스트 (5개 모듈별 분할)
-- **단일 테스트**: `pnpm test src/utils/__tests__/time.test.ts` 
-- **커버리지**: `pnpm test:coverage` (c8 기반)
+- **Vitest**: jsdom 환경에서 120개+ 테스트
+- **단일 테스트**: `pnpm test src/utils/__tests__/time-v2.test.ts`
+- **커버리지**: `pnpm test:coverage` (v8 기반)
 
 ### 플러그인 개발
 - **로컬 서버**: `pnpm plugin:server` → `http://localhost:3300`
@@ -340,4 +355,6 @@ renderer.seek(10.5);
 
 ---
 
-*최종 업데이트: 2025-09-09 - M4 플러그인 체인 합성 완료*
+*최종 업데이트: 2025-09-13 - M6 v2.0 네이티브 렌더러 완성*
+- @refactoringv2.md 앞쪽에 서술된 프롬프트를 보고 컨텍스트를 불러올 것, @refactoringv2.md 에 작업 완료사항을 업데이트할 것
+- 패키지매니저로 pnpm을 쓸 것

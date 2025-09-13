@@ -3,12 +3,13 @@
  * MotionText Renderer Demo Application
  */
 
-import { MotionTextRenderer, MotionTextController } from '../src/index';
-import { preloadPluginsForScenario } from './devPlugins';
+import { MotionTextRenderer, MotionTextController, configureMotionTextRenderer } from '../src/index';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
 import { AISubtitleEditor } from './aiEditor';
+import { preloadPluginsForScenario } from './devPlugins';
+import basicSample from './samples/basic.json';
 import pluginLocal from './samples/plugin_local.json';
 import pluginShowcase from './samples/plugin_showcase.json';
 import animatedSubtitle from './samples/animated_subtitle.json';
@@ -16,6 +17,10 @@ import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
 import cwiDemoFull from './samples/cwi_demo_full.json';
+import dualChannelTest from './samples/dual_channel_test.json';
+// v2.0 샘플들
+import basicV20 from './samples/v2/basic_v20.json';
+import withAssetsV20 from './samples/v2/with_assets_v20.json';
 import type { RendererConfig } from '../src/types';
 
 // DOM Elements
@@ -70,52 +75,7 @@ let aiEditor: AISubtitleEditor | null = null;
 
 // Sample configurations
 const sampleConfigs: Record<string, RendererConfig> = {
-  basic: {
-    version: '1.3',
-    timebase: { unit: 'seconds' },
-    stage: { baseAspect: '16:9' },
-    tracks: [
-      {
-        id: 'subtitle',
-        type: 'subtitle',
-        layer: 1,
-      },
-    ],
-    cues: [
-      {
-        id: 'cue1',
-        track: 'subtitle',
-        root: {
-          e_type: 'group',
-          children: [
-            {
-              e_type: 'text',
-              text: '안녕하세요! MotionText Renderer입니다.',
-              absStart: 2,
-              absEnd: 5,
-              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
-            },
-          ],
-        },
-      },
-      {
-        id: 'cue2',
-        track: 'subtitle',
-        root: {
-          e_type: 'group',
-          children: [
-            {
-              e_type: 'text',
-              text: '이것은 기본 자막 테스트입니다.',
-              absStart: 6,
-              absEnd: 9,
-              layout: { position: { x: 0.5, y: 0.85 }, anchor: 'bc' },
-            },
-          ],
-        },
-      },
-    ],
-  },
+  basic: basicSample as RendererConfig,
   animated_subtitle: animatedSubtitle as RendererConfig,
   animated_free_mixed: animatedFreeMixed as RendererConfig,
   tilted_box: tiltedBox as RendererConfig,
@@ -124,6 +84,13 @@ const sampleConfigs: Record<string, RendererConfig> = {
   plugin_showcase: pluginShowcase as RendererConfig,
   // CwI full demo (statically imported to avoid top-level await delay)
   cwi_demo_full: cwiDemoFull as RendererConfig,
+  
+  // v2.0 샘플들
+  'basic_v20 (v2.0)': basicV20 as RendererConfig,
+  'with_assets_v20 (v2.0)': withAssetsV20 as RendererConfig,
+  
+  // Dual-channel test (spin + typewriter)
+  'dual_channel_test (v2.0)': dualChannelTest as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -220,6 +187,15 @@ const sampleConfigs: Record<string, RendererConfig> = {
 
 // Initialize demo application
 async function initDemo() {
+  // Configure MotionTextRenderer for demo environment
+  configureMotionTextRenderer({
+    debugMode: false,   // Enable debug logs to test inheritance system
+    pluginServer: {
+      mode: 'auto',
+      serverBase: 'http://localhost:3300'
+    }
+  });
+  
   updateStatus('렌더러 준비됨');
   
   // Initialize AI Editor
@@ -276,10 +252,10 @@ async function initDemo() {
           (defaults as any).t1 = (defaults as any).t1 ?? Math.max(0.5, dur);
         }
         const txt = pluginPreviewText?.value || manifest.name;
-        // Center region with reasonable size
+        // Center region with reasonable size (position will be overridden to center in generator)
         const settings = {
           text: txt,
-          position: { x: 320, y: 180 },
+          position: { x: 0.5, y: 0.5 }, // This will be normalized to center in generator
           size: { width: 480, height: 120 },
           pluginParams: defaults,
         };
@@ -287,6 +263,8 @@ async function initDemo() {
           ? generateLoopedScenario(key, settings, dur)
           : generatePreviewScenario(key, settings, dur));
         await loadConfiguration(cfg);
+        // Reset video to start position for preview
+        video.currentTime = 0;
         if (renderer) { renderer.play(); }
       } catch (e) {
         console.error('플러그인 미리보기 생성 실패:', e);
@@ -391,11 +369,27 @@ async function loadConfiguration(config: RendererConfig) {
     (window as any).demoApp.renderer = renderer;
     updateStatus('렌더러 초기화됨');
 
-    // Preload plugins referenced by scenario (Dev loader)
-    await preloadPluginsForScenario(config);
-
-    // Load configuration and attach media
-    await renderer.loadConfig(config);
+    // v2.0 네이티브 처리: MotionTextRenderer가 내부적으로 처리
+    if ((config as any).version === '2.0') {
+      console.log('🔄 v2.0 시나리오 감지됨, 네이티브 처리 중...');
+      updateStatus('v2.0 플러그인 로드 중...');
+      
+      // v2.0 시나리오에서 사용되는 플러그인들을 미리 로드
+      await preloadPluginsForScenario(config as any);
+      
+      updateStatus('v2.0 네이티브 처리 중...');
+      // v2.0은 MotionTextRenderer가 직접 처리 (parseScenario + AssetManager 내장)
+      await renderer.loadConfig(config);
+      console.log('✅ v2.0 네이티브 처리 완료');
+    } else {
+      // v1.3 지원 중단 경고
+      console.warn('⚠️ v1.3 시나리오는 더 이상 지원되지 않습니다. v2.0으로 마이그레이션하세요.');
+      updateStatus('v1.3 지원 중단됨');
+      alert('v1.3 시나리오는 더 이상 지원되지 않습니다.\nv2.0 샘플을 사용해주세요.');
+      return;
+    }
+    
+    // Attach media
     renderer.attachMedia(video);
 
     // Mount custom controller overlay for testing
@@ -562,8 +556,7 @@ async function setPluginModeAuto(origin?: string, localBase?: string) {
 
 async function reloadCurrentConfig() {
   if (!currentConfig) return;
-  // Reuse existing flow to ensure plugins preload under new config
-  await preloadPluginsForScenario(currentConfig);
+  // Reload configuration with new plugin settings
   await loadConfiguration(currentConfig);
 }
 

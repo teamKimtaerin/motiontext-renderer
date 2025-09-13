@@ -1,7 +1,7 @@
-export default {
-  name: 'pulse',
-  version: '1.0.0',
-  animate(el, opts, ctx, duration) {
+export const name = 'pulse';
+export const version = '1.0.0';
+
+export function animate(el, opts, ctx, duration) {
     const maxScale = Number(opts?.maxScale ?? 1.2);
     const cycles = Math.max(1, Number(opts?.cycles ?? 1));
     if (ctx?.gsap) {
@@ -18,8 +18,7 @@ export default {
       const s = 1 + (maxScale - 1) * (0.5 - 0.5 * Math.cos(p * Math.PI * 2 * cycles));
       el.style.transform = `scale(${s}, ${s})`;
     };
-  },
-};
+}
 
 export function evalChannels(spec, p, ctx) {
   const maxScale = Number(spec?.params?.maxScale ?? 1.2);
