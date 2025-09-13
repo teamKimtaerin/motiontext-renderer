@@ -7,7 +7,9 @@ import type { TrackType } from '../types/scenario-v2';
 /**
  * Get default layout constraints for a track type
  */
-export function getDefaultTrackConstraints(trackType: TrackType): LayoutConstraints {
+export function getDefaultTrackConstraints(
+  trackType: TrackType
+): LayoutConstraints {
   switch (trackType) {
     case 'subtitle':
       return {
@@ -22,9 +24,9 @@ export function getDefaultTrackConstraints(trackType: TrackType): LayoutConstrai
         anchor: 'bc', // bottom-center default for subtitles
         constraintMode: 'flexible', // allow some flexibility
         breakoutEnabled: false, // subtitles shouldn't escape bounds
-        safeArea: { bottom: 0.1, left: 0.05, right: 0.05 } // safe area for subtitles
+        safeArea: { bottom: 0.1, left: 0.05, right: 0.05 }, // safe area for subtitles
       };
-      
+
     case 'free':
       return {
         mode: 'absolute',
@@ -38,9 +40,9 @@ export function getDefaultTrackConstraints(trackType: TrackType): LayoutConstrai
         anchor: 'cc', // center-center default for free elements
         constraintMode: 'breakout', // allow breaking constraints
         breakoutEnabled: true, // free elements can escape via portal
-        safeArea: undefined // no safe area restrictions
+        safeArea: undefined, // no safe area restrictions
       };
-      
+
     default:
       // Fallback to free track constraints
       return getDefaultTrackConstraints('free');
@@ -58,15 +60,15 @@ export function mergeConstraints(
   if (!parentConstraints && !childConstraints) {
     return getDefaultTrackConstraints('free');
   }
-  
+
   if (!parentConstraints) {
     return { ...childConstraints! };
   }
-  
+
   if (!childConstraints) {
     return { ...parentConstraints };
   }
-  
+
   // Child overrides parent
   return {
     mode: childConstraints.mode ?? parentConstraints.mode,
@@ -78,9 +80,11 @@ export function mergeConstraints(
     gap: childConstraints.gap ?? parentConstraints.gap,
     padding: childConstraints.padding ?? parentConstraints.padding,
     anchor: childConstraints.anchor ?? parentConstraints.anchor,
-    constraintMode: childConstraints.constraintMode ?? parentConstraints.constraintMode,
-    breakoutEnabled: childConstraints.breakoutEnabled ?? parentConstraints.breakoutEnabled,
-    safeArea: childConstraints.safeArea ?? parentConstraints.safeArea
+    constraintMode:
+      childConstraints.constraintMode ?? parentConstraints.constraintMode,
+    breakoutEnabled:
+      childConstraints.breakoutEnabled ?? parentConstraints.breakoutEnabled,
+    safeArea: childConstraints.safeArea ?? parentConstraints.safeArea,
   };
 }
 
@@ -105,16 +109,19 @@ export function calculateEffectiveConstraints(
   childConstraints: LayoutConstraints
 ): LayoutConstraints {
   const merged = mergeConstraints(parentConstraints, childConstraints);
-  
+
   // If parent is strict, child cannot exceed parent limits
   if (parentConstraints.constraintMode === 'strict') {
     return {
       ...merged,
       maxWidth: Math.min(merged.maxWidth ?? 1, parentConstraints.maxWidth ?? 1),
-      maxHeight: Math.min(merged.maxHeight ?? 1, parentConstraints.maxHeight ?? 1),
-      constraintMode: 'strict' // inherit strict mode
+      maxHeight: Math.min(
+        merged.maxHeight ?? 1,
+        parentConstraints.maxHeight ?? 1
+      ),
+      constraintMode: 'strict', // inherit strict mode
     };
   }
-  
+
   return merged;
 }

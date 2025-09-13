@@ -3,7 +3,7 @@
 //
 // 완전한 v2.0 전용 타입 정의. v1.3 의존성 없음.
 // - displayTime: [start, end] 배열 기반
-// - domLifetime: [start, end] 배열 기반  
+// - domLifetime: [start, end] 배열 기반
 // - time_offset: [start, end] 배열 기반
 // - 노드 ID 의무화
 // - Define 시스템 지원
@@ -67,11 +67,11 @@ export interface Timebase {
 
 export interface Stage {
   baseAspect: '16:9' | '9:16' | 'auto';
-  safeArea?: { 
-    top?: number; 
-    bottom?: number; 
-    left?: number; 
-    right?: number; 
+  safeArea?: {
+    top?: number;
+    bottom?: number;
+    left?: number;
+    right?: number;
   };
 }
 
@@ -165,7 +165,11 @@ export interface Scenario {
 // Inheritance System
 // ============================================================================
 
-export interface ResolvedNode extends Omit<BaseNode, 'displayTime' | 'layout' | 'style' | 'pluginChain' | 'effectScope'> {
+export interface ResolvedNode
+  extends Omit<
+    BaseNode,
+    'displayTime' | 'layout' | 'style' | 'pluginChain' | 'effectScope'
+  > {
   displayTime: TimeRange;
   layout?: Layout;
   style?: Style;
@@ -197,7 +201,11 @@ export interface ResolvedGroupNode extends ResolvedNode {
   children?: ResolvedNodeUnion[];
 }
 
-export type ResolvedNodeUnion = ResolvedTextNode | ResolvedImageNode | ResolvedVideoNode | ResolvedGroupNode;
+export type ResolvedNodeUnion =
+  | ResolvedTextNode
+  | ResolvedImageNode
+  | ResolvedVideoNode
+  | ResolvedGroupNode;
 
 // ============================================================================
 // Asset Management

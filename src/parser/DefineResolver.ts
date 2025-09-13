@@ -1,8 +1,11 @@
-import type { DefineSection, Scenario as ScenarioV2 } from '../types/scenario-v2';
+import type {
+  DefineSection,
+  Scenario as ScenarioV2,
+} from '../types/scenario-v2';
 
 /**
  * DefineResolver
- * 
+ *
  * Define 섹션의 참조를 해석하여 실제 값으로 치환하는 클래스
  * - "define.keyname" 형태의 문자열을 감지하여 실제 값으로 변환
  * - 중첩 객체와 배열 순회 지원
@@ -30,10 +33,10 @@ export class DefineResolver {
 
     // 시나리오의 define 섹션을 현재 defines와 병합
     const combinedDefines = { ...this.defines, ...scenario.define };
-    
+
     // 임시로 새 DefineResolver를 생성하여 병합된 defines 사용
     const tempResolver = new DefineResolver(combinedDefines);
-    
+
     // 시나리오 전체를 해석
     const resolved = tempResolver.resolveObject(scenario) as ScenarioV2;
 
@@ -58,7 +61,7 @@ export class DefineResolver {
 
     // 배열인 경우 각 요소 해석
     if (Array.isArray(obj)) {
-      return obj.map((item, index) => 
+      return obj.map((item, index) =>
         this.resolveObject(item, `${keyPath}[${index}]`)
       );
     }
@@ -91,7 +94,7 @@ export class DefineResolver {
 
     const fullPath = value.substring(7); // "define." 제거
     const pathParts = fullPath.split('.');
-    
+
     // 빈 키는 에러
     if (pathParts.length === 0 || !pathParts[0]) {
       throw new Error(`Invalid define reference: "${value}" at ${keyPath}`);
@@ -101,7 +104,9 @@ export class DefineResolver {
 
     // defines에서 키 찾기
     if (!(rootKey in this.defines)) {
-      throw new Error(`Undefined define key: "${rootKey}" referenced at ${keyPath}`);
+      throw new Error(
+        `Undefined define key: "${rootKey}" referenced at ${keyPath}`
+      );
     }
 
     // 정확한 경로 기반 순환 참조 검출
@@ -117,19 +122,28 @@ export class DefineResolver {
 
     try {
       // Root 값 해석
-      let resolved = this.resolveObject(this.defines[rootKey], `define.${rootKey}`);
-      
+      let resolved = this.resolveObject(
+        this.defines[rootKey],
+        `define.${rootKey}`
+      );
+
       // 중첩 경로가 있는 경우 깊이 탐색
       for (let i = 1; i < pathParts.length; i++) {
         const part = pathParts[i];
         if (resolved === null || resolved === undefined) {
-          throw new Error(`Cannot access "${part}" on ${typeof resolved} at ${keyPath}`);
+          throw new Error(
+            `Cannot access "${part}" on ${typeof resolved} at ${keyPath}`
+          );
         }
         if (typeof resolved !== 'object') {
-          throw new Error(`Cannot access property "${part}" on non-object at ${keyPath}`);
+          throw new Error(
+            `Cannot access property "${part}" on non-object at ${keyPath}`
+          );
         }
         if (!(part in resolved)) {
-          throw new Error(`Property "${part}" not found in define at ${keyPath}`);
+          throw new Error(
+            `Property "${part}" not found in define at ${keyPath}`
+          );
         }
         resolved = resolved[part];
       }

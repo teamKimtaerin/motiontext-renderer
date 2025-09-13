@@ -7,12 +7,14 @@
 // - 프레임 스냅 지원
 // - 배속 재생 안정성
 
+import { createLogger } from '../utils/logger';
+
 export interface TimelineOptions {
-  autoStart?: boolean;          // 비디오 재생 시 자동 시작
-  snapToFrame?: boolean;        // 프레임 단위 스냅
-  fps?: number;                 // 프레임률 (스냅 사용시)
-  syncTolerance?: number;       // 동기화 허용 오차 (초)
-  debugMode?: boolean;          // 디버그 모드
+  autoStart?: boolean; // 비디오 재생 시 자동 시작
+  snapToFrame?: boolean; // 프레임 단위 스냅
+  fps?: number; // 프레임률 (스냅 사용시)
+  syncTolerance?: number; // 동기화 허용 오차 (초)
+  debugMode?: boolean; // 디버그 모드
 }
 
 export interface TimelineState {
@@ -47,9 +49,11 @@ export class TimelineControllerV2 {
   private videoFrameId: number | null = null;
   private startTime = 0;
   private pausedTime = 0;
-  
+  private logger = createLogger('TimelineV2', null);
+
   // requestVideoFrameCallback 지원 감지
-  private supportsVideoFrame = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+  private supportsVideoFrame =
+    'requestVideoFrameCallback' in HTMLVideoElement.prototype;
 
   constructor(options: TimelineOptions = {}) {
     this.options = {
@@ -58,7 +62,7 @@ export class TimelineControllerV2 {
       fps: 30,
       syncTolerance: 0.1,
       debugMode: false,
-      ...options
+      ...options,
     };
 
     this.state = {
@@ -67,13 +71,15 @@ export class TimelineControllerV2 {
       playbackRate: 1,
       frameCount: 0,
       lastVideoTime: 0,
-      driftCorrection: 0
+      driftCorrection: 0,
     };
 
-    if (this.options.debugMode) {
-      console.log('[TimelineV2] Initialized with options:', this.options);
-      console.log('[TimelineV2] requestVideoFrameCallback supported:', this.supportsVideoFrame);
-    }
+    this.logger.setEnabled(this.options.debugMode);
+    this.logger.debug('Initialized with options:', this.options);
+    this.logger.debug(
+      'requestVideoFrameCallback supported:',
+      this.supportsVideoFrame
+    );
   }
 
   /**
@@ -95,10 +101,10 @@ export class TimelineControllerV2 {
     this.state.playbackRate = video.playbackRate;
 
     if (this.options.debugMode) {
-      console.log('[TimelineV2] Media attached:', {
+      this.logger.debug('Media attached:', {
         duration: video.duration,
         currentTime: video.currentTime,
-        playbackRate: video.playbackRate
+        playbackRate: video.playbackRate,
       });
     }
   }
@@ -113,9 +119,7 @@ export class TimelineControllerV2 {
     this.removeMediaListeners();
     this.media = null;
 
-    if (this.options.debugMode) {
-      console.log('[TimelineV2] Media detached');
-    }
+    this.logger.debug('Media detached');
   }
 
   /**
@@ -126,7 +130,7 @@ export class TimelineControllerV2 {
 
     this.state.isPlaying = true;
     this.startTime = performance.now() - (this.pausedTime || 0);
-    
+
     if (this.supportsVideoFrame && this.media) {
       this.startVideoFrameLoop();
     } else {
@@ -146,7 +150,7 @@ export class TimelineControllerV2 {
 
     this.state.isPlaying = false;
     this.pausedTime = performance.now() - this.startTime;
-    
+
     this.stopFrameLoop();
 
     if (this.options.debugMode) {
@@ -179,7 +183,7 @@ export class TimelineControllerV2 {
     this.state.currentTime = time;
     this.pausedTime = 0;
     this.startTime = performance.now();
-    
+
     // 비디오도 함께 이동
     if (this.media && Math.abs(this.media.currentTime - time) > 0.1) {
       this.media.currentTime = time;
@@ -200,7 +204,7 @@ export class TimelineControllerV2 {
     if (!Number.isFinite(rate) || rate <= 0) return;
 
     this.state.playbackRate = rate;
-    
+
     // 타임라인 시간 조정
     const now = performance.now();
     this.pausedTime = (now - this.startTime) * this.state.playbackRate;
@@ -248,22 +252,26 @@ export class TimelineControllerV2 {
 
       const videoTime = metadata.mediaTime || this.media!.currentTime;
       this.updateTimeFromVideo(videoTime);
-      
+
       const frameInfo: FrameInfo = {
         frameNumber: this.state.frameCount++,
         timestamp: now,
         videoTime,
         drift: this.state.driftCorrection,
-        frameRate: this.calculateFrameRate(now)
+        frameRate: this.calculateFrameRate(now),
       };
 
       this.notifyTick(frameInfo);
 
       // 다음 프레임 요청
-      this.videoFrameId = (this.media as any).requestVideoFrameCallback(videoFrameCallback);
+      this.videoFrameId = (this.media as any).requestVideoFrameCallback(
+        videoFrameCallback
+      );
     };
 
-    this.videoFrameId = (this.media as any).requestVideoFrameCallback(videoFrameCallback);
+    this.videoFrameId = (this.media as any).requestVideoFrameCallback(
+      videoFrameCallback
+    );
   }
 
   /**
@@ -274,13 +282,13 @@ export class TimelineControllerV2 {
       if (!this.state.isPlaying) return;
 
       this.updateTimeFromPerformance(now);
-      
+
       const frameInfo: FrameInfo = {
         frameNumber: this.state.frameCount++,
         timestamp: now,
         videoTime: this.media?.currentTime || 0,
         drift: this.state.driftCorrection,
-        frameRate: this.calculateFrameRate(now)
+        frameRate: this.calculateFrameRate(now),
       };
 
       this.notifyTick(frameInfo);
@@ -312,14 +320,16 @@ export class TimelineControllerV2 {
    */
   private updateTimeFromVideo(videoTime: number): void {
     const drift = Math.abs(this.state.currentTime - videoTime);
-    
+
     if (drift > this.options.syncTolerance) {
       // 드리프트가 허용 오차를 초과하면 비디오 시간으로 동기화
       this.state.currentTime = videoTime;
       this.state.driftCorrection = drift;
-      
+
       if (this.options.debugMode) {
-        console.warn(`[TimelineV2] Sync correction: drift=${drift.toFixed(3)}s`);
+        console.warn(
+          `[TimelineV2] Sync correction: drift=${drift.toFixed(3)}s`
+        );
       }
     } else {
       this.state.currentTime = videoTime;
@@ -333,14 +343,14 @@ export class TimelineControllerV2 {
    * performance.now()로부터 타임라인 시간 업데이트
    */
   private updateTimeFromPerformance(now: number): void {
-    const elapsed = (now - this.startTime) / 1000 * this.state.playbackRate;
+    const elapsed = ((now - this.startTime) / 1000) * this.state.playbackRate;
     this.state.currentTime = elapsed;
 
     // 비디오와 동기화 확인
     if (this.media && !this.media.paused) {
       const videoTime = this.media.currentTime;
       const drift = Math.abs(this.state.currentTime - videoTime);
-      
+
       if (drift > this.options.syncTolerance) {
         this.state.currentTime = videoTime;
         this.state.driftCorrection = drift;
@@ -362,7 +372,7 @@ export class TimelineControllerV2 {
    */
   private notifyTick(frameInfo?: FrameInfo): void {
     let currentTime = this.state.currentTime;
-    
+
     // 프레임 스냅 적용
     if (this.options.snapToFrame) {
       currentTime = this.snapToFrame(currentTime);

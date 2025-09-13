@@ -113,7 +113,7 @@ export interface LayoutConstraints {
   direction?: FlowDirection; // for flow mode
   maxWidth?: number; // normalized (0-1)
   maxHeight?: number; // normalized (0-1)
-  minWidth?: number; // normalized (0-1)  
+  minWidth?: number; // normalized (0-1)
   minHeight?: number; // normalized (0-1)
   gap?: number; // normalized gap for flow/grid
   padding?: Vec2Rel; // internal padding

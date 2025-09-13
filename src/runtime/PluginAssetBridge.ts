@@ -10,7 +10,7 @@ import type { AssetManager as PluginAssetManager } from './PluginContextV3';
  */
 export class PluginAssetManagerAdapter implements PluginAssetManager {
   constructor(
-    _coreAssetManager: AssetManager,  // TODO: 향후 코어 AssetManager 통합시 사용
+    _coreAssetManager: AssetManager, // TODO: 향후 코어 AssetManager 통합시 사용
     private pluginBaseUrl: string,
     private capabilities: string[] = []
   ) {}
@@ -36,18 +36,14 @@ export class PluginAssetManagerAdapter implements PluginAssetManager {
     }
 
     const fontUrl = this.getUrl(fontSpec.src);
-    const fontFace = new FontFace(
-      fontSpec.family,
-      `url("${fontUrl}")`,
-      {
-        weight: fontSpec.weight || 'normal',
-        style: fontSpec.style || 'normal',
-      }
-    );
+    const fontFace = new FontFace(fontSpec.family, `url("${fontUrl}")`, {
+      weight: fontSpec.weight || 'normal',
+      style: fontSpec.style || 'normal',
+    });
 
     await fontFace.load();
     document.fonts.add(fontFace);
-    
+
     // 플러그인이 로드한 폰트 추적 (정리를 위해)
     this.trackLoadedFont(fontSpec.family, fontFace);
   }
@@ -89,7 +85,7 @@ export class PluginAssetManagerAdapter implements PluginAssetManager {
    * 플러그인이 로드한 폰트 추적
    */
   private loadedFonts = new Set<FontFace>();
-  
+
   private trackLoadedFont(_family: string, fontFace: FontFace): void {
     this.loadedFonts.add(fontFace);
   }
@@ -133,30 +129,33 @@ export class PluginAudioSystem {
   private async getAudioContext(): Promise<AudioContext> {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
-      
+
       // 브라우저 autoplay 정책으로 인한 일시정지 상태 해제
       if (this.audioContext.state === 'suspended') {
         await this.audioContext.resume();
       }
     }
-    
+
     return this.audioContext;
   }
 
   /**
    * 오디오 재생
    */
-  async play(url: string, options: {
-    volume?: number;
-    loop?: boolean;
-    startTime?: number;
-  } = {}): Promise<void> {
+  async play(
+    url: string,
+    options: {
+      volume?: number;
+      loop?: boolean;
+      startTime?: number;
+    } = {}
+  ): Promise<void> {
     if (!this.hasCapability('asset-loading')) {
       throw new Error('Plugin does not have asset-loading capability');
     }
 
     const audioContext = await this.getAudioContext();
-    
+
     // 기존 재생 중단
     this.stop(url);
 
@@ -235,7 +234,7 @@ export class PluginAudioSystem {
   private async loadAudioBuffer(url: string): Promise<AudioBuffer> {
     const audioContext = await this.getAudioContext();
     const fullUrl = this.assetAdapter.getUrl(url);
-    
+
     const response = await fetch(fullUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch audio: ${response.status}`);
@@ -280,7 +279,7 @@ export class PluginPortalSystem {
   private originalParent: HTMLElement | null = null;
 
   constructor(
-    _effectsRoot: HTMLElement,  // TODO: effectsRoot 기반 portal 관리시 사용
+    _effectsRoot: HTMLElement, // TODO: effectsRoot 기반 portal 관리시 사용
     private stageContainer: HTMLElement,
     private capabilities: string[] = []
   ) {}
@@ -288,11 +287,13 @@ export class PluginPortalSystem {
   /**
    * effectsRoot 밖으로 탈출
    */
-  breakout(options: {
-    zIndex?: number;
-    className?: string;
-    appendTo?: 'body' | 'stage';
-  } = {}): HTMLElement {
+  breakout(
+    options: {
+      zIndex?: number;
+      className?: string;
+      appendTo?: 'body' | 'stage';
+    } = {}
+  ): HTMLElement {
     if (!this.hasCapability('portal-breakout')) {
       throw new Error('Plugin does not have portal-breakout capability');
     }
@@ -305,7 +306,7 @@ export class PluginPortalSystem {
     // 탈출용 컨테이너 생성
     this.breakoutElement = document.createElement('div');
     this.breakoutElement.className = options.className || 'mtx-plugin-breakout';
-    
+
     // 기본 스타일 설정
     this.breakoutElement.style.position = 'absolute';
     this.breakoutElement.style.top = '0';
@@ -316,9 +317,8 @@ export class PluginPortalSystem {
     this.breakoutElement.style.zIndex = String(options.zIndex || 1000);
 
     // 부모 요소 결정
-    const targetParent = options.appendTo === 'body' 
-      ? document.body 
-      : this.stageContainer;
+    const targetParent =
+      options.appendTo === 'body' ? document.body : this.stageContainer;
 
     targetParent.appendChild(this.breakoutElement);
     this.originalParent = targetParent;
@@ -375,10 +375,7 @@ export function createPluginAssetSystems(config: {
     config.capabilities
   );
 
-  const audioSystem = new PluginAudioSystem(
-    assetAdapter,
-    config.capabilities
-  );
+  const audioSystem = new PluginAudioSystem(assetAdapter, config.capabilities);
 
   const portalSystem = new PluginPortalSystem(
     config.effectsRoot,

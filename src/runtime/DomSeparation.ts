@@ -44,12 +44,12 @@ export function createBaseWrapper(
   if (!baseWrapper) {
     baseWrapper = document.createElement('div');
     baseWrapper.className = cfg.baseWrapperClass;
-    
+
     // 기본 스타일 설정
     baseWrapper.style.position = 'relative';
     baseWrapper.style.display = 'inline-block';
     baseWrapper.style.pointerEvents = 'none';
-    
+
     // CSS 변수 기반 transform 초기화
     if (cfg.enableCSSVariables) {
       initializeCSSVariables(baseWrapper);
@@ -62,7 +62,7 @@ export function createBaseWrapper(
         baseWrapper.appendChild(originalElement.firstChild);
       }
     }
-    
+
     originalElement.appendChild(baseWrapper);
   }
 
@@ -87,7 +87,7 @@ export function ensureEffectsRoot(
     effectsRoot = document.createElement('div');
     effectsRoot.className = cfg.effectsRootClass;
     effectsRoot.setAttribute('data-mtx-effects-root', '');
-    
+
     // effectsRoot 기본 스타일
     effectsRoot.style.position = 'relative';
     effectsRoot.style.pointerEvents = 'none';
@@ -117,7 +117,7 @@ function initializeCSSVariables(baseWrapper: HTMLElement): void {
   Object.entries(defaultChannels).forEach(([key, value]) => {
     const cssVar = `--mtx-${key}`;
     let cssValue: string;
-    
+
     switch (key) {
       case 'tx':
       case 'ty':
@@ -129,18 +129,18 @@ function initializeCSSVariables(baseWrapper: HTMLElement): void {
       default:
         cssValue = String(value);
     }
-    
+
     baseWrapper.style.setProperty(cssVar, cssValue);
   });
 
   // transform 및 opacity CSS 설정
-  baseWrapper.style.transform = 
+  baseWrapper.style.transform =
     'translateX(var(--mtx-tx, 0px)) ' +
     'translateY(var(--mtx-ty, 0px)) ' +
     'scaleX(var(--mtx-sx, 1)) ' +
     'scaleY(var(--mtx-sy, 1)) ' +
     'rotate(var(--mtx-rot, 0deg))';
-  
+
   baseWrapper.style.opacity = 'var(--mtx-opacity, 1)';
   baseWrapper.style.filter = 'var(--mtx-filter, none)';
 }
@@ -154,7 +154,7 @@ export function applyCSSVariableChannels(
 ): void {
   Object.entries(channels).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    
+
     const cssVar = `--mtx-${key}`;
     let cssValue: string;
 
@@ -191,20 +191,20 @@ export function legacyEnsureEffectsRoot(el: HTMLElement): HTMLElement {
   let root = el.querySelector(
     ':scope > [data-mtx-effects-root]'
   ) as HTMLElement | null;
-  
+
   if (!root) {
     root = document.createElement('div');
     root.setAttribute('data-mtx-effects-root', '');
     root.style.position = 'relative';
     root.style.pointerEvents = 'none';
-    
+
     if (getComputedStyle(el).position === 'static') {
       el.style.position = 'relative';
     }
-    
+
     el.appendChild(root);
   }
-  
+
   return root;
 }
 
@@ -218,7 +218,7 @@ export function applyDomSeparation(
 ): { baseWrapper: HTMLElement; effectsRoot: HTMLElement } {
   const baseWrapper = createBaseWrapper(originalElement, config);
   const effectsRoot = ensureEffectsRoot(baseWrapper, config);
-  
+
   return { baseWrapper, effectsRoot };
 }
 

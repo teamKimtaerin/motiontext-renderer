@@ -176,8 +176,8 @@ resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
     }
   },
   "tracks": [{
-    "id": "subtitle", 
-    "type": "subtitle", 
+    "id": "subtitle",
+    "type": "subtitle",
     "layer": 10,
     "defaultStyle": { "fontSize": "2rem" }
   }],
@@ -190,12 +190,12 @@ resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
       "id": "text1",
       "e_type": "text",
       "text": "Hello World",
-      "layout": { 
+      "layout": {
         "position": { "x": 0.5, "y": 0.9 },
         "anchor": "bc"
       },
       "pluginChain": [{
-        "name": "fadeIn", 
+        "name": "fadeIn",
         "time_offset": [0, 0.5]
       }]
     }
@@ -330,7 +330,7 @@ registerExternalPlugin({
 
 ### 테스트 환경
 - **Vitest**: jsdom 환경에서 120개+ 테스트
-- **단일 테스트**: `pnpm test src/utils/__tests__/time-v2.test.ts` 
+- **단일 테스트**: `pnpm test src/utils/__tests__/time-v2.test.ts`
 - **커버리지**: `pnpm test:coverage` (v8 기반)
 
 ### 플러그인 개발

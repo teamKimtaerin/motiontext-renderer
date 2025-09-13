@@ -16,7 +16,7 @@ export interface AssetManager {
    * 에셋 URL 생성 (베이스 URL 기준)
    */
   getUrl(path: string): string;
-  
+
   /**
    * 폰트 로드 및 등록 (권한 필요)
    */
@@ -26,12 +26,12 @@ export interface AssetManager {
     weight?: string;
     style?: string;
   }): Promise<void>;
-  
+
   /**
    * 이미지 프리로드 (권한 필요)
    */
   preloadImage?(url: string): Promise<HTMLImageElement>;
-  
+
   /**
    * 오디오 프리로드 (권한 필요)
    */
@@ -42,22 +42,25 @@ export interface AudioSystem {
   /**
    * 오디오 재생
    */
-  play(url: string, options?: {
-    volume?: number;
-    loop?: boolean;
-    startTime?: number;
-  }): Promise<void>;
-  
+  play(
+    url: string,
+    options?: {
+      volume?: number;
+      loop?: boolean;
+      startTime?: number;
+    }
+  ): Promise<void>;
+
   /**
    * 오디오 일시정지
    */
   pause(url: string): void;
-  
+
   /**
    * 볼륨 설정
    */
   setVolume(url: string, volume: number): void;
-  
+
   /**
    * 오디오 정지 및 해제
    */
@@ -74,12 +77,12 @@ export interface PortalSystem {
     className?: string;
     appendTo?: 'body' | 'stage';
   }): HTMLElement;
-  
+
   /**
    * 탈출 상태 해제
    */
   return(): void;
-  
+
   /**
    * 현재 탈출 상태인지 확인
    */
@@ -99,12 +102,12 @@ export interface PluginUtils {
    * 값 보간 (선형 보간 기본)
    */
   interpolate(from: any, to: any, progress: number, easing?: string): any;
-  
+
   /**
    * 이징 함수들
    */
   readonly easing: Record<string, (t: number) => number>;
-  
+
   /**
    * 색상 유틸리티
    */
@@ -121,31 +124,31 @@ export interface PluginUtils {
 export interface PluginContextV3 {
   // DOM 접근 (샌드박스)
   readonly container: HTMLElement; // effectsRoot
-  
+
   // 시나리오 정보 (읽기 전용)
   readonly scenario: ScenarioInfo;
-  
+
   // 에셋 관리
   readonly assets: AssetManager;
-  
+
   // 채널 시스템 (권한 필요: style-vars)
   readonly channels?: PluginChannelInterface;
-  
+
   // 포털 시스템 (권한 필요: portal-breakout)
   readonly portal?: PortalSystem;
-  
+
   // 오디오 시스템 (권한 필요: asset-loading)
   readonly audio?: AudioSystem;
-  
+
   // 렌더러 정보
   readonly renderer: RendererInfo;
-  
+
   // 유틸리티
   readonly utils: PluginUtils;
-  
+
   // 시간 관련 콜백
   onSeek?: (callback: (progress: number) => void) => void;
-  
+
   // 외부 라이브러리 (manifest.json의 peer 기준)
   readonly gsap?: any;
   readonly lottie?: any;
@@ -227,22 +230,33 @@ export const defaultUtils: PluginUtils = {
 
     // 색상 보간
     if (typeof from === 'string' && typeof to === 'string') {
-      if (from.startsWith('#') || to.startsWith('#') ||
-          from.startsWith('rgb') || to.startsWith('rgb')) {
+      if (
+        from.startsWith('#') ||
+        to.startsWith('#') ||
+        from.startsWith('rgb') ||
+        to.startsWith('rgb')
+      ) {
         return this.color.interpolate(from, to, t);
       }
     }
 
     // 배열 보간
     if (Array.isArray(from) && Array.isArray(to)) {
-      return from.map((f, i) => this.interpolate(f, to[i] || f, progress, easing));
+      return from.map((f, i) =>
+        this.interpolate(f, to[i] || f, progress, easing)
+      );
     }
 
     // 객체 보간
     if (typeof from === 'object' && typeof to === 'object') {
       const result: any = {};
       for (const key in from) {
-        result[key] = this.interpolate(from[key], to[key] || from[key], progress, easing);
+        result[key] = this.interpolate(
+          from[key],
+          to[key] || from[key],
+          progress,
+          easing
+        );
       }
       return result;
     }
@@ -255,7 +269,7 @@ export const defaultUtils: PluginUtils = {
     linear: (t: number) => t,
     easeIn: (t: number) => t * t,
     easeOut: (t: number) => t * (2 - t),
-    easeInOut: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    easeInOut: (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     backOut: (t: number) => {
       const c1 = 1.70158;
       const c3 = c1 + 1;
@@ -284,8 +298,10 @@ export const defaultUtils: PluginUtils = {
           };
         }
       }
-      
-      const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+
+      const rgbMatch = color.match(
+        /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+      );
       if (rgbMatch) {
         return {
           r: parseInt(rgbMatch[1], 10),
@@ -309,7 +325,7 @@ export const defaultUtils: PluginUtils = {
     interpolate(from: string, to: string, progress: number): string {
       const fromColor = this.parse(from);
       const toColor = this.parse(to);
-      
+
       if (!fromColor || !toColor) {
         return progress < 0.5 ? from : to;
       }

@@ -9,10 +9,11 @@
 
 import type { PluginSpec, Channels, ComposeMode } from '../types/plugin-v3';
 import type { TimeRange } from '../types/scenario-v2';
+import { createLogger } from '../utils/logger';
 import {
   isWithinTimeRange,
   progressInTimeRange,
-  computePluginWindowFromBase
+  computePluginWindowFromBase,
 } from '../utils/time-v2';
 
 export interface ComposerOptions {
@@ -30,9 +31,9 @@ export interface PluginEvaluationResult {
 }
 
 export type PluginEvaluator = (
-  plugin: PluginSpec,
-  progress: number,
-  context?: PluginEvaluationContext
+  _plugin: PluginSpec,
+  _progress: number,
+  _context?: PluginEvaluationContext
 ) => Channels;
 
 export interface PluginEvaluationContext {
@@ -48,14 +49,16 @@ export interface PluginEvaluationContext {
  */
 export class PluginChainComposerV2 {
   private options: Required<ComposerOptions>;
-  
+  private logger = createLogger('PluginChainComposerV2', null);
+
   constructor(options: ComposerOptions = {}) {
     this.options = {
       debugMode: false,
       maxActivePlugins: 10,
       skipInactivePlugins: true,
-      ...options
+      ...options,
     };
+    this.logger.setEnabled(this.options.debugMode);
   }
 
   /**
@@ -75,21 +78,21 @@ export class PluginChainComposerV2 {
     context?: PluginEvaluationContext
   ): Channels {
     if (!chain || chain.length === 0) return {};
-    
+
     const activePlugins = this.evaluatePlugins(
-      chain, 
-      currentTime, 
-      displayTime, 
+      chain,
+      currentTime,
+      displayTime,
       evaluator,
       context
     );
-    
+
     const channels = this.mergeChannels(activePlugins);
-    
+
     if (this.options.debugMode) {
       this.logDebugInfo(activePlugins, channels);
     }
-    
+
     return channels;
   }
 
@@ -105,27 +108,35 @@ export class PluginChainComposerV2 {
   ): PluginEvaluationResult[] {
     const results: PluginEvaluationResult[] = [];
     let activeCount = 0;
-    
+
     for (const plugin of chain) {
       // 최대 활성 플러그인 수 제한
       if (activeCount >= this.options.maxActivePlugins) {
         if (this.options.debugMode) {
-          console.warn(`[PluginChainComposerV2] Maximum active plugins (${this.options.maxActivePlugins}) reached`);
+          this.logger.debug(
+            `Maximum active plugins (${this.options.maxActivePlugins}) reached`
+          );
         }
         break;
       }
-      
-      const result = this.evaluatePlugin(plugin, currentTime, displayTime, evaluator, context);
-      
+
+      const result = this.evaluatePlugin(
+        plugin,
+        currentTime,
+        displayTime,
+        evaluator,
+        context
+      );
+
       if (result.isActive) {
         activeCount++;
       } else if (this.options.skipInactivePlugins) {
         continue; // 비활성 플러그인 건너뛰기
       }
-      
+
       results.push(result);
     }
-    
+
     return results;
   }
 
@@ -142,33 +153,41 @@ export class PluginChainComposerV2 {
     // time_offset 기반 플러그인 실행 창 계산
     // base_time 우선순위: plugin.base_time → displayTime
     const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-    const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+    const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+      '0%',
+      '100%',
+    ];
     const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
-    
+
     const isActive = isWithinTimeRange(currentTime, pluginWindow);
-    const progress = isActive ? progressInTimeRange(currentTime, pluginWindow) : 0;
-    
+    const progress = isActive
+      ? progressInTimeRange(currentTime, pluginWindow)
+      : 0;
+
     let channels: Channels = {};
-    
+
     if (isActive) {
       try {
         const evalContext = {
           ...context,
           currentTime,
-          displayTime
+          displayTime,
         };
         channels = evaluator(plugin, progress, evalContext);
       } catch (error) {
-        console.error(`[PluginChainComposerV2] Plugin evaluation error for "${plugin.name}":`, error);
+        console.error(
+          `[PluginChainComposerV2] Plugin evaluation error for "${plugin.name}":`,
+          error
+        );
       }
     }
-    
+
     return {
       plugin,
       channels,
       progress,
       window: pluginWindow,
-      isActive
+      isActive,
     };
   }
 
@@ -177,15 +196,16 @@ export class PluginChainComposerV2 {
    */
   private mergeChannels(results: PluginEvaluationResult[]): Channels {
     const finalChannels: Channels = {};
-    
+
     for (const result of results) {
       if (!result.isActive || !result.channels) continue;
-      
+
       const composeMode = (result.plugin.compose as ComposeMode) || 'replace';
-      const priority = (typeof result.plugin.priority === 'number') ? result.plugin.priority : 0;
+      const priority =
+        typeof result.plugin.priority === 'number' ? result.plugin.priority : 0;
       this.applyChannels(finalChannels, result.channels, composeMode, priority);
     }
-    
+
     return finalChannels;
   }
 
@@ -193,14 +213,14 @@ export class PluginChainComposerV2 {
    * 채널 적용 (합성 모드에 따라)
    */
   private applyChannels(
-    target: Channels, 
-    source: Channels, 
-    mode: ComposeMode, 
+    target: Channels,
+    source: Channels,
+    mode: ComposeMode,
     _priority: number = 0
   ): void {
     for (const [key, value] of Object.entries(source)) {
       if (value === undefined || value === null) continue;
-      
+
       switch (mode) {
         case 'add':
           if (typeof value === 'number' && typeof target[key] === 'number') {
@@ -209,7 +229,7 @@ export class PluginChainComposerV2 {
             target[key] = value;
           }
           break;
-          
+
         case 'multiply':
           if (typeof value === 'number' && typeof target[key] === 'number') {
             target[key] = (target[key] as number) * value;
@@ -217,7 +237,7 @@ export class PluginChainComposerV2 {
             target[key] = value;
           }
           break;
-          
+
         case 'replace':
         default:
           // 우선순위가 있는 경우 고려 (나중에 추가될 수 있음)
@@ -230,18 +250,23 @@ export class PluginChainComposerV2 {
   /**
    * 디버그 정보 로그
    */
-  private logDebugInfo(results: PluginEvaluationResult[], finalChannels: Channels): void {
-    const activePlugins = results.filter(r => r.isActive);
-    
+  private logDebugInfo(
+    results: PluginEvaluationResult[],
+    finalChannels: Channels
+  ): void {
+    const activePlugins = results.filter((r) => r.isActive);
+
     if (activePlugins.length === 0) return;
-    
-    console.log(`[PluginChainComposerV2] Active plugins: ${activePlugins.length}`);
-    
+
+    this.logger.debug(`Active plugins: ${activePlugins.length}`);
+
     for (const result of activePlugins) {
-      console.log(`  - ${result.plugin.name}: progress=${result.progress.toFixed(3)}, channels=${Object.keys(result.channels).join(',')}`);
+      this.logger.debug(
+        `  - ${result.plugin.name}: progress=${result.progress.toFixed(3)}, channels=${Object.keys(result.channels).join(',')}`
+      );
     }
-    
-    console.log(`[PluginChainComposerV2] Final channels:`, finalChannels);
+
+    this.logger.debug(`Final channels:`, finalChannels);
   }
 }
 
@@ -282,7 +307,10 @@ export function isPluginActive(
   displayTime: TimeRange
 ): boolean {
   const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+    '0%',
+    '100%',
+  ];
   const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
   return isWithinTimeRange(currentTime, pluginWindow);
 }
@@ -300,13 +328,16 @@ export function getPluginProgress(
   displayTime: TimeRange
 ): number {
   const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? ['0%', '100%'];
+  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+    '0%',
+    '100%',
+  ];
   const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
-  
+
   if (!isWithinTimeRange(currentTime, pluginWindow)) {
     return 0;
   }
-  
+
   return progressInTimeRange(currentTime, pluginWindow);
 }
 
@@ -317,13 +348,13 @@ export function getPluginProgress(
  * @param mode - 합성 모드
  */
 export function mergeChannelsByMode(
-  target: Channels, 
-  source: Channels, 
+  target: Channels,
+  source: Channels,
   mode: ComposeMode = 'replace'
 ): void {
   for (const [key, value] of Object.entries(source)) {
     if (value === undefined || value === null) continue;
-    
+
     switch (mode) {
       case 'add':
         if (typeof value === 'number' && typeof target[key] === 'number') {
@@ -332,7 +363,7 @@ export function mergeChannelsByMode(
           target[key] = value;
         }
         break;
-        
+
       case 'multiply':
         if (typeof value === 'number' && typeof target[key] === 'number') {
           target[key] = (target[key] as number) * value;
@@ -340,7 +371,7 @@ export function mergeChannelsByMode(
           target[key] = value;
         }
         break;
-        
+
       case 'replace':
       default:
         target[key] = value;
@@ -356,14 +387,14 @@ export function mergeChannelsByMode(
  */
 export function validateChannels(channels: Channels): Channels {
   const validated: Channels = {};
-  
+
   for (const [key, value] of Object.entries(channels)) {
     // undefined, null, NaN 값 제외
     if (value != null && !Number.isNaN(value)) {
       validated[key] = value;
     }
   }
-  
+
   return validated;
 }
 
@@ -381,6 +412,6 @@ export function getChannelsDebugInfo(channels: Channels): string {
       }
       return `${key}="${value}"`;
     });
-    
+
   return `{${entries.join(', ')}}`;
 }

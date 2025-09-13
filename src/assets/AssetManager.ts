@@ -2,12 +2,12 @@ import type { DefineAsset, AssetContext } from '../types/scenario-v2';
 
 /**
  * AssetManager
- * 
+ *
  * 기본 에셋 관리 (보안 검증 제외)
  * - 에셋 타입별 URL 해석 (font, image, video, audio)
  * - FontFace 기본 등록/해제 (무결성 검증 없이)
  * - Define 섹션의 에셋 참조 처리
- * 
+ *
  * 참고: M7에서 SHA-384 해시 및 서명 검증 추가 예정
  */
 export class AssetManager {
@@ -22,7 +22,7 @@ export class AssetManager {
       fonts: new Map(),
       images: new Map(),
       videos: new Map(),
-      audios: new Map()
+      audios: new Map(),
     };
   }
 
@@ -41,15 +41,17 @@ export class AssetManager {
    * @param defines Define 섹션 객체
    * @returns 추출된 에셋 배열
    */
-  private extractAssetsFromDefines(defines: Record<string, any>): Array<{ key: string; asset: DefineAsset }> {
+  private extractAssetsFromDefines(
+    defines: Record<string, any>
+  ): Array<{ key: string; asset: DefineAsset }> {
     const assets: Array<{ key: string; asset: DefineAsset }> = [];
-    
+
     for (const [key, value] of Object.entries(defines)) {
       if (this.isAssetDefinition(value)) {
         assets.push({ key, asset: value as DefineAsset });
       }
     }
-    
+
     return assets;
   }
 
@@ -72,7 +74,9 @@ export class AssetManager {
    * 에셋 배열을 순차적으로 로드
    * @param assets 로드할 에셋 배열
    */
-  private async loadAssets(assets: Array<{ key: string; asset: DefineAsset }>): Promise<void> {
+  private async loadAssets(
+    assets: Array<{ key: string; asset: DefineAsset }>
+  ): Promise<void> {
     for (const { key, asset } of assets) {
       try {
         await this.loadSingleAsset(key, asset);
@@ -89,7 +93,10 @@ export class AssetManager {
    * @param key 에셋 키
    * @param asset 에셋 정의
    */
-  private async loadSingleAsset(key: string, asset: DefineAsset): Promise<void> {
+  private async loadSingleAsset(
+    key: string,
+    asset: DefineAsset
+  ): Promise<void> {
     const resolvedUrl = this.resolveUrl(asset.url || asset.src);
 
     switch (asset.type) {
@@ -124,14 +131,13 @@ export class AssetManager {
     try {
       const fontFace = new FontFace(key, `url(${url})`);
       await fontFace.load();
-      
+
       // 브라우저 폰트 컨테이너에 추가
       document.fonts.add(fontFace);
-      
+
       // 컨텍스트에 등록
       this.context.fonts.set(key, fontFace);
       this.loadedFonts.set(key, fontFace);
-      
     } catch (error) {
       throw new Error(`Failed to load font "${key}" from ${url}: ${error}`);
     }
@@ -145,16 +151,16 @@ export class AssetManager {
   private async preloadImage(key: string, url: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      
+
       img.onload = () => {
         this.context.images.set(key, url);
         resolve();
       };
-      
+
       img.onerror = () => {
         reject(new Error(`Failed to preload image: ${url}`));
       };
-      
+
       img.src = url;
     });
   }
@@ -184,7 +190,11 @@ export class AssetManager {
    */
   private resolveUrl(url: string): string {
     // 이미 절대 URL인 경우 그대로 반환
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    if (
+      url.startsWith('http://') ||
+      url.startsWith('https://') ||
+      url.startsWith('data:')
+    ) {
       return url;
     }
 
@@ -277,9 +287,9 @@ export class AssetManager {
       images: this.context.images.size,
       videos: this.context.videos.size,
       audios: this.context.audios.size,
-      total: 0
+      total: 0,
     };
-    
+
     stats.total = stats.fonts + stats.images + stats.videos + stats.audios;
     return stats;
   }
@@ -310,7 +320,7 @@ export class AssetManager {
       ...this.context.fonts.keys(),
       ...this.context.images.keys(),
       ...this.context.videos.keys(),
-      ...this.context.audios.keys()
+      ...this.context.audios.keys(),
     ];
   }
 }

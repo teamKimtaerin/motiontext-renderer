@@ -21,12 +21,15 @@ export interface ChannelState {
 /**
  * 채널별 합성 규칙 정의
  */
-const CHANNEL_RULES: Record<string, {
-  defaultValue: any;
-  additive: boolean; // add 모드가 의미가 있는지
-  multiplicative: boolean; // multiply 모드가 의미가 있는지
-  unit?: string;
-}> = {
+const CHANNEL_RULES: Record<
+  string,
+  {
+    defaultValue: any;
+    additive: boolean; // add 모드가 의미가 있는지
+    multiplicative: boolean; // multiply 모드가 의미가 있는지
+    unit?: string;
+  }
+> = {
   tx: { defaultValue: 0, additive: true, multiplicative: false, unit: 'px' },
   ty: { defaultValue: 0, additive: true, multiplicative: false, unit: 'px' },
   sx: { defaultValue: 1, additive: false, multiplicative: true },
@@ -39,10 +42,10 @@ const CHANNEL_RULES: Record<string, {
 
 export class ChannelComposer {
   private channels = new Map<string, ChannelState>();
-  
+
   constructor() {
     // 표준 채널 초기화
-    Object.keys(CHANNEL_RULES).forEach(channelName => {
+    Object.keys(CHANNEL_RULES).forEach((channelName) => {
       this.initializeChannel(channelName);
     });
   }
@@ -51,12 +54,12 @@ export class ChannelComposer {
    * 채널 초기화
    */
   private initializeChannel(name: string): void {
-    const rule = CHANNEL_RULES[name] || { 
-      defaultValue: null, 
-      additive: false, 
-      multiplicative: false 
+    const rule = CHANNEL_RULES[name] || {
+      defaultValue: null,
+      additive: false,
+      multiplicative: false,
     };
-    
+
     this.channels.set(name, {
       baseValue: rule.defaultValue,
       compositions: [],
@@ -71,7 +74,7 @@ export class ChannelComposer {
     if (!this.channels.has(channel)) {
       this.initializeChannel(channel);
     }
-    
+
     const state = this.channels.get(channel)!;
     state.baseValue = value;
     this.recompute(channel);
@@ -80,22 +83,29 @@ export class ChannelComposer {
   /**
    * 플러그인에서 채널 값 합성
    */
-  compose(channel: string, value: any, mode: ComposeMode = 'replace', priority = 0): void {
+  compose(
+    channel: string,
+    value: any,
+    mode: ComposeMode = 'replace',
+    priority = 0
+  ): void {
     if (!this.channels.has(channel)) {
       this.initializeChannel(channel);
     }
 
     const state = this.channels.get(channel)!;
-    
+
     // 기존 동일 우선순위 항목 제거 (최신 것으로 교체)
-    state.compositions = state.compositions.filter(comp => comp.priority !== priority);
-    
+    state.compositions = state.compositions.filter(
+      (comp) => comp.priority !== priority
+    );
+
     // 새 합성 추가
     state.compositions.push({ name: channel, value, mode, priority });
-    
+
     // 우선순위별 정렬 (낮은 우선순위부터 적용)
     state.compositions.sort((a, b) => (a.priority || 0) - (b.priority || 0));
-    
+
     this.recompute(channel);
   }
 
@@ -106,7 +116,9 @@ export class ChannelComposer {
     const state = this.channels.get(channel);
     if (!state) return;
 
-    state.compositions = state.compositions.filter(comp => comp.priority !== priority);
+    state.compositions = state.compositions.filter(
+      (comp) => comp.priority !== priority
+    );
     this.recompute(channel);
   }
 
@@ -132,46 +144,50 @@ export class ChannelComposer {
    * 개별 합성 규칙 적용
    */
   private applyComposition(
-    base: any, 
-    value: any, 
+    base: any,
+    value: any,
     mode: ComposeMode,
-    rule?: typeof CHANNEL_RULES[string]
+    rule?: (typeof CHANNEL_RULES)[string]
   ): any {
     switch (mode) {
       case 'replace':
         return value;
-        
+
       case 'add':
         if (rule?.additive === false) {
-          console.warn(`Channel does not support additive composition, using replace`);
+          console.warn(
+            `Channel does not support additive composition, using replace`
+          );
           return value;
         }
-        
+
         // 숫자형: 덧셈
         if (typeof base === 'number' && typeof value === 'number') {
           return base + value;
         }
-        
+
         // 문자열: 공백으로 연결 (filter용)
         if (typeof base === 'string' && typeof value === 'string') {
           return base ? `${base} ${value}` : value;
         }
-        
+
         return value;
-        
+
       case 'multiply':
         if (rule?.multiplicative === false) {
-          console.warn(`Channel does not support multiplicative composition, using replace`);
+          console.warn(
+            `Channel does not support multiplicative composition, using replace`
+          );
           return value;
         }
-        
+
         // 숫자형: 곱셈
         if (typeof base === 'number' && typeof value === 'number') {
           return base * value;
         }
-        
+
         return value;
-        
+
       default:
         return value;
     }
@@ -182,11 +198,11 @@ export class ChannelComposer {
    */
   getComposedChannels(): ChannelValues {
     const result: ChannelValues = {};
-    
+
     this.channels.forEach((state, name) => {
       result[name] = state.finalValue;
     });
-    
+
     return result;
   }
 
@@ -202,7 +218,7 @@ export class ChannelComposer {
    * 채널 상태 초기화
    */
   reset(): void {
-    this.channels.forEach(state => {
+    this.channels.forEach((state) => {
       state.compositions = [];
       state.finalValue = state.baseValue;
     });
@@ -214,11 +230,11 @@ export class ChannelComposer {
   debugChannelState(channel: string): any {
     const state = this.channels.get(channel);
     if (!state) return null;
-    
+
     return {
       channel,
       baseValue: state.baseValue,
-      compositions: state.compositions.map(c => ({
+      compositions: state.compositions.map((c) => ({
         value: c.value,
         mode: c.mode,
         priority: c.priority,
@@ -244,10 +260,10 @@ export function syncChannelsToDOM(
   baseWrapper: HTMLElement
 ): void {
   const channels = composer.getComposedChannels();
-  
+
   Object.entries(channels).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    
+
     const cssVar = `--mtx-${key}`;
     let cssValue: string;
 
@@ -278,7 +294,8 @@ export class PluginChannelInterface {
    * 채널 값 설정
    */
   set(channel: string, value: any, mode: ComposeMode = 'replace'): void {
-    const priority = this.priorityOffset + this.getPriorityForPlugin(this.pluginId);
+    const priority =
+      this.priorityOffset + this.getPriorityForPlugin(this.pluginId);
     this.composer.compose(channel, value, mode, priority);
   }
 
@@ -300,9 +317,10 @@ export class PluginChannelInterface {
    * 플러그인 정리 (모든 합성 제거)
    */
   cleanup(): void {
-    const priority = this.priorityOffset + this.getPriorityForPlugin(this.pluginId);
-    
-    this.composer.getAvailableChannels().forEach(channel => {
+    const priority =
+      this.priorityOffset + this.getPriorityForPlugin(this.pluginId);
+
+    this.composer.getAvailableChannels().forEach((channel) => {
       this.composer.removeComposition(channel, priority);
     });
   }

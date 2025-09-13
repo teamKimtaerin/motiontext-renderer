@@ -3,7 +3,10 @@
 
 import type { ScenarioFileV1_3 } from '../types/scenario';
 import type { Scenario as ScenarioV2 } from '../types/scenario-v2';
-import { V13ToV20Migrator, type MigrationOptions } from '../migration/V13ToV20Migrator';
+import {
+  V13ToV20Migrator,
+  type MigrationOptions,
+} from '../migration/V13ToV20Migrator';
 
 export type CompatibleScenario = ScenarioFileV1_3 | ScenarioV2;
 
@@ -49,9 +52,8 @@ export class CompatibilityLayer {
    */
   process(scenario: CompatibleScenario | string): CompatibilityResult {
     // JSON 문자열인 경우 파싱
-    const parsedScenario = typeof scenario === 'string' 
-      ? JSON.parse(scenario) 
-      : scenario;
+    const parsedScenario =
+      typeof scenario === 'string' ? JSON.parse(scenario) : scenario;
 
     // 버전 감지
     const version = this.detectVersion(parsedScenario);
@@ -98,7 +100,9 @@ export class CompatibilityLayer {
 
       // v1.3을 v2.0 구조로 간단 변환 (deprecated 필드 유지)
       const basicMigrated = this.basicV13ToV20Conversion(parsedScenario);
-      warnings.push('v1.3 scenario detected: using basic compatibility mode with deprecated fields');
+      warnings.push(
+        'v1.3 scenario detected: using basic compatibility mode with deprecated fields'
+      );
 
       return {
         scenario: basicMigrated,
@@ -120,7 +124,7 @@ export class CompatibilityLayer {
     if (scenario.version) {
       if (scenario.version === '2.0') return '2.0';
       if (scenario.version === '1.3') return '1.3';
-      
+
       // 지원하지 않는 버전
       throw new Error(`Unsupported scenario version: ${scenario.version}`);
     }
@@ -162,12 +166,18 @@ export class CompatibilityLayer {
   }
 
   /**
-   * v1.3 고유 기능 감지  
+   * v1.3 고유 기능 감지
    */
   private hasV13Features(scenario: any): boolean {
     // deprecated 필드들 존재
-    const deprecatedFields = ['hintTime', 'absStart', 'absEnd', 'relStart', 'relEnd'];
-    
+    const deprecatedFields = [
+      'hintTime',
+      'absStart',
+      'absEnd',
+      'relStart',
+      'relEnd',
+    ];
+
     return this.hasAnyFields(scenario, deprecatedFields);
   }
 
@@ -176,7 +186,7 @@ export class CompatibilityLayer {
    */
   private hasTimeArrayFields(obj: any): boolean {
     const timeArrayFields = ['displayTime', 'domLifetime', 'time_offset'];
-    
+
     return this.searchForArrayFields(obj, timeArrayFields);
   }
 
@@ -193,7 +203,8 @@ export class CompatibilityLayer {
       if (Array.isArray(obj)) {
         obj.forEach(countNodes);
       } else if (typeof obj === 'object' && obj !== null) {
-        if (obj.e_type || obj.type) { // 노드로 판단되는 객체
+        if (obj.e_type || obj.type) {
+          // 노드로 판단되는 객체
           nodeCount++;
           if (obj.id) nodesWithId++;
         }
@@ -204,7 +215,7 @@ export class CompatibilityLayer {
     scenario.cues.forEach(countNodes);
 
     // 50% 이상의 노드가 ID를 가지면 v2.0으로 판단
-    return nodeCount > 0 && (nodesWithId / nodeCount) >= 0.5;
+    return nodeCount > 0 && nodesWithId / nodeCount >= 0.5;
   }
 
   /**
@@ -212,17 +223,19 @@ export class CompatibilityLayer {
    */
   private hasAnyFields(obj: any, fields: string[]): boolean {
     if (Array.isArray(obj)) {
-      return obj.some(item => this.hasAnyFields(item, fields));
+      return obj.some((item) => this.hasAnyFields(item, fields));
     } else if (typeof obj === 'object' && obj !== null) {
       // 현재 객체에서 확인
-      if (fields.some(field => field in obj)) {
+      if (fields.some((field) => field in obj)) {
         return true;
       }
-      
+
       // 자식 객체들에서 재귀 검색
-      return Object.values(obj).some(value => this.hasAnyFields(value, fields));
+      return Object.values(obj).some((value) =>
+        this.hasAnyFields(value, fields)
+      );
     }
-    
+
     return false;
   }
 
@@ -231,19 +244,25 @@ export class CompatibilityLayer {
    */
   private searchForArrayFields(obj: any, fields: string[]): boolean {
     if (Array.isArray(obj)) {
-      return obj.some(item => this.searchForArrayFields(item, fields));
+      return obj.some((item) => this.searchForArrayFields(item, fields));
     } else if (typeof obj === 'object' && obj !== null) {
       // 현재 객체에서 배열 필드 확인
       for (const field of fields) {
-        if (field in obj && Array.isArray(obj[field]) && obj[field].length === 2) {
+        if (
+          field in obj &&
+          Array.isArray(obj[field]) &&
+          obj[field].length === 2
+        ) {
           return true;
         }
       }
-      
+
       // 자식 객체들에서 재귀 검색
-      return Object.values(obj).some(value => this.searchForArrayFields(value, fields));
+      return Object.values(obj).some((value) =>
+        this.searchForArrayFields(value, fields)
+      );
     }
-    
+
     return false;
   }
 
@@ -267,9 +286,13 @@ export class CompatibilityLayer {
   /**
    * 시간 배열 재귀 검증
    */
-  private validateTimeArraysRecursive(obj: any, path: string, warnings: string[]): void {
+  private validateTimeArraysRecursive(
+    obj: any,
+    path: string,
+    warnings: string[]
+  ): void {
     const timeFields = ['displayTime', 'domLifetime', 'time_offset'];
-    
+
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
         this.validateTimeArraysRecursive(item, `${path}[${index}]`, warnings);
@@ -277,17 +300,26 @@ export class CompatibilityLayer {
     } else if (typeof obj === 'object' && obj !== null) {
       Object.entries(obj).forEach(([key, value]) => {
         const newPath = path ? `${path}.${key}` : key;
-        
+
         if (timeFields.includes(key)) {
           if (!Array.isArray(value) || value.length !== 2) {
-            warnings.push(`Invalid time array at ${newPath}: expected [start, end]`);
-          } else if (typeof value[0] !== 'number' || typeof value[1] !== 'number') {
-            warnings.push(`Invalid time array at ${newPath}: values must be numbers`);
+            warnings.push(
+              `Invalid time array at ${newPath}: expected [start, end]`
+            );
+          } else if (
+            typeof value[0] !== 'number' ||
+            typeof value[1] !== 'number'
+          ) {
+            warnings.push(
+              `Invalid time array at ${newPath}: values must be numbers`
+            );
           } else if (value[0] > value[1]) {
-            warnings.push(`Invalid time range at ${newPath}: start (${value[0]}) > end (${value[1]})`);
+            warnings.push(
+              `Invalid time range at ${newPath}: start (${value[0]}) > end (${value[1]})`
+            );
           }
         }
-        
+
         this.validateTimeArraysRecursive(value, newPath, warnings);
       });
     }
@@ -298,15 +330,15 @@ export class CompatibilityLayer {
    */
   private basicV13ToV20Conversion(scenario: any): ScenarioV2 {
     const converted = JSON.parse(JSON.stringify(scenario));
-    
+
     // 버전만 업데이트
     converted.version = '2.0';
-    
+
     // 빈 define 섹션 추가
     if (!converted.define) {
       converted.define = {};
     }
-    
+
     return converted as ScenarioV2;
   }
 
@@ -318,7 +350,10 @@ export class CompatibilityLayer {
    * 시나리오가 v2.0인지 확인
    */
   static isV20(scenario: any): boolean {
-    const layer = new CompatibilityLayer({ autoMigrate: false, showWarnings: false });
+    const layer = new CompatibilityLayer({
+      autoMigrate: false,
+      showWarnings: false,
+    });
     return layer.detectVersion(scenario) === '2.0';
   }
 
@@ -326,7 +361,10 @@ export class CompatibilityLayer {
    * 시나리오가 v1.3인지 확인
    */
   static isV13(scenario: any): boolean {
-    const layer = new CompatibilityLayer({ autoMigrate: false, showWarnings: false });
+    const layer = new CompatibilityLayer({
+      autoMigrate: false,
+      showWarnings: false,
+    });
     return layer.detectVersion(scenario) === '1.3';
   }
 

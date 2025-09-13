@@ -8,29 +8,43 @@
 // - 플러그인 v3.0 지원
 // - domLifetime 기반 DOM 생명주기
 
-import type { 
-  Scenario, 
-  Cue, 
-  ResolvedNodeUnion, 
-  TimeRange 
+import type {
+  Scenario,
+  Cue,
+  ResolvedNodeUnion,
+  TimeRange,
 } from '../types/scenario-v2';
 import type { PluginSpec, TimelineLike, SeekApplier } from '../types/plugin-v3';
 import type { Channels } from '../types/plugin-v3';
 import {
   isWithinTimeRange,
   progressInTimeRange,
-  computePluginWindowFromBase
+  computePluginWindowFromBase,
 } from '../utils/time-v2';
 import { DefineResolver } from '../parser/DefineResolver';
 import { devRegistry } from '../loader/dev/DevPluginRegistry';
-import { createPluginContextV3, type PluginContextV3 } from '../runtime/PluginContextV3';
+import {
+  createPluginContextV3,
+  type PluginContextV3,
+} from '../runtime/PluginContextV3';
 import { applyLayoutWithConstraints } from '../layout/LayoutEngine';
 import { getDefaultTrackConstraints } from '../layout/DefaultConstraints';
-import { TimelineControllerV2, type TimelineOptions, type TickCallback } from './TimelineControllerV2';
+import {
+  TimelineControllerV2,
+  type TimelineOptions,
+  type TickCallback,
+} from './TimelineControllerV2';
 import { Stage } from './Stage';
 import { TrackManager } from './TrackManager';
-import { applyDomSeparation, applyCSSVariableChannels } from '../runtime/DomSeparation';
-import { isBuiltinPlugin as isBuiltinPluginV2, evaluateBuiltinPlugin } from '../runtime/plugins/BuiltinV2';
+import {
+  applyDomSeparation,
+  applyCSSVariableChannels,
+} from '../runtime/DomSeparation';
+import {
+  isBuiltinPlugin as isBuiltinPluginV2,
+  evaluateBuiltinPlugin,
+} from '../runtime/plugins/BuiltinV2';
+import { createLogger, setGlobalDebug } from '../utils/logger';
 
 /**
  * DOM 플러그인 상태 관리 인터페이스
@@ -65,7 +79,7 @@ export class RendererV2 {
   private container: HTMLElement;
   private scenario: Scenario | null = null;
   private mountedElements = new Map<string, MountedElement>();
-  
+
   // DOM 플러그인 상태 관리: nodeId → pluginName → DomPluginState
   private domPluginStates = new Map<string, Map<string, DomPluginState>>();
   private options: Required<RendererOptions>;
@@ -74,7 +88,8 @@ export class RendererV2 {
   private timeline: TimelineControllerV2;
   private stage: Stage;
   private trackManager: TrackManager;
-  
+  private logger = createLogger('RendererV2', null);
+
   constructor(options: RendererOptions) {
     this.container = options.container;
     this.options = {
@@ -82,28 +97,32 @@ export class RendererV2 {
       snapToFrame: false,
       fps: 30,
       debugMode: false,
-      ...options
+      ...options,
     };
-    
+
     // Initialize TimelineController
     const timelineOptions: TimelineOptions = {
       autoStart: true,
       snapToFrame: this.options.snapToFrame,
       fps: this.options.fps,
-      debugMode: this.options.debugMode
+      debugMode: this.options.debugMode,
     };
     this.timeline = new TimelineControllerV2(timelineOptions);
-    
+
+    // Configure logger based on debug option
+    setGlobalDebug(this.options.debugMode);
+    this.logger.setEnabled(this.options.debugMode);
+
     // Register update callback
     this.timeline.onTick(this.onTimelineUpdate.bind(this));
-    
+
     // Initialize Stage
     this.stage = new Stage();
     this.stage.setContainer(this.container);
-    
+
     // Initialize TrackManager
     this.trackManager = new TrackManager();
-    
+
     this.setupContainer();
   }
 
@@ -114,51 +133,49 @@ export class RendererV2 {
   setScenario(scenario: Scenario): void {
     // 상속 시스템에서 사용할 수 있도록 전역 변수에 debugMode 설정
     (globalThis as any).__MTX_DEBUG_MODE__ = this.options.debugMode;
-    
-    if (this.options.debugMode) {
-      console.log('[RendererV2] setScenario called', {
-        version: scenario.version,
-        cuesCount: scenario.cues?.length || 0,
-        tracksCount: scenario.tracks?.length || 0,
-        hasDefine: !!scenario.define
-      });
-    }
-    
+
+    this.logger.debug('setScenario called', {
+      version: scenario.version,
+      cuesCount: scenario.cues?.length || 0,
+      tracksCount: scenario.tracks?.length || 0,
+      hasDefine: !!scenario.define,
+    });
+
     if (scenario.version !== '2.0') {
-      throw new Error(`RendererV2 only supports v2.0 scenarios, got version "${scenario.version}"`);
+      throw new Error(
+        `RendererV2 only supports v2.0 scenarios, got version "${scenario.version}"`
+      );
     }
-    
+
     this.scenario = scenario;
     this.unmountAll(); // 기존 요소들 정리
-    
+
     // DefineResolver 초기화 - scenario의 define 섹션으로 새로 생성
     if (scenario.define) {
       this.defineResolver = new DefineResolver(scenario.define);
     }
-    
+
     // Stage에 시나리오 설정
     this.stage.setScenario(scenario);
-    
+
     // TrackManager에 시나리오 설정
     this.trackManager.setScenario(scenario);
-    
-    if (this.options.debugMode) {
-      console.log('[RendererV2] Scenario loaded:', {
-        version: scenario.version,
-        cueCount: scenario.cues.length,
-        trackCount: scenario.tracks.length,
-        container: {
-          width: this.container.clientWidth,
-          height: this.container.clientHeight,
-          styles: {
-            position: this.container.style.position,
-            overflow: this.container.style.overflow,
-            visibility: getComputedStyle(this.container).visibility,
-            display: getComputedStyle(this.container).display
-          }
-        }
-      });
-    }
+
+    this.logger.debug('Scenario loaded:', {
+      version: scenario.version,
+      cueCount: scenario.cues.length,
+      trackCount: scenario.tracks.length,
+      container: {
+        width: this.container.clientWidth,
+        height: this.container.clientHeight,
+        styles: {
+          position: this.container.style.position,
+          overflow: this.container.style.overflow,
+          visibility: getComputedStyle(this.container).visibility,
+          display: getComputedStyle(this.container).display,
+        },
+      },
+    });
   }
 
   /**
@@ -167,26 +184,22 @@ export class RendererV2 {
    */
   private onTimelineUpdate: TickCallback = (currentTime) => {
     if (!this.scenario) {
-      if (this.options.debugMode) {
-        console.log(`[RendererV2] Timeline update but no scenario loaded`);
-      }
+      this.logger.debug('Timeline update but no scenario loaded');
       return;
     }
-    
+
     this.lastUpdateTime = currentTime;
-    
-    if (this.options.debugMode) {
-      console.log(`[RendererV2] Timeline update: t=${currentTime.toFixed(3)}s, cues=${this.scenario.cues.length}`);
-    }
-    
+
+    this.logger.debug(
+      `Timeline update: t=${currentTime.toFixed(3)}s, cues=${this.scenario.cues.length}`
+    );
+
     // Cue별 처리
     for (const cue of this.scenario.cues) {
       this.processCue(cue, currentTime);
     }
-    
-    if (this.options.debugMode) {
-      this.logDebugInfo(currentTime);
-    }
+
+    this.logDebugInfo(currentTime);
   };
 
   /**
@@ -206,17 +219,17 @@ export class RendererV2 {
       console.warn(`[RendererV2] Unknown track: ${cue.track}`);
       return;
     }
-    
+
     // domLifetime 체크 (DOM 생명주기 관리)
     if (cue.domLifetime) {
       const [domStart, domEnd] = cue.domLifetime as TimeRange;
-      
+
       if (!this.isWithinDomLifetime(currentTime, domStart, domEnd)) {
         this.unmountCue(cue);
         return;
       }
     }
-    
+
     // 루트 노드 처리
     this.processNode(cue.root as ResolvedNodeUnion, cue, track, currentTime);
   }
@@ -232,18 +245,21 @@ export class RendererV2 {
     parentNodeId?: string
   ): void {
     const nodeId = `${cue.id}:${node.id}`;
-    
+
     // displayTime 체크
-    const [displayStart, displayEnd] = node.displayTime || [-Infinity, Infinity];
+    const [displayStart, displayEnd] = node.displayTime || [
+      -Infinity,
+      Infinity,
+    ];
     const isActive = isWithinTimeRange(currentTime, [displayStart, displayEnd]);
-    
+
     if (isActive) {
       this.ensureMounted(node, cue, nodeId, track, parentNodeId);
       this.updateNode(node, currentTime, nodeId, track);
     } else {
       this.unmountNode(nodeId);
     }
-    
+
     // group 노드의 children 재귀 처리
     if (node.e_type === 'group' && node.children) {
       for (const child of node.children) {
@@ -263,19 +279,21 @@ export class RendererV2 {
     parentNodeId?: string
   ): void {
     if (this.mountedElements.has(nodeId)) return;
-    
+
     const element = this.createElement(node);
     // Annotate element with the composite node key (cueId:nodeId)
     try {
       (element as any).dataset = (element as any).dataset || {};
       element.dataset.nodeKey = nodeId;
       element.dataset.cueId = cue.id;
-    } catch {}
+    } catch (_e) {
+      void 0;
+    }
     this.mountedElements.set(nodeId, {
       node,
       element,
       cueId: cue.id,
-      mountTime: this.lastUpdateTime
+      mountTime: this.lastUpdateTime,
     });
     // Determine parent DOM element (group nesting support)
     let parentEl: HTMLElement | null = null;
@@ -286,39 +304,42 @@ export class RendererV2 {
 
     // Fallback to root container when no valid parent
     (parentEl || this.container).appendChild(element);
-    
+
     // 기본 스타일 적용 (레이아웃 + 트랙 기본값)
     this.applyBaseStyle(element, node, track);
-    
-    if (this.options.debugMode) {
-      console.log(`[RendererV2] Mounted node: ${nodeId}`, {
-        element: element,
-        nodetype: node.e_type,
-        text: node.e_type === 'text' ? (node as any).text : undefined,
-        layout: node.layout,
-        displayTime: node.displayTime,
-        trackDefaults: track?.defaultStyle,
-        styles: {
-          position: element.style.position,
-          left: element.style.left,
-          top: element.style.top,
-          transform: element.style.transform,
-          fontSize: element.style.fontSize,
-          color: element.style.color,
-          visibility: element.style.visibility,
-          display: element.style.display
-        }
-      });
-    }
+
+    this.logger.debug(`[RendererV2] Mounted node: ${nodeId}`, {
+      element: element,
+      nodetype: node.e_type,
+      text: node.e_type === 'text' ? (node as any).text : undefined,
+      layout: node.layout,
+      displayTime: node.displayTime,
+      trackDefaults: track?.defaultStyle,
+      styles: {
+        position: element.style.position,
+        left: element.style.left,
+        top: element.style.top,
+        transform: element.style.transform,
+        fontSize: element.style.fontSize,
+        color: element.style.color,
+        visibility: element.style.visibility,
+        display: element.style.display,
+      },
+    });
   }
 
   /**
    * 노드 업데이트 (플러그인 효과 적용)
    */
-  private updateNode(node: ResolvedNodeUnion, currentTime: number, nodeId: string, _track: any): void {
+  private updateNode(
+    node: ResolvedNodeUnion,
+    currentTime: number,
+    nodeId: string,
+    _track: any
+  ): void {
     const mounted = this.mountedElements.get(nodeId);
     if (!mounted) return;
-    
+
     // 플러그인 체인 처리
     if (node.pluginChain && node.pluginChain.length > 0) {
       const channels = this.processPluginChain(
@@ -327,7 +348,7 @@ export class RendererV2 {
         currentTime,
         mounted.element
       );
-      
+
       this.applyChannels(mounted.element, channels);
     }
   }
@@ -342,29 +363,42 @@ export class RendererV2 {
     element: HTMLElement
   ): Channels {
     const channels: Channels = {};
-    
+
     for (const plugin of pluginChain) {
       // base_time 우선순위: plugin.base_time → node.base_time → node.displayTime
-      const rawBase: any = (plugin as any).base_time ?? (node as any).base_time ?? node.displayTime;
+      const rawBase: any =
+        (plugin as any).base_time ??
+        (node as any).base_time ??
+        node.displayTime;
       const baseTime = this.resolveAllDefines(rawBase) as TimeRange;
 
       // time_offset은 절대 초 또는 백분율('%') 허용
       const rawOffset = (plugin as any).time_offset ?? ['0%', '100%'];
-      const resolvedOffset = this.resolveAllDefines(rawOffset) as [unknown, unknown];
+      const resolvedOffset = this.resolveAllDefines(rawOffset) as [
+        unknown,
+        unknown,
+      ];
 
       // 실행 창 계산
-      const pluginWindow = computePluginWindowFromBase(baseTime, resolvedOffset);
-      
+      const pluginWindow = computePluginWindowFromBase(
+        baseTime,
+        resolvedOffset
+      );
+
       if (isWithinTimeRange(currentTime, pluginWindow)) {
         const progress = progressInTimeRange(currentTime, pluginWindow);
-        
+
         const pluginChannels = this.evaluatePlugin(plugin, progress, element);
-        
+
         // 채널 병합 (compose 모드에 따라)
-        this.mergeChannels(channels, pluginChannels, plugin.compose || 'replace');
+        this.mergeChannels(
+          channels,
+          pluginChannels,
+          plugin.compose || 'replace'
+        );
       }
     }
-    
+
     return channels;
   }
 
@@ -381,22 +415,25 @@ export class RendererV2 {
           stage: { baseAspect: '16:9' as const },
           tracks: [],
           cues: [],
-          temp: value
+          temp: value,
         };
         const resolved = this.defineResolver.resolveScenario(tempScenario);
         return (resolved as any).temp;
       } catch (error) {
         if (this.options.debugMode) {
-          console.warn(`[RendererV2] Failed to resolve define "${value}":`, error);
+          console.warn(
+            `[RendererV2] Failed to resolve define "${value}":`,
+            error
+          );
         }
         return value; // 해석 실패 시 원본 값 반환
       }
     }
-    
+
     if (Array.isArray(value)) {
-      return value.map(v => this.resolveAllDefines(v));
+      return value.map((v) => this.resolveAllDefines(v));
     }
-    
+
     if (typeof value === 'object' && value !== null) {
       const resolved: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
@@ -404,71 +441,81 @@ export class RendererV2 {
       }
       return resolved;
     }
-    
+
     return value;
   }
 
   /**
    * 플러그인 평가 (내장 + 외부)
    */
-  private evaluatePlugin(plugin: PluginSpec, progress: number, element?: HTMLElement): Channels {
+  private evaluatePlugin(
+    plugin: PluginSpec,
+    progress: number,
+    element?: HTMLElement
+  ): Channels {
     // Define 참조를 사전 해석
     const resolvedParams = this.resolveAllDefines(plugin.params || {});
-    
+
     // 해석된 params로 플러그인 스펙 생성
     const resolvedPlugin: PluginSpec = {
       ...plugin,
-      params: resolvedParams as Record<string, any>
+      params: resolvedParams as Record<string, any>,
     };
-    
+
     // 플러그인 타입 감지 (하이브리드 지원)
     const pluginTypes = this.detectPluginType(resolvedPlugin);
-    
+
     if (pluginTypes.size === 0) {
       console.warn(`[RendererV2] Unknown plugin: ${plugin.name}`);
       return {};
     }
-    
+
     let channels: Channels = {};
-    
+
     // 내장 플러그인
     if (pluginTypes.has('builtin')) {
       return this.evaluateBuiltinPlugin(resolvedPlugin, progress) || {};
     }
-    
+
     // 채널 기반 플러그인
     if (pluginTypes.has('channel')) {
-      const channelResult = this.evaluateChannelPlugin(resolvedPlugin, progress, element);
+      const channelResult = this.evaluateChannelPlugin(
+        resolvedPlugin,
+        progress,
+        element
+      );
       channels = { ...channels, ...channelResult };
     }
-    
+
     // DOM 기반 플러그인 (채널을 반환하지 않지만 DOM 직접 조작)
     if (pluginTypes.has('dom') && element) {
       this.evaluateDomPlugin(resolvedPlugin, progress, element);
       // DOM 플러그인은 채널 반환하지 않음
     }
-    
+
     return channels;
   }
 
   /**
    * 플러그인 타입 감지 - v3.0 하이브리드 지원
    */
-  private detectPluginType(plugin: PluginSpec): Set<'builtin' | 'channel' | 'dom'> {
+  private detectPluginType(
+    plugin: PluginSpec
+  ): Set<'builtin' | 'channel' | 'dom'> {
     const types = new Set<'builtin' | 'channel' | 'dom'>();
-    
+
     // 내장 플러그인 확인
     if (this.isBuiltinPlugin(plugin.name)) {
       types.add('builtin');
       return types;
     }
-    
+
     // 외부 플러그인 확인
     const registeredPlugin = devRegistry.resolve(plugin.name);
     if (!registeredPlugin) {
       return types; // 빈 Set 반환
     }
-    
+
     // 1순위: 시나리오에 명시된 타입
     if (plugin.type) {
       if (plugin.type === 'channel') {
@@ -481,7 +528,7 @@ export class RendererV2 {
       }
       return types;
     }
-    
+
     // 2순위: Manifest에 명시된 타입
     if (registeredPlugin.manifest?.type) {
       const manifestType = registeredPlugin.manifest.type;
@@ -495,7 +542,7 @@ export class RendererV2 {
       }
       return types;
     }
-    
+
     // 3순위: 자동 감지 (폴백)
     if (typeof registeredPlugin.module?.evalChannels === 'function') {
       types.add('channel');
@@ -503,7 +550,7 @@ export class RendererV2 {
     if (typeof registeredPlugin.module?.animate === 'function') {
       types.add('dom');
     }
-    
+
     return types;
   }
 
@@ -518,7 +565,10 @@ export class RendererV2 {
   /**
    * 내장 플러그인 평가
    */
-  private evaluateBuiltinPlugin(plugin: PluginSpec, progress: number): Channels | null {
+  private evaluateBuiltinPlugin(
+    plugin: PluginSpec,
+    progress: number
+  ): Channels | null {
     // BuiltinV2.ts의 구현 사용 (21개 플러그인 지원)
     return evaluateBuiltinPlugin(plugin, progress);
   }
@@ -526,18 +576,26 @@ export class RendererV2 {
   /**
    * 채널 기반 플러그인 평가 (v3.0 API)
    */
-  private evaluateChannelPlugin(plugin: PluginSpec, progress: number, _element?: HTMLElement): Channels {
+  private evaluateChannelPlugin(
+    plugin: PluginSpec,
+    progress: number,
+    _element?: HTMLElement
+  ): Channels {
     const registeredPlugin = devRegistry.resolve(plugin.name);
     if (!registeredPlugin) {
-      console.warn(`[RendererV2] Plugin not found in registry: "${plugin.name}"`);
+      console.warn(
+        `[RendererV2] Plugin not found in registry: "${plugin.name}"`
+      );
       return {};
     }
 
     if (this.options.debugMode) {
-      console.log(`[RendererV2] Plugin found:`, {
+      // keep existing gate but delegate to logger to avoid no-console
+      this.logger.debug(`Plugin found:`, {
         name: plugin.name,
         hasModule: !!registeredPlugin.module,
-        hasEvalChannels: typeof registeredPlugin.module?.evalChannels === 'function'
+        hasEvalChannels:
+          typeof registeredPlugin.module?.evalChannels === 'function',
       });
     }
 
@@ -546,36 +604,49 @@ export class RendererV2 {
       try {
         // PluginContextV3 생성
         const context = this.createPluginContext(registeredPlugin.baseUrl);
-        
+
         if (this.options.debugMode) {
-          console.log(`[RendererV2] Calling evalChannels for "${plugin.name}" with:`, {
+          this.logger.debug(`Calling evalChannels for "${plugin.name}" with:`, {
             plugin,
             progress,
-            context
+            context,
           });
         }
-        
-        const channels = registeredPlugin.module.evalChannels(plugin, progress, context);
-        
+
+        const channels = registeredPlugin.module.evalChannels(
+          plugin,
+          progress,
+          context
+        );
+
         if (this.options.debugMode) {
-          console.log(`[RendererV2] evalChannels returned:`, channels);
+          this.logger.debug(`evalChannels returned:`, channels);
         }
-        
+
         return channels || {};
       } catch (error) {
-        console.error(`[RendererV2] Channel plugin "${plugin.name}" evalChannels failed:`, error);
+        console.error(
+          `[RendererV2] Channel plugin "${plugin.name}" evalChannels failed:`,
+          error
+        );
         return {};
       }
     }
 
-    console.warn(`[RendererV2] Plugin "${plugin.name}" has no evalChannels function`);
+    console.warn(
+      `[RendererV2] Plugin "${plugin.name}" has no evalChannels function`
+    );
     return {};
   }
 
   /**
    * DOM 기반 플러그인 평가 (v2.1 API)
    */
-  private evaluateDomPlugin(plugin: PluginSpec, progress: number, element?: HTMLElement): Channels {
+  private evaluateDomPlugin(
+    plugin: PluginSpec,
+    progress: number,
+    element?: HTMLElement
+  ): Channels {
     if (!element) {
       console.warn(`[RendererV2] DOM plugin "${plugin.name}" requires element`);
       return {};
@@ -584,30 +655,38 @@ export class RendererV2 {
     // Prefer composite node key if present; fallback to legacy nodeId (node-only)
     const nodeId = (element.dataset.nodeKey || element.dataset.nodeId)!;
     if (!nodeId) {
-      console.warn(`[RendererV2] Missing nodeKey/nodeId on element for plugin ${plugin.name}`);
+      console.warn(
+        `[RendererV2] Missing nodeKey/nodeId on element for plugin ${plugin.name}`
+      );
       return {};
     }
-    
+
     if (this.options.debugMode) {
-      console.log(`[RendererV2] DOM plugin "${plugin.name}" element structure:`, {
+      this.logger.debug(`DOM plugin "${plugin.name}" element structure:`, {
         nodeId,
         outerHTML: element.outerHTML,
-        children: Array.from(element.children).map(c => c.className),
+        children: Array.from(element.children).map((c) => c.className),
         effectsRootSelector: '.mtx-effects-root, [data-mtx-effects-root]',
-        effectsRootFound: !!element.querySelector('.mtx-effects-root, [data-mtx-effects-root]')
+        effectsRootFound: !!element.querySelector(
+          '.mtx-effects-root, [data-mtx-effects-root]'
+        ),
       });
     }
-    
-    const effectsRoot = element.querySelector('.mtx-effects-root, [data-mtx-effects-root]') as HTMLElement;
-    
+
+    const effectsRoot = element.querySelector(
+      '.mtx-effects-root, [data-mtx-effects-root]'
+    ) as HTMLElement;
+
     if (!effectsRoot) {
-      console.warn(`[RendererV2] DOM plugin "${plugin.name}" requires effectsRoot`);
+      console.warn(
+        `[RendererV2] DOM plugin "${plugin.name}" requires effectsRoot`
+      );
       return {};
     }
 
     // DOM 플러그인 상태 관리 (M3에서 구현 예정)
     this.manageDomPluginState(nodeId, plugin, effectsRoot, progress);
-    
+
     // DOM 플러그인은 채널 값을 반환하지 않음 (DOM 직접 조작)
     return {};
   }
@@ -615,17 +694,24 @@ export class RendererV2 {
   /**
    * DOM 플러그인 상태 관리
    */
-  private manageDomPluginState(nodeId: string, plugin: PluginSpec, effectsRoot: HTMLElement, progress: number): void {
+  private manageDomPluginState(
+    nodeId: string,
+    plugin: PluginSpec,
+    effectsRoot: HTMLElement,
+    progress: number
+  ): void {
     if (this.options.debugMode) {
-      console.log(`[RendererV2] manageDomPluginState: plugin="${plugin.name}", nodeId="${nodeId}", progress=${progress}`);
+      console.log(
+        `[RendererV2] manageDomPluginState: plugin="${plugin.name}", nodeId="${nodeId}", progress=${progress}`
+      );
     }
-    
+
     let nodeStates = this.domPluginStates.get(nodeId);
     if (!nodeStates) {
       nodeStates = new Map();
       this.domPluginStates.set(nodeId, nodeStates);
       if (this.options.debugMode) {
-        console.log(`[RendererV2] Created new nodeStates for nodeId: ${nodeId}`);
+        this.logger.debug(`Created new nodeStates for nodeId: ${nodeId}`);
       }
     }
 
@@ -641,15 +727,20 @@ export class RendererV2 {
     // 초기화가 안 된 경우 또는 DOM 요소가 없는 경우 초기화
     if (!state.initialized) {
       if (this.options.debugMode) {
-        console.log(`[RendererV2] Initializing DOM plugin: ${plugin.name}`);
+        this.logger.debug(`Initializing DOM plugin: ${plugin.name}`);
       }
       this.initializeDomPlugin(state, plugin, effectsRoot);
     } else {
       // 플러그인이 초기화되었다고 되어 있지만 DOM 요소가 실제로 존재하는지 확인
-      const needsReinitialization = this.checkDomPluginElements(plugin.name, effectsRoot);
+      const needsReinitialization = this.checkDomPluginElements(
+        plugin.name,
+        effectsRoot
+      );
       if (needsReinitialization) {
         if (this.options.debugMode) {
-          console.log(`[RendererV2] DOM elements missing for ${plugin.name}, reinitializing...`);
+          this.logger.debug(
+            `DOM elements missing for ${plugin.name}, reinitializing...`
+          );
         }
         // 상태 리셋 후 재초기화
         state.initialized = false;
@@ -657,7 +748,9 @@ export class RendererV2 {
         this.initializeDomPlugin(state, plugin, effectsRoot);
       } else {
         if (this.options.debugMode) {
-          console.log(`[RendererV2] Plugin ${plugin.name} already initialized and DOM elements exist`);
+          this.logger.debug(
+            `Plugin ${plugin.name} already initialized and DOM elements exist`
+          );
         }
       }
     }
@@ -665,25 +758,34 @@ export class RendererV2 {
     // seek 함수가 있으면 진행도 적용
     if (state.seekFunction) {
       if (this.options.debugMode) {
-        console.log(`[RendererV2] Applying progress ${progress} to ${plugin.name}`);
+        this.logger.debug(`Applying progress ${progress} to ${plugin.name}`);
       }
       if (typeof state.seekFunction === 'function') {
         // SeekApplier 타입: (progress: number) => void
         if (this.options.debugMode) {
-          console.log(`[RendererV2] Calling SeekApplier for ${plugin.name}`);
+          this.logger.debug(`Calling SeekApplier for ${plugin.name}`);
         }
         state.seekFunction(progress);
-      } else if (state.seekFunction && typeof state.seekFunction.progress === 'function') {
+      } else if (
+        state.seekFunction &&
+        typeof state.seekFunction.progress === 'function'
+      ) {
         // TimelineLike 타입: GSAP Timeline 등
         if (this.options.debugMode) {
-          console.log(`[RendererV2] Calling Timeline.progress for ${plugin.name}`);
+          this.logger.debug(`Calling Timeline.progress for ${plugin.name}`);
         }
         state.seekFunction.progress(progress);
       } else {
-        console.warn(`[RendererV2] Invalid seekFunction type for plugin ${plugin.name}:`, typeof state.seekFunction);
+        console.warn(
+          `[RendererV2] Invalid seekFunction type for plugin ${plugin.name}:`,
+          typeof state.seekFunction
+        );
       }
     } else {
-      console.warn(`[RendererV2] No seekFunction found for plugin ${plugin.name}, state:`, state);
+      console.warn(
+        `[RendererV2] No seekFunction found for plugin ${plugin.name}, state:`,
+        state
+      );
     }
   }
 
@@ -691,7 +793,10 @@ export class RendererV2 {
    * DOM 플러그인의 예상 DOM 요소가 존재하는지 확인
    * @returns true if reinitialization is needed (elements are missing)
    */
-  private checkDomPluginElements(pluginName: string, effectsRoot: HTMLElement): boolean {
+  private checkDomPluginElements(
+    pluginName: string,
+    effectsRoot: HTMLElement
+  ): boolean {
     switch (pluginName) {
       case 'glow':
         return !effectsRoot.querySelector('[data-glow]');
@@ -711,7 +816,11 @@ export class RendererV2 {
   /**
    * DOM 플러그인 초기화
    */
-  private initializeDomPlugin(state: DomPluginState, plugin: PluginSpec, effectsRoot: HTMLElement): void {
+  private initializeDomPlugin(
+    state: DomPluginState,
+    plugin: PluginSpec,
+    effectsRoot: HTMLElement
+  ): void {
     const registeredPlugin = devRegistry.resolve(plugin.name);
     if (!registeredPlugin?.module) {
       console.warn(`[RendererV2] DOM plugin not found: ${plugin.name}`);
@@ -729,11 +838,11 @@ export class RendererV2 {
           currentTime: 0,
           duration: 1,
           timeScale: 1,
-          fps: this.options.fps
+          fps: this.options.fps,
         },
         peerDeps: {
           gsap: (window as any).gsap,
-        }
+        },
       });
       const resolvedParams = this.resolveAllDefines(plugin.params || {});
 
@@ -753,8 +862,16 @@ export class RendererV2 {
 
         state.seekFunction = seekFn;
         // Safety: if plugin returned a GSAP-like timeline, pause it.
-        if (seekFn && typeof seekFn === 'object' && typeof (seekFn as any).pause === 'function') {
-          try { (seekFn as any).pause(0); } catch {}
+        if (
+          seekFn &&
+          typeof seekFn === 'object' &&
+          typeof (seekFn as any).pause === 'function'
+        ) {
+          try {
+            (seekFn as any).pause(0);
+          } catch (_e) {
+            void 0;
+          }
         }
       }
 
@@ -765,7 +882,10 @@ export class RendererV2 {
         console.log(`[RendererV2] DOM plugin initialized: ${plugin.name}`);
       }
     } catch (error) {
-      console.warn(`[RendererV2] DOM plugin init failed: ${plugin.name}`, error);
+      console.warn(
+        `[RendererV2] DOM plugin init failed: ${plugin.name}`,
+        error
+      );
     }
   }
 
@@ -776,7 +896,9 @@ export class RendererV2 {
     let nodeStates = this.domPluginStates.get(nodeId);
     // Backward compatibility: prior to fix, keys used bare node.id. Fallback to that.
     if (!nodeStates) {
-      const fallbackId = nodeId.includes(':') ? nodeId.split(':')[1] : undefined;
+      const fallbackId = nodeId.includes(':')
+        ? nodeId.split(':')[1]
+        : undefined;
       if (fallbackId) nodeStates = this.domPluginStates.get(fallbackId);
     }
     if (!nodeStates) return;
@@ -786,24 +908,36 @@ export class RendererV2 {
       const state = nodeStates.get(pluginName);
       if (state?.context && state.initialized) {
         // Timeline 정리
-        if (state.seekFunction && typeof state.seekFunction === 'object' && state.seekFunction.kill) {
+        if (
+          state.seekFunction &&
+          typeof state.seekFunction === 'object' &&
+          state.seekFunction.kill
+        ) {
           try {
             state.seekFunction.kill();
           } catch (error) {
-            console.warn(`[RendererV2] Timeline cleanup failed for ${pluginName}:`, error);
+            console.warn(
+              `[RendererV2] Timeline cleanup failed for ${pluginName}:`,
+              error
+            );
           }
         }
-        
+
         // 플러그인 정리
         const registeredPlugin = devRegistry.resolve(pluginName);
         if (registeredPlugin?.module?.cleanup) {
           try {
-            registeredPlugin.module.cleanup(state.context.targetElement || document.createElement('div'));
+            registeredPlugin.module.cleanup(
+              state.context.targetElement || document.createElement('div')
+            );
           } catch (error) {
-            console.warn(`[RendererV2] DOM plugin cleanup failed: ${pluginName}`, error);
+            console.warn(
+              `[RendererV2] DOM plugin cleanup failed: ${pluginName}`,
+              error
+            );
           }
         }
-        
+
         // 상태 리셋: 재진입 시 재초기화되도록 함
         state.initialized = false;
         state.seekFunction = undefined;
@@ -814,24 +948,36 @@ export class RendererV2 {
       for (const [name, state] of nodeStates) {
         if (state.context && state.initialized) {
           // Timeline 정리
-          if (state.seekFunction && typeof state.seekFunction === 'object' && state.seekFunction.kill) {
+          if (
+            state.seekFunction &&
+            typeof state.seekFunction === 'object' &&
+            state.seekFunction.kill
+          ) {
             try {
               state.seekFunction.kill();
             } catch (error) {
-              console.warn(`[RendererV2] Timeline cleanup failed for ${name}:`, error);
+              console.warn(
+                `[RendererV2] Timeline cleanup failed for ${name}:`,
+                error
+              );
             }
           }
-          
+
           // 플러그인 정리
           const registeredPlugin = devRegistry.resolve(name);
           if (registeredPlugin?.module?.cleanup) {
             try {
-              registeredPlugin.module.cleanup(state.context.targetElement || document.createElement('div'));
+              registeredPlugin.module.cleanup(
+                state.context.targetElement || document.createElement('div')
+              );
             } catch (error) {
-              console.warn(`[RendererV2] DOM plugin cleanup failed: ${name}`, error);
+              console.warn(
+                `[RendererV2] DOM plugin cleanup failed: ${name}`,
+                error
+              );
             }
           }
-          
+
           // 상태 리셋: 재진입 시 재초기화되도록 함
           state.initialized = false;
           state.seekFunction = undefined;
@@ -873,10 +1019,14 @@ export class RendererV2 {
   /**
    * 채널 병합
    */
-  private mergeChannels(target: Channels, source: Channels, mode: string): void {
+  private mergeChannels(
+    target: Channels,
+    source: Channels,
+    mode: string
+  ): void {
     for (const [key, value] of Object.entries(source)) {
       if (value === undefined) continue;
-      
+
       switch (mode) {
         case 'add':
           if (typeof value === 'number' && typeof target[key] === 'number') {
@@ -885,7 +1035,7 @@ export class RendererV2 {
             target[key] = value;
           }
           break;
-          
+
         case 'multiply':
           if (typeof value === 'number' && typeof target[key] === 'number') {
             target[key] = (target[key] as number) * value;
@@ -893,7 +1043,7 @@ export class RendererV2 {
             target[key] = value;
           }
           break;
-          
+
         case 'replace':
         default:
           target[key] = value;
@@ -910,10 +1060,10 @@ export class RendererV2 {
       console.log(`[RendererV2] applyChannels called`, {
         hasChannels: !!channels,
         channelCount: Object.keys(channels || {}).length,
-        channels: channels
+        channels: channels,
       });
     }
-    
+
     // 적용할 채널이 없으면 스킵
     if (!channels || Object.keys(channels).length === 0) {
       if (this.options.debugMode) {
@@ -921,33 +1071,38 @@ export class RendererV2 {
       }
       return;
     }
-    
+
     // baseWrapper를 찾아서 채널 적용
-    const baseWrapper = element.querySelector('.mtx-base-wrapper') as HTMLElement;
+    const baseWrapper = element.querySelector(
+      '.mtx-base-wrapper'
+    ) as HTMLElement;
     if (!baseWrapper) {
-      console.warn('[RendererV2] No baseWrapper found for channel application', {
-        element,
-        innerHTML: element.innerHTML,
-        classList: Array.from(element.classList),
-        children: Array.from(element.children).map(child => ({
-          tagName: child.tagName,
-          classList: Array.from(child.classList)
-        })),
-        channels
-      });
+      console.warn(
+        '[RendererV2] No baseWrapper found for channel application',
+        {
+          element,
+          innerHTML: element.innerHTML,
+          classList: Array.from(element.classList),
+          children: Array.from(element.children).map((child) => ({
+            tagName: child.tagName,
+            classList: Array.from(child.classList),
+          })),
+          channels,
+        }
+      );
       return;
     }
-    
+
     if (this.options.debugMode) {
       console.log(`[RendererV2] Applying channels to baseWrapper`, {
         baseWrapper: baseWrapper,
-        channels: channels
+        channels: channels,
       });
     }
-    
+
     // CSS 변수를 통한 채널 적용 (DomSeparation의 CSS 변수 시스템 사용)
     applyCSSVariableChannels(baseWrapper, channels);
-    
+
     if (this.options.debugMode) {
       console.log(`[RendererV2] Channels applied successfully`);
     }
@@ -959,22 +1114,22 @@ export class RendererV2 {
   private createElement(node: ResolvedNodeUnion): HTMLElement {
     // 1. 기본 요소 생성
     const originalElement = this.createOriginalElement(node);
-    
+
     // 2. DOM 분리 아키텍처 적용
     const { baseWrapper, effectsRoot } = applyDomSeparation(originalElement, {
       enableCSSVariables: true,
-      preserveExisting: true
+      preserveExisting: true,
     });
-    
+
     // 3. 콘텐츠를 effectsRoot로 이동
     this.moveContentToEffectsRoot(node, originalElement, effectsRoot);
-    
+
     // 4. 메타데이터 저장
     // Keep legacy nodeId (node-local id) for compatibility; composite is set in ensureMounted
     originalElement.dataset.nodeId = node.id;
     baseWrapper.dataset.baseWrapper = 'true';
     effectsRoot.dataset.effectsRoot = 'true';
-    
+
     if (this.options.debugMode) {
       console.log('[RendererV2] createElement completed', {
         nodeId: node.id,
@@ -982,10 +1137,10 @@ export class RendererV2 {
         outerHTML: originalElement.outerHTML,
         hasBaseWrapper: !!originalElement.querySelector('.mtx-base-wrapper'),
         hasEffectsRoot: !!originalElement.querySelector('.mtx-effects-root'),
-        innerHTML: originalElement.innerHTML
+        innerHTML: originalElement.innerHTML,
       });
     }
-    
+
     return originalElement;
   }
 
@@ -994,45 +1149,49 @@ export class RendererV2 {
    */
   private createOriginalElement(node: ResolvedNodeUnion): HTMLElement {
     let element: HTMLElement;
-    
+
     switch (node.e_type) {
       case 'text':
         element = document.createElement('div');
         element.textContent = node.text || '';
         element.className = 'mtx-text';
         break;
-        
+
       case 'image':
         element = document.createElement('img') as HTMLImageElement;
         (element as HTMLImageElement).src = node.src || '';
         (element as HTMLImageElement).alt = node.alt || '';
         element.className = 'mtx-image';
         break;
-        
+
       case 'video':
         element = document.createElement('video') as HTMLVideoElement;
         (element as HTMLVideoElement).src = node.src || '';
         (element as HTMLVideoElement).muted = node.muted ?? true;
         element.className = 'mtx-video';
         break;
-        
+
       case 'group':
         element = document.createElement('div');
         element.className = 'mtx-group';
         break;
-        
+
       default:
         element = document.createElement('div');
         element.className = 'mtx-unknown';
     }
-    
+
     return element;
   }
 
   /**
    * 콘텐츠를 effectsRoot로 이동
    */
-  private moveContentToEffectsRoot(node: ResolvedNodeUnion, originalElement: HTMLElement, effectsRoot: HTMLElement): void {
+  private moveContentToEffectsRoot(
+    node: ResolvedNodeUnion,
+    originalElement: HTMLElement,
+    effectsRoot: HTMLElement
+  ): void {
     switch (node.e_type) {
       case 'text':
         // 텍스트를 effectsRoot로 이동
@@ -1044,31 +1203,35 @@ export class RendererV2 {
           }
         }
         break;
-        
+
       case 'image':
-        // 이미지 속성을 effectsRoot의 img로 이동
-        const imgElement = document.createElement('img');
-        imgElement.src = (originalElement as HTMLImageElement).src;
-        imgElement.alt = (originalElement as HTMLImageElement).alt;
-        imgElement.style.width = '100%';
-        imgElement.style.height = '100%';
-        effectsRoot.appendChild(imgElement);
-        // 원본은 빈 상태로 유지
-        (originalElement as HTMLImageElement).src = '';
+        {
+          // 이미지 속성을 effectsRoot의 img로 이동
+          const imgElement = document.createElement('img');
+          imgElement.src = (originalElement as HTMLImageElement).src;
+          imgElement.alt = (originalElement as HTMLImageElement).alt;
+          imgElement.style.width = '100%';
+          imgElement.style.height = '100%';
+          effectsRoot.appendChild(imgElement);
+          // 원본은 빈 상태로 유지
+          (originalElement as HTMLImageElement).src = '';
+        }
         break;
-        
+
       case 'video':
-        // 비디오 속성을 effectsRoot의 video로 이동
-        const videoElement = document.createElement('video');
-        videoElement.src = (originalElement as HTMLVideoElement).src;
-        videoElement.muted = (originalElement as HTMLVideoElement).muted;
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
-        effectsRoot.appendChild(videoElement);
-        // 원본은 빈 상태로 유지
-        (originalElement as HTMLVideoElement).src = '';
+        {
+          // 비디오 속성을 effectsRoot의 video로 이동
+          const videoElement = document.createElement('video');
+          videoElement.src = (originalElement as HTMLVideoElement).src;
+          videoElement.muted = (originalElement as HTMLVideoElement).muted;
+          videoElement.style.width = '100%';
+          videoElement.style.height = '100%';
+          effectsRoot.appendChild(videoElement);
+          // 원본은 빈 상태로 유지
+          (originalElement as HTMLVideoElement).src = '';
+        }
         break;
-        
+
       case 'group':
         // 그룹은 effectsRoot를 컨테이너로 사용
         break;
@@ -1078,28 +1241,34 @@ export class RendererV2 {
   /**
    * 기본 스타일 적용 (새로운 constraints 시스템 사용)
    */
-  private applyBaseStyle(element: HTMLElement, node: ResolvedNodeUnion, track?: any): void {
+  private applyBaseStyle(
+    element: HTMLElement,
+    node: ResolvedNodeUnion,
+    track?: any
+  ): void {
     // Get track constraints if available
-    const trackConstraints = track?.defaultConstraints || (track?.type ? getDefaultTrackConstraints(track.type) : undefined);
-    
+    const trackConstraints =
+      track?.defaultConstraints ||
+      (track?.type ? getDefaultTrackConstraints(track.type) : undefined);
+
     // Apply layout with constraints system
     applyLayoutWithConstraints(
-      element, 
-      node.layout, 
+      element,
+      node.layout,
       trackConstraints,
       'cc', // default anchor
       {
         hasEffectScope: !!node.effectScope,
         stageSafe: this.scenario?.stage?.safeArea,
-        trackSafe: track?.safeArea
+        trackSafe: track?.safeArea,
       }
     );
-    
+
     // Merge styles: track defaults → node styles (node takes precedence)
     const trackDefaults = track?.defaultStyle || {};
     const nodeStyle = node.style || {};
     const mergedStyle = { ...trackDefaults, ...nodeStyle } as any;
-    
+
     // Apply merged styles
     if (mergedStyle.fontSizeRel) {
       // Convert relative size to pixels based on container size
@@ -1108,10 +1277,12 @@ export class RendererV2 {
       element.style.fontSize = `${mergedStyle.fontSizeRel * containerHeight}px`;
     }
     if (mergedStyle.color) element.style.color = mergedStyle.color;
-    if (mergedStyle.fontFamily) element.style.fontFamily = mergedStyle.fontFamily;
-    if (mergedStyle.fontWeight) element.style.fontWeight = String(mergedStyle.fontWeight);
+    if (mergedStyle.fontFamily)
+      element.style.fontFamily = mergedStyle.fontFamily;
+    if (mergedStyle.fontWeight)
+      element.style.fontWeight = String(mergedStyle.fontWeight);
     if (mergedStyle.align) element.style.textAlign = mergedStyle.align;
-    
+
     // Apply default text styling for text nodes without explicit style
     if (node.e_type === 'text' && !mergedStyle.fontSizeRel) {
       element.style.fontSize = '2rem'; // Default visible size
@@ -1123,11 +1294,13 @@ export class RendererV2 {
   /**
    * 유틸리티 메서드들
    */
-  private isWithinDomLifetime(time: number, start: number, end: number): boolean {
+  private isWithinDomLifetime(
+    time: number,
+    start: number,
+    end: number
+  ): boolean {
     return time >= start && time <= end;
   }
-
-
 
   private getTrack(trackId: string) {
     return this.trackManager.getTrackById(trackId);
@@ -1136,23 +1309,24 @@ export class RendererV2 {
   private unmountNode(nodeId: string): void {
     const mounted = this.mountedElements.get(nodeId);
     if (!mounted) return;
-    
+
     // DOM 플러그인 정리
     this.cleanupDomPlugin(nodeId);
-    
+
     mounted.element.remove();
     this.mountedElements.delete(nodeId);
-    
+
     if (this.options.debugMode) {
-      console.log(`[RendererV2] Unmounted node: ${nodeId}`);
+      this.logger.debug(`Unmounted node: ${nodeId}`);
     }
   }
 
   private unmountCue(cue: Cue): void {
-    const toRemove = Array.from(this.mountedElements.keys())
-      .filter(nodeId => nodeId.startsWith(`${cue.id}:`));
-    
-    toRemove.forEach(nodeId => this.unmountNode(nodeId));
+    const toRemove = Array.from(this.mountedElements.keys()).filter((nodeId) =>
+      nodeId.startsWith(`${cue.id}:`)
+    );
+
+    toRemove.forEach((nodeId) => this.unmountNode(nodeId));
   }
 
   private unmountAll(): void {
@@ -1164,16 +1338,17 @@ export class RendererV2 {
   private setupContainer(): void {
     this.container.style.position = 'relative';
     this.container.style.overflow = 'hidden';
-    
+
     // Ensure container has dimensions
     if (this.container.clientWidth === 0 || this.container.clientHeight === 0) {
       this.container.style.width = this.container.style.width || '100%';
       this.container.style.height = this.container.style.height || '100%';
-      this.container.style.minHeight = this.container.style.minHeight || '400px';
+      this.container.style.minHeight =
+        this.container.style.minHeight || '400px';
     }
-    
+
     if (this.options.debugMode) {
-      console.log('[RendererV2] Container setup:', {
+      this.logger.debug('Container setup:', {
         width: this.container.clientWidth,
         height: this.container.clientHeight,
         styles: {
@@ -1181,17 +1356,19 @@ export class RendererV2 {
           overflow: this.container.style.overflow,
           width: this.container.style.width,
           height: this.container.style.height,
-          minHeight: this.container.style.minHeight
-        }
+          minHeight: this.container.style.minHeight,
+        },
       });
     }
   }
 
   private logDebugInfo(currentTime: number): void {
     const mountedCount = this.mountedElements.size;
-    
+
     if (mountedCount > 0) {
-      console.log(`[RendererV2] t=${currentTime.toFixed(3)}s, mounted=${mountedCount}`);
+      this.logger.debug(
+        `t=${currentTime.toFixed(3)}s, mounted=${mountedCount}`
+      );
     }
   }
 
@@ -1202,13 +1379,13 @@ export class RendererV2 {
   attachMedia(media: HTMLVideoElement): void {
     this.timeline.attachMedia(media);
     this.stage.setMedia(media);
-    
+
     if (this.options.debugMode) {
       console.log('[RendererV2] Media attached:', {
         duration: media.duration,
         readyState: media.readyState,
         videoWidth: media.videoWidth,
-        videoHeight: media.videoHeight
+        videoHeight: media.videoHeight,
       });
     }
   }
@@ -1218,7 +1395,7 @@ export class RendererV2 {
    */
   detachMedia(): void {
     this.timeline.detachMedia();
-    
+
     if (this.options.debugMode) {
       console.log('[RendererV2] Media detached');
     }

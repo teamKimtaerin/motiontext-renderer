@@ -190,7 +190,7 @@ describe('v2.0 샘플 JSON 검증', () => {
       it('실제 v2.0 샘플들을 빠르게 처리한다', () => {
         const scenarios = [basicV20Json, withAssetsV20Json];
         
-        scenarios.forEach((jsonStr, index) => {
+        scenarios.forEach((jsonStr, _index) => {
           const startTime = performance.now();
           const scenario = JSON.parse(jsonStr) as ScenarioV2;
           const resolver = new DefineResolver();
@@ -304,7 +304,7 @@ describe('v2.0 샘플 JSON 검증', () => {
         expect(() => FieldMigration.validateNodeIds(scenario)).not.toThrow();
         
         // 시간 범위 검증
-        const textNode = scenario.cues[0].root.children![0];
+        const _textNode = scenario.cues[0].root.children![0];
         expect(() => FieldMigration.validateTimeRange(scenario.cues[0].domLifetime!, 'domLifetime')).not.toThrow();
       });
     });

@@ -32,7 +32,7 @@ export function parseScenario(input: unknown): Scenario {
     const version = raw.version || 'unknown';
     throw new Error(
       `Only v2.0 scenarios are supported, got version "${version}". ` +
-      'Use migration tools to convert v1.3 scenarios to v2.0.'
+        'Use migration tools to convert v1.3 scenarios to v2.0.'
     );
   }
 
@@ -85,17 +85,19 @@ export function detectScenarioVersion(input: unknown): string | null {
  * @param input - JSON 입력
  * @returns 성공/실패 결과
  */
-export function safeParseScenario(input: unknown): 
+export function safeParseScenario(
+  input: unknown
+):
   | { success: true; data: Scenario; version: '2.0' }
   | { success: false; error: string; version: string | null } {
-  
   const version = detectScenarioVersion(input);
-  
+
   try {
     const scenario = parseScenario(input);
     return { success: true, data: scenario, version: '2.0' };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown parsing error';
+    const message =
+      error instanceof Error ? error.message : 'Unknown parsing error';
     return { success: false, error: message, version };
   }
 }
@@ -106,9 +108,12 @@ export function safeParseScenario(input: unknown):
  * @param debugPath - 디버그 경로 (선택적)
  * @returns 파싱된 시나리오
  */
-export function parseScenarioDebug(input: unknown, debugPath?: string): Scenario {
+export function parseScenarioDebug(
+  input: unknown,
+  debugPath?: string
+): Scenario {
   const prefix = debugPath ? `[${debugPath}] ` : '';
-  
+
   try {
     return parseScenario(input);
   } catch (error) {

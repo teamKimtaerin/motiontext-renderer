@@ -183,7 +183,10 @@ export function applyLayoutWithConstraints(
     : opts.parentConstraints;
 
   // Check if this element should breakout of parent constraints
-  if (effectiveConstraints && shouldBreakout(effectiveConstraints, opts.hasEffectScope || false)) {
+  if (
+    effectiveConstraints &&
+    shouldBreakout(effectiveConstraints, opts.hasEffectScope || false)
+  ) {
     // TODO: Implement portal/breakout system
     // For now, fall back to absolute positioning
     applyNormalizedPosition(el, layout, defaultAnchor, opts);
@@ -195,10 +198,22 @@ export function applyLayoutWithConstraints(
 
   switch (mode) {
     case 'flow':
-      applyFlowContainerWithConstraints(el, layout, effectiveConstraints, defaultAnchor, opts);
+      applyFlowContainerWithConstraints(
+        el,
+        layout,
+        effectiveConstraints,
+        defaultAnchor,
+        opts
+      );
       break;
     case 'grid':
-      applyGridContainerWithConstraints(el, layout, effectiveConstraints, defaultAnchor, opts);
+      applyGridContainerWithConstraints(
+        el,
+        layout,
+        effectiveConstraints,
+        defaultAnchor,
+        opts
+      );
       break;
     case 'absolute':
     default:
@@ -224,33 +239,45 @@ function applyFlowContainerWithConstraints(
 ) {
   // Apply base positioning first
   applyNormalizedPosition(el, layout, defaultAnchor, opts);
-  
+
   // Set up flex container
   el.style.display = 'flex';
-  
+
   // Direction from constraints or default vertical
   const direction = constraints?.direction || 'vertical';
   el.style.flexDirection = direction === 'vertical' ? 'column' : 'row';
-  
+
   // Anchor-based alignment
   const anchor = layout?.anchor || constraints?.anchor || defaultAnchor;
-  
+
   // Cross-axis alignment (수평 정렬)
   const alignMap: Record<string, string> = {
-    tl: 'flex-start', tc: 'center', tr: 'flex-end',
-    cl: 'flex-start', cc: 'center', cr: 'flex-end',
-    bl: 'flex-start', bc: 'center', br: 'flex-end',
+    tl: 'flex-start',
+    tc: 'center',
+    tr: 'flex-end',
+    cl: 'flex-start',
+    cc: 'center',
+    cr: 'flex-end',
+    bl: 'flex-start',
+    bc: 'center',
+    br: 'flex-end',
   };
   el.style.alignItems = alignMap[anchor] || 'center';
-  
+
   // Main-axis alignment (수직 정렬 - flow direction 기준)
   const justifyMap: Record<string, string> = {
-    tl: 'flex-start', tc: 'flex-start', tr: 'flex-start',
-    cl: 'center', cc: 'center', cr: 'center',
-    bl: 'flex-end', bc: 'flex-end', br: 'flex-end',
+    tl: 'flex-start',
+    tc: 'flex-start',
+    tr: 'flex-start',
+    cl: 'center',
+    cc: 'center',
+    cr: 'center',
+    bl: 'flex-end',
+    bc: 'flex-end',
+    br: 'flex-end',
   };
   el.style.justifyContent = justifyMap[anchor] || 'center';
-  
+
   // Gap from constraints or layout
   const gap = constraints?.gap || layout?.gapRel || 0;
   if (gap && el.parentElement) {
@@ -258,7 +285,7 @@ function applyFlowContainerWithConstraints(
     const gapProp = direction === 'vertical' ? 'rowGap' : 'columnGap';
     el.style[gapProp] = `${Math.round(ph * gap)}px`;
   }
-  
+
   // Apply size constraints
   applyConstraintSizing(el, constraints);
 }
@@ -275,11 +302,11 @@ function applyGridContainerWithConstraints(
 ) {
   // Apply base positioning first
   applyNormalizedPosition(el, layout, defaultAnchor, opts);
-  
+
   // Set up grid container
   el.style.display = 'grid';
   (el.style as any).gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
-  
+
   // Gap from constraints
   const gap = constraints?.gap || layout?.gapRel || 0;
   if (gap && el.parentElement) {
@@ -288,16 +315,22 @@ function applyGridContainerWithConstraints(
     (el.style as any).rowGap = `${gapPx}px`;
     (el.style as any).columnGap = `${gapPx}px`;
   }
-  
+
   // Anchor-based grid alignment
   const anchor = layout?.anchor || constraints?.anchor || defaultAnchor;
   const hmap: Record<string, string> = {
-    tl: 'start', tc: 'center', tr: 'end',
-    cl: 'start', cc: 'center', cr: 'end',
-    bl: 'start', bc: 'center', br: 'end',
+    tl: 'start',
+    tc: 'center',
+    tr: 'end',
+    cl: 'start',
+    cc: 'center',
+    cr: 'end',
+    bl: 'start',
+    bc: 'center',
+    br: 'end',
   };
   (el.style as any).justifyItems = hmap[anchor] || 'center';
-  
+
   // Apply size constraints
   applyConstraintSizing(el, constraints);
 }
@@ -305,9 +338,12 @@ function applyGridContainerWithConstraints(
 /**
  * Apply size constraints to element
  */
-function applyConstraintSizing(el: HTMLElement, constraints?: LayoutConstraints) {
+function applyConstraintSizing(
+  el: HTMLElement,
+  constraints?: LayoutConstraints
+) {
   if (!constraints) return;
-  
+
   // Apply max/min constraints
   if (constraints.maxWidth !== undefined) {
     el.style.maxWidth = `${constraints.maxWidth * 100}%`;
@@ -321,7 +357,7 @@ function applyConstraintSizing(el: HTMLElement, constraints?: LayoutConstraints)
   if (constraints.minHeight !== undefined) {
     el.style.minHeight = `${constraints.minHeight * 100}%`;
   }
-  
+
   // Apply padding from constraints
   if (constraints.padding) {
     const px = constraints.padding.x || 0;
@@ -412,38 +448,58 @@ export function applyGridContainer(
  * This allows groups to control how their children are arranged independently of their own positioning
  */
 function applyChildrenLayout(
-  el: HTMLElement, 
+  el: HTMLElement,
   childrenLayout: NonNullable<Layout['childrenLayout']>
 ): void {
-  const { mode = 'flow', direction = 'horizontal', gap = 0, align = 'center', justify = 'center' } = childrenLayout;
-  
+  const {
+    mode = 'flow',
+    direction = 'horizontal',
+    gap = 0,
+    align = 'center',
+    justify = 'center',
+  } = childrenLayout;
+
   switch (mode) {
-    case 'flow':
+    case 'flow': {
       // Set up flexbox for children
       el.style.display = 'flex';
       el.style.flexDirection = direction === 'horizontal' ? 'row' : 'column';
-      
+
       // Alignment
-      const alignItems = align === 'start' ? 'flex-start' : align === 'end' ? 'flex-end' : 'center';
-      const justifyContent = justify === 'start' ? 'flex-start' : justify === 'end' ? 'flex-end' : 
-                            justify === 'space-between' ? 'space-between' : 'center';
-      
+      const alignItems =
+        align === 'start'
+          ? 'flex-start'
+          : align === 'end'
+            ? 'flex-end'
+            : 'center';
+      const justifyContent =
+        justify === 'start'
+          ? 'flex-start'
+          : justify === 'end'
+            ? 'flex-end'
+            : justify === 'space-between'
+              ? 'space-between'
+              : 'center';
+
       el.style.alignItems = alignItems;
       el.style.justifyContent = justifyContent;
-      
+
       // Gap
       if (gap && el.parentElement) {
-        const containerSize = direction === 'horizontal' ? 
-          (el.parentElement.clientWidth || 0) : (el.parentElement.clientHeight || 0);
+        const containerSize =
+          direction === 'horizontal'
+            ? el.parentElement.clientWidth || 0
+            : el.parentElement.clientHeight || 0;
         const gapProp = direction === 'horizontal' ? 'columnGap' : 'rowGap';
-        el.style[gapProp] = `${Math.round(containerSize * gap)}px`;
+        (el.style as any)[gapProp] = `${Math.round(containerSize * gap)}px`;
       }
       break;
-      
-    case 'grid':
+    }
+
+    case 'grid': {
       el.style.display = 'grid';
       el.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
-      
+
       if (gap && el.parentElement) {
         const containerSize = el.parentElement.clientHeight || 0;
         const gapPx = Math.round(containerSize * gap);
@@ -451,7 +507,8 @@ function applyChildrenLayout(
         (el.style as any).columnGap = `${gapPx}px`;
       }
       break;
-      
+    }
+
     case 'stack':
     default:
       // Stack children on top of each other (default behavior)

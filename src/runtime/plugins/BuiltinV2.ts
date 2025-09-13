@@ -32,9 +32,6 @@ export interface BuiltinPluginOptions {
   // shake
   intensity?: number; // 강도
   
-  // spin
-  turns?: number; // 회전 수
-  
   // 고급 옵션
   reverse?: boolean; // 효과 방향 반전
   loop?: boolean; // 반복
@@ -293,13 +290,6 @@ function evaluateElastic(progress: number, options: BuiltinPluginOptions): Chann
   const scale = progress + (elastic - progress) * elasticity;
   
   return { sx: scale, sy: scale };
-}
-
-function evaluateSpin(progress: number, options: BuiltinPluginOptions): Channels {
-  const turns = options.turns || 1; // 회전 수
-  const rotation = progress * 360 * turns;
-  
-  return { rot: rotation };
 }
 
 function evaluateFlip(progress: number, options: BuiltinPluginOptions): Channels {

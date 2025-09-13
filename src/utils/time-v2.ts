@@ -23,12 +23,12 @@ export function isWithinTimeRange(t: number, timeRange: TimeRange): boolean {
   if (!Array.isArray(timeRange) || timeRange.length !== 2) {
     return false;
   }
-  
+
   const [start, end] = timeRange;
   if (!Number.isFinite(t) || !Number.isFinite(start) || !Number.isFinite(end)) {
     return false;
   }
-  
+
   return t >= start && t <= end;
 }
 
@@ -39,23 +39,27 @@ export function isWithinTimeRange(t: number, timeRange: TimeRange): boolean {
  * @returns 0~1 사이의 진행도. 구간 밖이면 clamp됨
  */
 export function progressInTimeRange(
-  currentTime: number, 
+  currentTime: number,
   timeRange: TimeRange
 ): number {
   if (!Array.isArray(timeRange) || timeRange.length !== 2) {
     return 0;
   }
-  
+
   const [start, end] = timeRange;
-  if (!Number.isFinite(currentTime) || !Number.isFinite(start) || !Number.isFinite(end)) {
+  if (
+    !Number.isFinite(currentTime) ||
+    !Number.isFinite(start) ||
+    !Number.isFinite(end)
+  ) {
     return 0;
   }
-  
+
   const duration = end - start;
   if (duration <= 0) {
     return 0;
   }
-  
+
   const progress = (currentTime - start) / duration;
   return Math.max(0, Math.min(1, progress));
 }
@@ -68,32 +72,32 @@ export function progressInTimeRange(
  */
 export function computePluginWindow(
   displayTime: TimeRange,
-  timeOffset: TimeRange = [0, 1]  // 기본값을 [0, 1]로 변경
+  timeOffset: TimeRange = [0, 1] // 기본값을 [0, 1]로 변경
 ): TimeRange {
   if (!Array.isArray(displayTime) || displayTime.length !== 2) {
     throw new TypeError('displayTime must be [start, end] array');
   }
-  
+
   if (!Array.isArray(timeOffset) || timeOffset.length !== 2) {
     throw new TypeError('timeOffset must be [start, end] array');
   }
-  
+
   const [nodeStart, nodeEnd] = displayTime;
   const [offsetStart, offsetEnd] = timeOffset;
-  
+
   if (!Number.isFinite(nodeStart) || !Number.isFinite(nodeEnd)) {
     throw new TypeError('displayTime values must be finite numbers');
   }
-  
+
   if (!Number.isFinite(offsetStart) || !Number.isFinite(offsetEnd)) {
     throw new TypeError('timeOffset values must be finite numbers');
   }
-  
+
   // time_offset는 0~1 상대 비율로 처리
   const nodeDuration = nodeEnd - nodeStart;
   const pluginStart = nodeStart + nodeDuration * offsetStart;
   const pluginEnd = nodeStart + nodeDuration * offsetEnd;
-  
+
   return [pluginStart, pluginEnd];
 }
 
@@ -107,7 +111,11 @@ export function computePluginWindow(
  * - 2.5 (number) → baseStart + 2.5 (초)
  * - "-1.0" (string, % 없음) → baseStart + (-1.0)
  */
-function resolveOffsetToAbsolute(bound: unknown, baseStart: number, baseDuration: number): number {
+function resolveOffsetToAbsolute(
+  bound: unknown,
+  baseStart: number,
+  baseDuration: number
+): number {
   if (typeof bound === 'string') {
     const s = bound.trim();
     if (s.endsWith('%')) {
@@ -169,16 +177,16 @@ export function clampTimeRange(
   if (!Array.isArray(timeRange) || timeRange.length !== 2) {
     return [min, max];
   }
-  
+
   const [start, end] = timeRange;
-  
+
   // Handle NaN values by replacing with bounds
   const safeStart = Number.isFinite(start) ? start : min;
   const safeEnd = Number.isFinite(end) ? end : max;
-  
+
   const clampedStart = Math.max(min, Math.min(max, safeStart));
   const clampedEnd = Math.max(min, Math.min(max, safeEnd));
-  
+
   return [clampedStart, clampedEnd];
 }
 
@@ -191,12 +199,12 @@ export function getTimeRangeDuration(timeRange: TimeRange): number {
   if (!Array.isArray(timeRange) || timeRange.length !== 2) {
     return 0;
   }
-  
+
   const [start, end] = timeRange;
   if (!Number.isFinite(start) || !Number.isFinite(end)) {
     return 0;
   }
-  
+
   return Math.max(0, end - start);
 }
 
@@ -206,19 +214,26 @@ export function getTimeRangeDuration(timeRange: TimeRange): number {
  * @param range2 - 두 번째 시간 구간
  * @returns 겹치면 true
  */
-export function timeRangesOverlap(range1: TimeRange, range2: TimeRange): boolean {
+export function timeRangesOverlap(
+  range1: TimeRange,
+  range2: TimeRange
+): boolean {
   if (!Array.isArray(range1) || !Array.isArray(range2)) {
     return false;
   }
-  
+
   const [start1, end1] = range1;
   const [start2, end2] = range2;
-  
-  if (!Number.isFinite(start1) || !Number.isFinite(end1) || 
-      !Number.isFinite(start2) || !Number.isFinite(end2)) {
+
+  if (
+    !Number.isFinite(start1) ||
+    !Number.isFinite(end1) ||
+    !Number.isFinite(start2) ||
+    !Number.isFinite(end2)
+  ) {
     return false;
   }
-  
+
   return start1 <= end2 && start2 <= end1;
 }
 
@@ -231,21 +246,22 @@ export function unionTimeRanges(ranges: TimeRange[]): TimeRange | null {
   if (!Array.isArray(ranges) || ranges.length === 0) {
     return null;
   }
-  
-  const validRanges = ranges.filter(range => 
-    Array.isArray(range) && 
-    range.length === 2 && 
-    Number.isFinite(range[0]) && 
-    Number.isFinite(range[1])
+
+  const validRanges = ranges.filter(
+    (range) =>
+      Array.isArray(range) &&
+      range.length === 2 &&
+      Number.isFinite(range[0]) &&
+      Number.isFinite(range[1])
   );
-  
+
   if (validRanges.length === 0) {
     return null;
   }
-  
-  const allStarts = validRanges.map(range => range[0]);
-  const allEnds = validRanges.map(range => range[1]);
-  
+
+  const allStarts = validRanges.map((range) => range[0]);
+  const allEnds = validRanges.map((range) => range[1]);
+
   return [Math.min(...allStarts), Math.max(...allEnds)];
 }
 
@@ -272,11 +288,14 @@ export function snapToFrame(time: number, fps?: number): number {
  * @param fps - 프레임률
  * @returns 프레임에 맞춰진 시간 구간
  */
-export function snapTimeRangeToFrame(timeRange: TimeRange, fps?: number): TimeRange {
+export function snapTimeRangeToFrame(
+  timeRange: TimeRange,
+  fps?: number
+): TimeRange {
   if (!Array.isArray(timeRange) || timeRange.length !== 2 || !fps) {
     return timeRange;
   }
-  
+
   const [start, end] = timeRange;
   return [snapToFrame(start, fps), snapToFrame(end, fps)];
 }
@@ -298,26 +317,26 @@ export function computeRelativeTimeRange(
   if (!Array.isArray(parentRange) || parentRange.length !== 2) {
     throw new TypeError('parentRange must be [start, end] array');
   }
-  
+
   if (!Array.isArray(relativeRange) || relativeRange.length !== 2) {
     throw new TypeError('relativeRange must be [startPct, endPct] array');
   }
-  
+
   const [parentStart, parentEnd] = parentRange;
   const [startPct, endPct] = relativeRange;
-  
+
   if (!Number.isFinite(parentStart) || !Number.isFinite(parentEnd)) {
     throw new TypeError('parentRange values must be finite numbers');
   }
-  
+
   if (startPct < 0 || startPct > 1 || endPct < 0 || endPct > 1) {
     throw new RangeError('relative percentages must be between 0 and 1');
   }
-  
+
   const parentDuration = parentEnd - parentStart;
   const absoluteStart = parentStart + parentDuration * startPct;
   const absoluteEnd = parentStart + parentDuration * endPct;
-  
+
   return [absoluteStart, absoluteEnd];
 }
 
@@ -331,27 +350,31 @@ export function computeRelativeTimeRange(
  * @throws TypeError - 유효하지 않은 형식
  * @throws RangeError - start > end인 경우
  */
-export function validateTimeRange(timeRange: unknown): asserts timeRange is TimeRange {
+export function validateTimeRange(
+  timeRange: unknown
+): asserts timeRange is TimeRange {
   if (!Array.isArray(timeRange)) {
     throw new TypeError('timeRange must be an array');
   }
-  
+
   if (timeRange.length !== 2) {
     throw new TypeError('timeRange must have exactly 2 elements [start, end]');
   }
-  
+
   const [start, end] = timeRange;
-  
+
   if (!Number.isFinite(start)) {
     throw new TypeError('timeRange start must be a finite number');
   }
-  
+
   if (!Number.isFinite(end)) {
     throw new TypeError('timeRange end must be a finite number');
   }
-  
+
   if (start > end) {
-    throw new RangeError(`timeRange start (${start}) must not be greater than end (${end})`);
+    throw new RangeError(
+      `timeRange start (${start}) must not be greater than end (${end})`
+    );
   }
 }
 
@@ -378,7 +401,7 @@ export function isValidTimeRange(timeRange: unknown): timeRange is TimeRange {
  * @deprecated v2.0 네이티브 사용 권장
  */
 export function legacyAbsToDisplayTime(
-  absStart?: number, 
+  absStart?: number,
   absEnd?: number
 ): TimeRange | undefined {
   if (absStart != null && absEnd != null) {
@@ -392,7 +415,7 @@ export function legacyAbsToDisplayTime(
  * @deprecated v2.0 네이티브 사용 권장
  */
 export function legacyRelToTimeOffset(
-  relStart?: number, 
+  relStart?: number,
   relEnd?: number
 ): TimeRange | undefined {
   if (relStart != null || relEnd != null) {
