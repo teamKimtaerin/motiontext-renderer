@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { DefineResolver } from '../DefineResolver';
 import { FieldMigration } from '../FieldMigration';
 import { AssetManager } from '../../assets/AssetManager';
@@ -276,14 +276,27 @@ describe('v2.0 Integration Tests', () => {
 
       // AssetManager에서 에셋 정의 추출 테스트
       const assetManager = new AssetManager('http://localhost:3000/');
-      
-      // 에셋 로드 시도 (Node.js 환경에서는 에러가 발생하지만 무시됨)
-      try {
-        await assetManager.loadAssetsFromDefines(resolved.define || {});
-      } catch (error) {
-        // Node.js 환경에서의 에러는 무시
-        console.warn('Asset loading failed in test environment (expected)');
-      }
+
+      // jsdom 환경에서는 실제 로드가 일어나지 않아 Promise가 대기 상태가 될 수 있으므로
+      // FontFace/Image를 모킹하여 빠르게 실패하도록 처리한다.
+      // FontFace mock
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).FontFace = vi.fn().mockImplementation(() => ({
+        load: vi.fn().mockRejectedValue(new Error('unavailable')),
+      }));
+      // Image mock: immediately trigger onerror so preloadImage rejects and loadAssets swallows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).Image = vi.fn().mockImplementation(() => ({
+        set src(_v: string) {
+          setTimeout(() => this.onerror && this.onerror(new Error('unavailable')), 0);
+        },
+        get src() { return ''; },
+        onload: null,
+        onerror: null,
+      }));
+
+      // 에셋 로드 시도 (실패해도 내부에서 경고만 출력하고 계속됨)
+      await assetManager.loadAssetsFromDefines(resolved.define || {});
 
       // 에셋 정의가 있는지만 확인
       expect(resolved.define?.custom_font).toEqual({

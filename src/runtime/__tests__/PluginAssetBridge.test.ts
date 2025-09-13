@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   PluginAssetManagerAdapter,
   PluginAudioSystem,
@@ -32,9 +32,22 @@ describe('PluginAssetManagerAdapter', () => {
       global.FontFace = vi.fn().mockImplementation(() => ({
         load: vi.fn().mockResolvedValue(undefined),
       }));
-      global.document = {
-        fonts: { add: vi.fn() },
-      } as any;
+      // Do not replace the whole document; just define fonts set
+      Object.defineProperty(document as any, 'fonts', {
+        value: { add: vi.fn() },
+        configurable: true,
+        writable: false,
+      });
+    });
+
+    afterEach(() => {
+      // cleanup mocked fonts
+      try {
+        // @ts-expect-error cleanup
+        delete (document as any).fonts;
+      } catch (_e) {
+        void 0; // ignore cleanup errors in JSDOM
+      }
     });
 
     it('loads font when asset-loading capability is present', async () => {
@@ -136,12 +149,13 @@ describe('PluginAssetManagerAdapter', () => {
         .mockReturnValueOnce(mockFontFace1)
         .mockReturnValueOnce(mockFontFace2);
       
-      global.document = {
-        fonts: {
+      Object.defineProperty(document as any, 'fonts', {
+        value: {
           add: vi.fn(),
           delete: vi.fn(),
         },
-      } as any;
+        configurable: true,
+      });
 
       await adapter.loadFont({
         family: 'Font1',

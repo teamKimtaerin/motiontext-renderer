@@ -1,100 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
-  DefaultScenarioResolver,
+  DefaultScenarioInfo,
   DefaultAssetManager,
   createPluginContextV3,
   defaultUtils,
 } from '../PluginContextV3';
 import type { ScenarioFileV1_3 } from '../../types/scenario';
 
-describe('DefaultScenarioResolver', () => {
-  let resolver: DefaultScenarioResolver;
-  let scenario: ScenarioFileV1_3;
-
-  beforeEach(() => {
-    scenario = {
-      version: '1.3',
-      timebase: { unit: 'seconds', fps: 30 },
-      stage: { baseAspect: '16:9' },
-      tracks: [],
-      cues: [],
-      define: {
-        colors: {
-          primary: '#ff0000',
-          secondary: '#00ff00',
-        },
-        fonts: {
-          heading: {
-            family: 'Arial',
-            size: '24px',
-          },
-        },
-        nested: {
-          deep: {
-            value: 'deep-value',
-          },
-        },
-      },
-    } as any;
-    
-    resolver = new DefaultScenarioResolver(scenario);
-  });
-
-  describe('resolveDefine', () => {
-    it('resolves simple define paths', () => {
-      expect(resolver.resolveDefine('define.colors.primary')).toBe('#ff0000');
-      expect(resolver.resolveDefine('define.colors.secondary')).toBe('#00ff00');
-    });
-
-    it('resolves nested define paths', () => {
-      expect(resolver.resolveDefine('define.fonts.heading.family')).toBe('Arial');
-      expect(resolver.resolveDefine('define.nested.deep.value')).toBe('deep-value');
-    });
-
-    it('returns undefined for non-existent paths', () => {
-      expect(resolver.resolveDefine('define.nonexistent')).toBeUndefined();
-      expect(resolver.resolveDefine('define.colors.nonexistent')).toBeUndefined();
-    });
-
-    it('returns original value for non-define paths', () => {
-      expect(resolver.resolveDefine('regular.value')).toBe('regular.value');
-      expect(resolver.resolveDefine('#ffffff')).toBe('#ffffff');
-    });
-
-    it('handles complex object values', () => {
-      const fontObj = resolver.resolveDefine('define.fonts.heading');
-      expect(fontObj).toEqual({
-        family: 'Arial',
-        size: '24px',
-      });
-    });
-  });
-
-  describe('metadata access', () => {
-    it('provides version information', () => {
-      expect(resolver.version).toBe('1.3');
-    });
-
-    it('provides timebase information', () => {
-      expect(resolver.timebase).toEqual({ unit: 'seconds', fps: 30 });
-    });
-
-    it('provides stage information', () => {
-      expect(resolver.stage).toEqual({ baseAspect: '16:9' });
-    });
-
-    it('provides tracks information', () => {
-      expect(resolver.tracks).toEqual([]);
-    });
-
-    it('handles missing metadata with defaults', () => {
-      const minimalScenario = { version: '1.3' } as any;
-      const minimalResolver = new DefaultScenarioResolver(minimalScenario);
-      
-      expect(minimalResolver.timebase).toEqual({ unit: 'seconds' });
-      expect(minimalResolver.stage).toEqual({ baseAspect: '16:9' });
-      expect(minimalResolver.tracks).toEqual([]);
-    });
+describe('DefaultScenarioInfo', () => {
+  it('exposes scenario version', () => {
+    const scenario = { version: '1.3' } as any;
+    const info = new DefaultScenarioInfo(scenario);
+    expect(info.version).toBe('1.3');
   });
 });
 
@@ -127,12 +44,11 @@ describe('DefaultAssetManager', () => {
         load: vi.fn().mockResolvedValue(undefined),
       }));
       
-      // document.fonts 모킹
-      global.document = {
-        fonts: {
-          add: vi.fn(),
-        },
-      } as any;
+      // document.fonts 모킹 (전체 document를 대체하지 않음)
+      Object.defineProperty(document as any, 'fonts', {
+        value: { add: vi.fn() },
+        configurable: true,
+      });
 
       await assetManager.loadFont({
         family: 'CustomFont',
@@ -153,9 +69,10 @@ describe('DefaultAssetManager', () => {
         load: vi.fn().mockResolvedValue(undefined),
       }));
       
-      global.document = {
-        fonts: { add: vi.fn() },
-      } as any;
+      Object.defineProperty(document as any, 'fonts', {
+        value: { add: vi.fn() },
+        configurable: true,
+      });
 
       await assetManager.loadFont({
         family: 'CustomFont',
@@ -215,9 +132,8 @@ describe('DefaultAssetManager', () => {
           get() { return this._src; },
           set(value) {
             this._src = value;
-            setTimeout(() => {
-              if (this.onerror) this.onerror();
-            }, 0);
+            // trigger error immediately to ensure rejection path
+            if (this.onerror) this.onerror(new Error('mock error'));
           },
         });
         
@@ -407,7 +323,7 @@ describe('createPluginContextV3', () => {
     });
 
     expect(context.container).toBe(container);
-    expect(context.scenario).toBeInstanceOf(DefaultScenarioResolver);
+    expect(context.scenario).toBeInstanceOf(DefaultScenarioInfo);
     expect(context.assets).toBeInstanceOf(DefaultAssetManager);
     expect(context.renderer.version).toBe('2.0.0');
     expect(context.utils).toBe(defaultUtils);

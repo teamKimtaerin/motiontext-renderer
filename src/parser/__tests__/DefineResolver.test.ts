@@ -221,7 +221,7 @@ describe('DefineResolver', () => {
       };
 
       expect(() => resolver.resolveScenario(scenario)).toThrow(
-        'Circular reference detected in define: a -> a'
+        'Circular reference detected in define: define.a -> define.a'
       );
     });
 

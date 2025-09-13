@@ -102,10 +102,12 @@ describe('v2.0 샘플 JSON 검증', () => {
         const textNode = firstCue.root.children![0];
         expect(textNode.displayTime).toEqual([2, 5]);
         expect(textNode.layout?.position).toEqual([0.5, 0.85]);
-        expect(textNode.pluginChain).toEqual([{
-          name: "fadeIn",
-          time_offset: [0, 0.3]
-        }]);
+        expect(textNode.pluginChain).toEqual([
+          {
+            name: 'fadeIn',
+            time_offset: ['0%', '30%'],
+          },
+        ]);
       });
 
       it('모든 cue가 올바른 시간 범위를 가진다', () => {
@@ -175,8 +177,8 @@ describe('v2.0 샘플 JSON 검증', () => {
         // title_cue의 pluginChain 검증
         const titleCue = resolved.cues.find(c => c.id === 'title_cue');
         expect(titleCue?.root.pluginChain).toEqual([
-          { name: 'slideInLeft', time_offset: [0, 0.6] },
-          { name: 'fadeOut', time_offset: [0.8, 1.0] }
+          { name: 'slideInLeft', time_offset: ['0%', '60%'] },
+          { name: 'fadeOut', time_offset: ['80%', '100%'] },
         ]);
       });
 

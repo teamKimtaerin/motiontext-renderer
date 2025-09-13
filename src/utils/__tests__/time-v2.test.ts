@@ -68,14 +68,17 @@ describe('time-v2.ts', () => {
       const displayTime = [1, 5] as const;
       const timeOffset = [0, 1] as const;
       
-      expect(computePluginWindow(displayTime, timeOffset)).toEqual([1, 6]);
+      // In v2 helpers, numeric offsets are treated as 0..1 relative to duration
+      // duration = 4 → [1 + 4*0, 1 + 4*1] = [1, 5]
+      expect(computePluginWindow(displayTime, timeOffset)).toEqual([1, 5]);
     });
 
     it('handles negative offsets', () => {
       const displayTime = [2, 8] as const;
       const timeOffset = [-1, 2] as const;
       
-      expect(computePluginWindow(displayTime, timeOffset)).toEqual([1, 10]);
+      // duration = 6 → [2 + 6*(-1), 2 + 6*2] = [-4, 14]
+      expect(computePluginWindow(displayTime, timeOffset)).toEqual([-4, 14]);
     });
 
     it('uses default time offset when not provided', () => {
