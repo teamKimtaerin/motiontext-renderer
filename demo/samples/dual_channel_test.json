@@ -1,0 +1,63 @@
+{
+  "version": "2.0",
+  "timebase": {
+    "unit": "seconds",
+    "fps": 30
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "tracks": [
+    {
+      "id": "main",
+      "type": "subtitle",
+      "layer": 10,
+      "defaultStyle": {
+        "fontSizeRel": 0.08,
+        "color": "#ffffff",
+        "fontFamily": "Arial, sans-serif"
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "dual-test",
+      "track": "main",
+      "displayTime": [0, 10],
+      "domLifetime": [0, 10],
+      "root": {
+        "id": "test-text",
+        "e_type": "text",
+        "text": "Spinning Typewriter!",
+        "displayTime": [0, 10],
+        "layout": {
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "anchor": "cc"
+        },
+        "pluginChain": [
+          {
+            "name": "spin",
+            "time_offset": [0, 1],
+            "params": {
+              "fullTurns": 2
+            },
+            "compose": "replace"
+          },
+          {
+            "name": "typewriter@1.0.0",
+            "time_offset": [0, 1],
+            "params": {
+              "typingSpeed": 0.1,
+              "showCursor": true,
+              "cursorBlink": true
+            },
+            "compose": "replace"
+          }
+        ]
+      }
+    }
+  ]
+}

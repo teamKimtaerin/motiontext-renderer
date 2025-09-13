@@ -49,10 +49,10 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
-export default {
-  name: 'cwi-loud',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'cwi-loud';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     const host = el.parentElement;
     if (!host) return;
     
@@ -89,8 +89,9 @@ export default {
       tremble: Object.assign({ ampPx: 1.5, freq: 12 }, opts?.tremble || {}),
       speaker: opts?.speaker
     };
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const state = el.__cwiLoud;
     if (!state) return () => {};
     
@@ -130,10 +131,10 @@ export default {
       span.style.transform = `translate(${dx}px, ${dy - 8}px) scale(${s}, ${s})`;
       span.style.opacity = '1';
     };
-  },
-  cleanup(el) {
-    if (el && el.__cwiLoud) {
-      el.__cwiLoud = undefined;
-    }
+}
+
+export function cleanup(el) {
+  if (el && el.__cwiLoud) {
+    el.__cwiLoud = undefined;
   }
-};
+}

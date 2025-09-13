@@ -4,19 +4,18 @@
  * MotionText Renderer Plugin API v2.1
  */
 
-export default {
-  name: "slideup",
-  version: "1.0.0",
-  
-  init(el, options, ctx) {
+export const name = "slideup";
+export const version = "1.0.0";
+
+export function init(el, options, ctx) {
     if (!ctx.gsap) {
       console.error('GSAP is required for Slide Up effect');
       return;
     }
     splitTextIntoWords(el);
-  },
+}
 
-  animate(el, options, ctx, duration) {
+export function animate(el, options, ctx, duration) {
     if (!ctx.gsap || !el) {
       return (p) => {};
     }
@@ -76,9 +75,9 @@ export default {
     });
 
     return tl;
-  },
+}
 
-  cleanup(el) {
+export function cleanup(el) {
     if (el && window.gsap) {
       window.gsap.killTweensOf(el.querySelectorAll('.slideup-word'));
       const originalText = Array.from(el.querySelectorAll('.slideup-word'))
@@ -86,8 +85,7 @@ export default {
         .join(' ');
       el.innerHTML = originalText;
     }
-  }
-};
+}
 
 function splitTextIntoWords(element) {
   if (!element) return;

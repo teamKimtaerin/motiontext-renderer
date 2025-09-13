@@ -4,11 +4,10 @@
  * MotionText Renderer Plugin API v2.1
  */
 
-export default {
-  name: "elastic",
-  version: "1.0.0",
-  
-  init(el, options, ctx) {
+export const name = "elastic";
+export const version = "1.0.0";
+
+export function init(el, options, ctx) {
     // effectsRoot(el)에 초기 설정 적용
     if (!ctx.gsap) {
       console.error('GSAP is required for Elastic Bounce effect');
@@ -17,9 +16,9 @@ export default {
 
     // 텍스트를 단어별로 분리
     splitTextIntoWords(el);
-  },
+}
 
-  animate(el, options, ctx, duration) {
+export function animate(el, options, ctx, duration) {
     if (!ctx.gsap || !el) {
       return (p) => {}; // 빈 함수 반환
     }
@@ -85,9 +84,9 @@ export default {
 
     // 상대 타임라인 반환 (호스트가 진행 제어)
     return tl;
-  },
+}
 
-  cleanup(el) {
+export function cleanup(el) {
     if (el && window.gsap) {
       window.gsap.killTweensOf(el.querySelectorAll('.bounce-word'));
       // DOM 구조 복원
@@ -96,8 +95,7 @@ export default {
         .join(' ');
       el.innerHTML = originalText;
     }
-  }
-};
+}
 
 /**
  * 텍스트를 단어별로 분리하여 DOM 구조 생성

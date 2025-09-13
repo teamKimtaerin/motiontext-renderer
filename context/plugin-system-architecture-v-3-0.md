@@ -60,6 +60,7 @@ plugins/
 {
   "name": "advanced-text-effects",
   "version": "2.0.0",
+  "type": "hybrid",
   "pluginApi": "3.0",
   "minRenderer": "2.0.0",
   "entry": "index.mjs",
@@ -139,6 +140,15 @@ plugins/
 ```
 
 ### 새로운 필드 설명
+
+#### `type` (string, optional)
+플러그인의 실행 모드를 명시적으로 선언하여 성능 최적화:
+- `"channel"`: CSS 변수 채널만 사용 (evalChannels 함수)
+- `"dom"`: DOM 조작만 사용 (init/animate/cleanup 함수)  
+- `"hybrid"`: 두 모드 모두 사용 (복잡한 효과)
+
+**우선순위**: 시나리오 plugin.type → manifest type → 자동 감지
+**성능 이점**: 불필요한 초기화 스킵, 메모리 사용 최적화
 
 #### `pluginApi` (string, required)
 플러그인 API 버전. v3.0에서는 `"3.0"` 고정.
@@ -1028,7 +1038,8 @@ export default {
 // manifest.json
 {
   "name": "advanced-text-fx",
-  "version": "2.0.0", 
+  "version": "2.0.0",
+  "type": "hybrid",
   "pluginApi": "3.0",
   "minRenderer": "2.0.0",
   "entry": "index.mjs",

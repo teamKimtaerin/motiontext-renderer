@@ -42,6 +42,7 @@ export type PluginTarget =
 
 export interface PluginSpec {
   name: string;
+  type?: 'channel' | 'dom' | 'hybrid'; // v3.0 플러그인 타입 명시 (성능 최적화)
   time_offset?: DefineReference<TimeRange>; // [start, end] - v3.0 시간 표현 통일
   params?: DefineReference<Record<string, unknown>>;
   compose?: DefineReference<ComposeMode>; // default 'replace'
@@ -95,6 +96,7 @@ export interface SchemaField {
 export interface PluginManifest {
   name: string;
   version: string;
+  type?: 'channel' | 'dom' | 'hybrid'; // v3.0 플러그인 타입 선언 (성능 최적화)
   pluginApi: '3.0';
   minRenderer: string; // 최소 렌더러 버전
   entry: string; // 진입점 파일

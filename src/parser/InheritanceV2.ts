@@ -15,7 +15,50 @@ import type {
   TimeRange, 
   ResolvedNodeUnion 
 } from '../types/scenario-v2';
-import type { Layout, Style } from '../types/layout';
+import type { Style, Layout } from '../types/layout';
+import { getDefaultTrackConstraints, mergeConstraints } from '../layout/DefaultConstraints';
+
+// 상속 우선순위 설정
+type InheritancePriority = 'direct' | 'parent' | 'track' | 'system';
+
+// 필드별 상속 규칙 설정
+interface FieldInheritanceRule {
+  priority: InheritancePriority[];
+  merge?: boolean; // 병합이 필요한 필드 (예: style)
+  systemDefault?: any; // 시스템 기본값
+}
+
+// 상속 규칙 구성
+const INHERITANCE_RULES: Record<string, FieldInheritanceRule> = {
+  displayTime: {
+    priority: ['direct', 'parent', 'system'],
+    systemDefault: [-Infinity, Infinity]
+  },
+  layout: {
+    priority: ['direct', 'parent', 'track'], // layout은 이제 track constraints와 병합됨
+    merge: true, // layout과 constraints 병합
+    systemDefault: undefined
+  },
+  style: {
+    priority: ['direct', 'parent', 'track'],
+    merge: true, // 스타일은 병합
+    systemDefault: undefined
+  },
+  pluginChain: {
+    priority: ['direct'], // 각 노드별 고유 효과
+    systemDefault: undefined
+  },
+  effectScope: {
+    priority: ['direct', 'parent'],
+    systemDefault: undefined
+  }
+};
+
+// 기본 상속 규칙 (등록되지 않은 필드용)
+const DEFAULT_INHERITANCE_RULE: FieldInheritanceRule = {
+  priority: ['direct', 'parent', 'track', 'system'],
+  systemDefault: undefined
+};
 
 /**
  * v2.0 시나리오 상속 시스템 적용
@@ -29,17 +72,38 @@ export function applyInheritance(scenario: Scenario): Scenario {
     trackDefaults.set(track.id, track);
   }
   
+  const debugMode = (globalThis as any).__MTX_DEBUG_MODE__ || false;
+  
   // 각 Cue에 상속 적용
-  const inheritedCues = scenario.cues.map(cue => {
+  const inheritedCues = scenario.cues.map((cue, index) => {
     const track = trackDefaults.get(cue.track);
     
-    return {
+    if (debugMode) {
+      // eslint-disable-next-line no-console
+      console.log(`[Inheritance] Processing cue ${index}: ${cue.id}`, {
+        displayTime: (cue as any).displayTime,
+        domLifetime: cue.domLifetime,
+        track: track?.id
+      });
+    }
+    
+    const inheritedCue = {
       ...cue,
       // domLifetime 상속 (Cue 레벨에서는 부모가 없으므로 트랙 기본값만)
       domLifetime: cue.domLifetime || getDefaultDomLifetime(cue.root),
-      // 루트 노드에 상속 적용
-      root: applyNodeInheritance(cue.root, null, track)
+      // 루트 노드에 상속 적용 (Cue의 displayTime을 컨텍스트로 전달)
+      root: applyNodeInheritance(cue.root, null, track, (cue as any).displayTime)
     };
+    
+    if (debugMode) {
+      // eslint-disable-next-line no-console
+      console.log(`[Inheritance] Cue ${cue.id} inheritance completed`, {
+        originalDisplayTime: (cue as any).displayTime,
+        inheritedRoot: inheritedCue.root
+      });
+    }
+    
+    return inheritedCue;
   });
   
   return {
@@ -53,168 +117,145 @@ export function applyInheritance(scenario: Scenario): Scenario {
  * @param node - 현재 노드
  * @param parent - 부모 노드 (없으면 null)
  * @param track - 소속 트랙
+ * @param cueDisplayTime - Cue의 displayTime (최상위 컨텍스트)
  * @returns 상속이 적용된 노드
  */
 function applyNodeInheritance(
   node: Node, 
   parent: ResolvedNodeUnion | null, 
-  _track: Track | undefined
+  track: Track | undefined,
+  cueDisplayTime?: TimeRange
 ): ResolvedNodeUnion {
-  // 1. displayTime 상속
-  const inheritedDisplayTime = inheritDisplayTime(node, parent, _track);
+  const debugMode = (globalThis as any).__MTX_DEBUG_MODE__ || false;
   
-  // 2. layout 상속
-  const inheritedLayout = inheritLayout(node, parent, _track);
+  // 모든 원본 필드를 복사하여 상속된 노드 생성
+  const inheritedNode = { ...node };
   
-  // 3. style 상속 (병합)
-  const inheritedStyle = inheritStyle(node, parent, _track);
+  if (debugMode) {
+    // eslint-disable-next-line no-console
+    console.log(`[Inheritance] Processing node: ${node.id || 'unknown'}`, {
+      nodeType: node.e_type,
+      hasDisplayTime: !!(node as any).displayTime,
+      parentDisplayTime: parent?.displayTime,
+      cueDisplayTime,
+      fields: Object.keys(node)
+    });
+  }
   
-  // 4. pluginChain 상속
-  const inheritedPluginChain = inheritPluginChain(node, parent, _track);
-  
-  // 5. effectScope 상속
-  const inheritedEffectScope = inheritEffectScope(node, parent, _track);
-  
-  // 기본 상속된 노드 생성
-  const baseInherited = {
-    ...node,
-    displayTime: inheritedDisplayTime,
-    layout: inheritedLayout,
-    style: inheritedStyle,
-    pluginChain: inheritedPluginChain,
-    effectScope: inheritedEffectScope
-  };
+  // INHERITANCE_RULES에 정의된 필드들에만 상속 로직 적용
+  for (const fieldName of Object.keys(INHERITANCE_RULES)) {
+    const originalValue = inheritedNode[fieldName as keyof Node];
+    inheritedNode[fieldName as keyof Node] = inheritField(
+      fieldName,
+      node,
+      parent,
+      track,
+      cueDisplayTime
+    );
+    
+    if (debugMode && fieldName === 'displayTime') {
+      // eslint-disable-next-line no-console
+      console.log(`[Inheritance] ${fieldName} inheritance:`, {
+        nodeId: node.id || 'unknown',
+        original: originalValue,
+        inherited: inheritedNode[fieldName as keyof Node],
+        parentValue: parent?.[fieldName as keyof ResolvedNodeUnion],
+        cueValue: cueDisplayTime
+      });
+    }
+  }
   
   // 노드 타입별 처리
   if (node.e_type === 'group') {
-    const groupNode = baseInherited as ResolvedNodeUnion & { e_type: 'group'; children?: Node[] };
+    const groupNode = inheritedNode as ResolvedNodeUnion & { e_type: 'group'; children?: Node[] };
     
     return {
       ...groupNode,
       children: groupNode.children?.map(child => 
-        applyNodeInheritance(child, baseInherited as ResolvedNodeUnion, _track)
+        applyNodeInheritance(child, inheritedNode as ResolvedNodeUnion, track, cueDisplayTime)
       )
     };
   }
   
   // text, image, video 노드는 추가 처리 없음
-  return baseInherited as ResolvedNodeUnion;
+  return inheritedNode as ResolvedNodeUnion;
 }
 
 /**
- * displayTime 상속 로직
+ * 통합 필드 상속 로직
+ * @param fieldName - 상속할 필드명
+ * @param node - 현재 노드
+ * @param parent - 부모 노드
+ * @param track - 소속 트랙
+ * @param cueDisplayTime - Cue의 displayTime (최상위 컨텍스트)
+ * @returns 상속된 값
  */
-function inheritDisplayTime(
-  node: Node, 
-  parent: ResolvedNodeUnion | null, 
-  _track: Track | undefined
-): TimeRange {
-  // 1. 직접 명시 (최우선)
-  if (node.displayTime) {
-    return node.displayTime as TimeRange;
+function inheritField(
+  fieldName: string,
+  node: Node,
+  parent: ResolvedNodeUnion | null,
+  track: Track | undefined,
+  cueDisplayTime?: TimeRange
+): any {
+  const rule = INHERITANCE_RULES[fieldName] || DEFAULT_INHERITANCE_RULE;
+  
+  // 특수 필드 처리 (layout, pluginChain 등)
+  if (fieldName === 'layout' || fieldName === 'pluginChain') {
+    // 이러한 필드들은 일반적으로 상속되지 않음
+    return (node as any)[fieldName] || rule.systemDefault;
   }
   
-  // 2. 부모에서 상속
-  if (parent?.displayTime) {
-    return parent.displayTime;
+  const values: any[] = [];
+  
+  // 우선순위에 따라 값 수집
+  for (const priority of rule.priority) {
+    let value: any = undefined;
+    
+    switch (priority) {
+      case 'direct':
+        value = (node as any)[fieldName];
+        break;
+      case 'parent':
+        value = parent ? (parent as any)[fieldName] : undefined;
+        break;
+      case 'track':
+        // 특정 필드에 대한 트랙 기본값 처리
+        if (fieldName === 'style') {
+          value = track?.defaultStyle;
+        }
+        // 다른 필드들은 향후 확장 가능
+        break;
+      case 'system':
+        // displayTime의 경우 Cue의 displayTime을 우선 사용
+        if (fieldName === 'displayTime' && cueDisplayTime) {
+          value = cueDisplayTime;
+        } else {
+          value = rule.systemDefault;
+        }
+        break;
+    }
+    
+    if (value !== undefined) {
+      values.push(value);
+    }
   }
   
-  // 3. 트랙 기본값 (현재 v2.0에서는 트랙에 displayTime 기본값 없음)
-  // 향후 확장 가능
-  
-  // 4. 시스템 기본값 (전체 시간)
-  return [-Infinity, Infinity];
-}
-
-/**
- * layout 상속 로직
- */
-function inheritLayout(
-  node: Node, 
-  _parent: ResolvedNodeUnion | null, 
-  _track: Track | undefined
-): Layout | undefined {
-  // 1. 직접 명시
-  if (node.layout) {
-    return node.layout as Layout;
+  // 값이 없으면 시스템 기본값 또는 undefined
+  if (values.length === 0) {
+    return rule.systemDefault;
   }
   
-  // 2. 부모에서 상속 (layout은 일반적으로 상속되지 않음)
-  // 부모의 layout을 상속하면 겹침 문제가 발생할 수 있음
-  
-  // 3. 트랙 기본값 (현재 없음)
-  
-  // 4. undefined (기본값)
-  return undefined;
-}
-
-/**
- * style 상속 및 병합 로직
- */
-function inheritStyle(
-  node: Node, 
-  parent: ResolvedNodeUnion | null, 
-  track: Track | undefined
-): Style | undefined {
-  // 상속 순서대로 스타일 수집
-  const styles: (Style | undefined)[] = [
-    track?.defaultStyle as Style | undefined,  // 트랙 기본값 (가장 낮은 우선순위)
-    parent?.style,        // 부모 스타일
-    node.style as Style | undefined           // 직접 명시 (최우선)
-  ];
-  
-  // undefined가 아닌 스타일들만 필터링
-  const validStyles = styles.filter((style): style is Style => style !== undefined);
-  
-  if (validStyles.length === 0) {
-    return undefined;
+  // 병합이 필요한 필드 처리
+  if (rule.merge) {
+    if (fieldName === 'style') {
+      return mergeStyles(...values.filter(v => v !== undefined));
+    } else if (fieldName === 'layout') {
+      return mergeLayouts(values.filter(v => v !== undefined), track);
+    }
   }
   
-  // 스타일 병합 (나중 것이 우선)
-  return mergeStyles(...validStyles);
-}
-
-/**
- * pluginChain 상속 로직
- */
-function inheritPluginChain(
-  node: Node, 
-  _parent: ResolvedNodeUnion | null, 
-  _track: Track | undefined
-): any[] | undefined {
-  // 1. 직접 명시 (최우선)
-  if (node.pluginChain) {
-    return node.pluginChain as any[];
-  }
-  
-  // 2. 부모에서 상속할지는 정책에 따라
-  // 일반적으로 pluginChain은 상속하지 않음 (각 노드별 고유 효과)
-  
-  // 3. 트랙 기본 플러그인 (향후 확장 가능)
-  
-  return undefined;
-}
-
-/**
- * effectScope 상속 로직
- */
-function inheritEffectScope(
-  node: Node, 
-  parent: ResolvedNodeUnion | null, 
-  _track: Track | undefined
-): any | undefined {
-  // 1. 직접 명시
-  if (node.effectScope) {
-    return node.effectScope;
-  }
-  
-  // 2. 부모에서 상속
-  if (parent?.effectScope) {
-    return parent.effectScope;
-  }
-  
-  // 3. 기본값
-  return undefined;
+  // 일반 필드는 첫 번째 값 (가장 높은 우선순위) 반환
+  return values[0];
 }
 
 /**
@@ -234,6 +275,60 @@ function mergeStyles(...styles: Style[]): Style {
   
   return merged;
 }
+
+/**
+ * 레이아웃 병합 유틸리티 (track constraints 포함)
+ * @param layouts - 병합할 레이아웃 배열 (나중 것이 우선)
+ * @param track - 트랙 정보 (constraints 제공)
+ * @returns 병합된 레이아웃
+ */
+function mergeLayouts(layouts: Layout[], track?: Track): Layout {
+  let merged: Layout = {};
+  
+  // Track의 defaultConstraints를 기본값으로 사용
+  if (track?.defaultConstraints) {
+    // track constraints를 layout 형태로 변환
+    const trackLayout = constraintsToLayout(track.defaultConstraints);
+    merged = { ...trackLayout };
+  } else if (track?.type) {
+    // track type 기반 기본 constraints 적용
+    const defaultConstraints = getDefaultTrackConstraints(track.type);
+    const trackLayout = constraintsToLayout(defaultConstraints);
+    merged = { ...trackLayout };
+  }
+  
+  // 명시적 layout들을 순서대로 병합 (나중 것이 우선)
+  for (const layout of layouts) {
+    if (layout) {
+      merged = { ...merged, ...layout };
+    }
+  }
+  
+  return merged;
+}
+
+/**
+ * LayoutConstraints를 Layout으로 변환
+ */
+function constraintsToLayout(constraints: any): Layout {
+  const layout: Layout = {};
+  
+  if (constraints.mode) layout.mode = constraints.mode;
+  if (constraints.anchor) layout.anchor = constraints.anchor;
+  if (constraints.gap) layout.gapRel = constraints.gap;
+  if (constraints.padding) layout.padding = constraints.padding;
+  
+  // constraints의 maxWidth/maxHeight를 size로 변환
+  if (constraints.maxWidth !== undefined || constraints.maxHeight !== undefined) {
+    layout.size = {
+      width: constraints.maxWidth,
+      height: constraints.maxHeight
+    };
+  }
+  
+  return layout;
+}
+
 
 /**
  * 노드 구조를 분석하여 기본 domLifetime 계산

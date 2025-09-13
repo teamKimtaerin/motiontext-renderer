@@ -45,7 +45,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -84,7 +84,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -123,7 +123,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -163,7 +163,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -204,7 +204,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -245,7 +245,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               },
               {
@@ -257,7 +257,7 @@
                 "compose": "multiply",
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               },
               {
@@ -269,7 +269,7 @@
                 "compose": "add",
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               },
               {
@@ -279,7 +279,7 @@
                 },
                 "time_offset": [
                   0,
-                  0.01
+                  1
                 ]
               }
             ],
@@ -314,7 +314,11 @@
                 "name": "spin",
                 "params": {
                   "fullTurns": 1
-                }
+                },
+                "time_offset": [
+                  0,
+                  1
+                ]
               }
             ],
             "displayTime": [
@@ -339,7 +343,11 @@
                 "params": {
                   "amplitudePx": 14,
                   "cycles": 3
-                }
+                },
+                "time_offset": [
+                  0,
+                  1
+                ]
               }
             ],
             "displayTime": [
@@ -364,7 +372,11 @@
                 "params": {
                   "maxScale": 1.2,
                   "cycles": 2
-                }
+                },
+                "time_offset": [
+                  0,
+                  1
+                ]
               }
             ],
             "displayTime": [
@@ -391,7 +403,11 @@
                   "intensity": 0.4,
                   "pulse": true,
                   "cycles": 10
-                }
+                },
+                "time_offset": [
+                  0,
+                  1
+                ]
               }
             ],
             "displayTime": [

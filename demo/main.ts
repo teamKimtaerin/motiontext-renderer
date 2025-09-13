@@ -3,7 +3,7 @@
  * MotionText Renderer Demo Application
  */
 
-import { MotionTextRenderer, MotionTextController } from '../src/index';
+import { MotionTextRenderer, MotionTextController, configureMotionTextRenderer } from '../src/index';
 import { configureDevPlugins } from '../src/loader/dev/DevPluginConfig';
 import { loadPluginManifest, getDefaultParameters, generatePreviewScenario, generateLoopedScenario } from './scenarioGenerator';
 import { getDevPluginConfig } from '../src/loader/dev/DevPluginConfig';
@@ -17,6 +17,7 @@ import animatedFreeMixed from './samples/animated_free_mixed.json';
 import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
 import cwiDemoFull from './samples/cwi_demo_full.json';
+import dualChannelTest from './samples/dual_channel_test.json';
 // v2.0 샘플들
 import basicV20 from './samples/v2/basic_v20.json';
 import withAssetsV20 from './samples/v2/with_assets_v20.json';
@@ -87,6 +88,9 @@ const sampleConfigs: Record<string, RendererConfig> = {
   // v2.0 샘플들
   'basic_v20 (v2.0)': basicV20 as RendererConfig,
   'with_assets_v20 (v2.0)': withAssetsV20 as RendererConfig,
+  
+  // Dual-channel test (spin + typewriter)
+  'dual_channel_test (v2.0)': dualChannelTest as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -183,6 +187,15 @@ const sampleConfigs: Record<string, RendererConfig> = {
 
 // Initialize demo application
 async function initDemo() {
+  // Configure MotionTextRenderer for demo environment
+  configureMotionTextRenderer({
+    debugMode: true,   // Enable debug logs to test inheritance system
+    pluginServer: {
+      mode: 'auto',
+      serverBase: 'http://localhost:3300'
+    }
+  });
+  
   updateStatus('렌더러 준비됨');
   
   // Initialize AI Editor
@@ -239,10 +252,10 @@ async function initDemo() {
           (defaults as any).t1 = (defaults as any).t1 ?? Math.max(0.5, dur);
         }
         const txt = pluginPreviewText?.value || manifest.name;
-        // Center region with reasonable size
+        // Center region with reasonable size (position will be overridden to center in generator)
         const settings = {
           text: txt,
-          position: { x: 320, y: 180 },
+          position: { x: 0.5, y: 0.5 }, // This will be normalized to center in generator
           size: { width: 480, height: 120 },
           pluginParams: defaults,
         };
@@ -250,6 +263,8 @@ async function initDemo() {
           ? generateLoopedScenario(key, settings, dur)
           : generatePreviewScenario(key, settings, dur));
         await loadConfiguration(cfg);
+        // Reset video to start position for preview
+        video.currentTime = 0;
         if (renderer) { renderer.play(); }
       } catch (e) {
         console.error('플러그인 미리보기 생성 실패:', e);

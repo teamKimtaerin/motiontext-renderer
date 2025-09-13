@@ -7,21 +7,55 @@ export { MotionTextController } from "./controller";
 // Public plugin configuration/registration API (for external consumers)
 export { configureDevPlugins as configurePluginSource, getDevPluginConfig } from './loader/dev/DevPluginConfig';
 import { devRegistry } from './loader/dev/DevPluginRegistry';
+import { configureDevPlugins } from './loader/dev/DevPluginConfig';
 
-// (reserved) type helpers can be added later
+// Global renderer configuration interface
+export interface MotionTextRendererConfig {
+  debugMode?: boolean;
+  pluginServer?: {
+    mode?: 'server' | 'local' | 'auto';
+    serverBase?: string;
+    localBase?: string;
+  };
+  fps?: number;
+  snapToFrame?: boolean;
+  preloadMs?: number;
+}
+
+// Global configuration storage
+let globalConfig: MotionTextRendererConfig = {
+  debugMode: false,  // Default to false for production
+  fps: 30,
+  snapToFrame: false,
+  preloadMs: 300
+};
+
+// Global configuration function
+export function configureMotionTextRenderer(config: MotionTextRendererConfig): void {
+  // Update global config
+  globalConfig = { ...globalConfig, ...config };
+  
+  // Configure plugin server if provided
+  if (config.pluginServer) {
+    configureDevPlugins(config.pluginServer);
+  }
+}
 
 export class MotionTextRenderer {
   private renderer: RendererV2;
   private assetManager: AssetManager;
   private scenario: Scenario | null = null;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: Partial<MotionTextRendererConfig>) {
+    // Merge global config with constructor options
+    const config = { ...globalConfig, ...options };
+    
     this.renderer = new RendererV2({
       container,
-      preloadMs: 300,
-      snapToFrame: false,
-      fps: 30,
-      debugMode: true
+      preloadMs: config.preloadMs ?? 300,
+      snapToFrame: config.snapToFrame ?? false,
+      fps: config.fps ?? 30,
+      debugMode: config.debugMode ?? false
     });
     this.assetManager = new AssetManager();
   }

@@ -8,7 +8,7 @@
 // - 노드 ID 의무화
 // - Define 시스템 지원
 
-import type { Layout, Style, EffectScope } from './layout';
+import type { Layout, Style, EffectScope, LayoutConstraints } from './layout';
 import type { PluginSpec } from './plugin-v3';
 
 // ============================================================================
@@ -90,6 +90,7 @@ export interface Track {
   layer: number; // higher is above
   overlapPolicy?: DefineReference<OverlapPolicy>; // default push
   defaultStyle?: DefineReference<Style>;
+  defaultConstraints?: DefineReference<LayoutConstraints>; // default layout constraints for this track
 }
 
 export interface Cue {

@@ -1,8 +1,9 @@
 // Minimal layout helpers for M2.5: apply normalized position to absolute element.
 // Future: handle flow/grid/override/transform/safeArea.
 
-import type { Layout, Anchor } from '../types/layout';
+import type { Layout, Anchor, LayoutConstraints } from '../types/layout';
 import { anchorTranslate, anchorFraction } from './utils/anchors';
+import { mergeConstraints, shouldBreakout } from './DefaultConstraints';
 
 type SafeArea =
   | { top?: number; bottom?: number; left?: number; right?: number }
@@ -157,6 +158,165 @@ export function applyNormalizedPosition(
     }
   }
   el.style.transform = parts.join(' ');
+}
+
+// New constraints-based layout system
+export interface LayoutWithConstraintsOptions extends ApplyLayoutOptions {
+  parentConstraints?: LayoutConstraints;
+  hasEffectScope?: boolean;
+}
+
+/**
+ * Apply layout with constraints system (Flutter-like)
+ * This is the new unified layout function that handles constraints
+ */
+export function applyLayoutWithConstraints(
+  el: HTMLElement,
+  layout?: Layout,
+  constraints?: LayoutConstraints,
+  defaultAnchor: Anchor = 'cc',
+  opts: LayoutWithConstraintsOptions = {}
+) {
+  // Merge provided constraints with parent constraints
+  const effectiveConstraints = constraints
+    ? mergeConstraints(opts.parentConstraints, constraints)
+    : opts.parentConstraints;
+
+  // Check if this element should breakout of parent constraints
+  if (effectiveConstraints && shouldBreakout(effectiveConstraints, opts.hasEffectScope || false)) {
+    // TODO: Implement portal/breakout system
+    // For now, fall back to absolute positioning
+    applyNormalizedPosition(el, layout, defaultAnchor, opts);
+    return;
+  }
+
+  // Determine layout mode from constraints or layout
+  const mode = layout?.mode || effectiveConstraints?.mode || 'absolute';
+
+  switch (mode) {
+    case 'flow':
+      applyFlowContainerWithConstraints(el, layout, effectiveConstraints, defaultAnchor, opts);
+      break;
+    case 'grid':
+      applyGridContainerWithConstraints(el, layout, effectiveConstraints, defaultAnchor, opts);
+      break;
+    case 'absolute':
+    default:
+      applyNormalizedPosition(el, layout, defaultAnchor, opts);
+      break;
+  }
+}
+
+/**
+ * Apply flow layout with constraints
+ */
+function applyFlowContainerWithConstraints(
+  el: HTMLElement,
+  layout?: Layout,
+  constraints?: LayoutConstraints,
+  defaultAnchor: Anchor = 'cc',
+  opts: ApplyLayoutOptions = {}
+) {
+  // Apply base positioning first
+  applyNormalizedPosition(el, layout, defaultAnchor, opts);
+  
+  // Set up flex container
+  el.style.display = 'flex';
+  
+  // Direction from constraints or default vertical
+  const direction = constraints?.direction || 'vertical';
+  el.style.flexDirection = direction === 'vertical' ? 'column' : 'row';
+  
+  // Anchor-based alignment
+  const anchor = layout?.anchor || constraints?.anchor || defaultAnchor;
+  const alignMap: Record<string, string> = {
+    tl: 'flex-start', tc: 'center', tr: 'flex-end',
+    cl: 'flex-start', cc: 'center', cr: 'flex-end',
+    bl: 'flex-start', bc: 'center', br: 'flex-end',
+  };
+  el.style.alignItems = alignMap[anchor] || 'center';
+  
+  // Gap from constraints or layout
+  const gap = constraints?.gap || layout?.gapRel || 0;
+  if (gap && el.parentElement) {
+    const ph = el.parentElement.clientHeight || 0;
+    const gapProp = direction === 'vertical' ? 'rowGap' : 'columnGap';
+    el.style[gapProp] = `${Math.round(ph * gap)}px`;
+  }
+  
+  // Apply size constraints
+  applyConstraintSizing(el, constraints);
+}
+
+/**
+ * Apply grid layout with constraints
+ */
+function applyGridContainerWithConstraints(
+  el: HTMLElement,
+  layout?: Layout,
+  constraints?: LayoutConstraints,
+  defaultAnchor: Anchor = 'cc',
+  opts: ApplyLayoutOptions = {}
+) {
+  // Apply base positioning first
+  applyNormalizedPosition(el, layout, defaultAnchor, opts);
+  
+  // Set up grid container
+  el.style.display = 'grid';
+  (el.style as any).gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
+  
+  // Gap from constraints
+  const gap = constraints?.gap || layout?.gapRel || 0;
+  if (gap && el.parentElement) {
+    const ph = el.parentElement.clientHeight || 0;
+    const gapPx = Math.round(ph * gap);
+    (el.style as any).rowGap = `${gapPx}px`;
+    (el.style as any).columnGap = `${gapPx}px`;
+  }
+  
+  // Anchor-based grid alignment
+  const anchor = layout?.anchor || constraints?.anchor || defaultAnchor;
+  const hmap: Record<string, string> = {
+    tl: 'start', tc: 'center', tr: 'end',
+    cl: 'start', cc: 'center', cr: 'end',
+    bl: 'start', bc: 'center', br: 'end',
+  };
+  (el.style as any).justifyItems = hmap[anchor] || 'center';
+  
+  // Apply size constraints
+  applyConstraintSizing(el, constraints);
+}
+
+/**
+ * Apply size constraints to element
+ */
+function applyConstraintSizing(el: HTMLElement, constraints?: LayoutConstraints) {
+  if (!constraints) return;
+  
+  // Apply max/min constraints
+  if (constraints.maxWidth !== undefined) {
+    el.style.maxWidth = `${constraints.maxWidth * 100}%`;
+  }
+  if (constraints.maxHeight !== undefined) {
+    el.style.maxHeight = `${constraints.maxHeight * 100}%`;
+  }
+  if (constraints.minWidth !== undefined) {
+    el.style.minWidth = `${constraints.minWidth * 100}%`;
+  }
+  if (constraints.minHeight !== undefined) {
+    el.style.minHeight = `${constraints.minHeight * 100}%`;
+  }
+  
+  // Apply padding from constraints
+  if (constraints.padding) {
+    const px = constraints.padding.x || 0;
+    const py = constraints.padding.y || 0;
+    if (el.parentElement) {
+      const pw = el.parentElement.clientWidth || 0;
+      const ph = el.parentElement.clientHeight || 0;
+      el.style.padding = `${Math.round(ph * py)}px ${Math.round(pw * px)}px`;
+    }
+  }
 }
 
 // Apply flow container: absolute place the group, then stack children vertically

@@ -73,10 +73,10 @@ function rgbToCss({ r, g, b }) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-export default {
-  name: 'cwi-color',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'cwi-color';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     const host = el.parentElement;
     if (!host) return;
     
@@ -108,47 +108,45 @@ export default {
       host,
       span,
       palette: opts?.palette || {},
-      t0: Number(opts?.t0 ?? 0),
-      t1: Number(opts?.t1 ?? 0),
       speaker: opts?.speaker
     };
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const state = el.__cwiColor;
     if (!state) return () => {};
     
     const span = state.span;
-    const D = Math.max(0.0001, Number(duration) || 0.0001);
-    const t0 = Math.max(0, Number(state.t0 || 0));
-    const t1 = Math.max(t0, Number(state.t1 || 0));
 
     // Initial baseline
     span.style.color = WHITE90;
     span.style.opacity = '1';
 
-    // Seek-applier driven by host progress p (0..1)
-    return (p) => {
-      const now = p * D;
-      const w = Math.max(0.0001, (t1 - t0) || 0.0001);
-      const pw = (now - t0) / w;
-
-      // Before window: white, During: interpolate, After: keep speaker color
-      if (now < t0) {
+    // Seek-applier driven by renderer progress p (0..1)
+    // The renderer handles time_offset calculations and gives us clean relative progress
+    return (progress) => {
+      // progress is already 0-1 from the renderer's time_offset calculations
+      // No need for absolute time calculations - just interpolate colors based on progress
+      
+      if (progress <= 0) {
+        // Before animation starts: white
         span.style.color = WHITE90;
-      } else if (now >= t1) {
+      } else if (progress >= 1) {
+        // After animation ends: target color
         span.style.color = colorFor(state, opts, el);
       } else {
+        // During animation: interpolate from white to target color
         const from = hexToRgb('#ffffff');
         const to = hexToRgb(colorFor(state, opts, el));
-        const c = mixRgb(from, to, easeOutCubic(pw));
+        const c = mixRgb(from, to, easeOutCubic(progress));
         span.style.color = rgbToCss(c);
       }
       span.style.opacity = '1';
     };
-  },
-  cleanup(el) {
-    if (el && el.__cwiColor) {
-      el.__cwiColor = undefined;
-    }
+}
+
+export function cleanup(el) {
+  if (el && el.__cwiColor) {
+    el.__cwiColor = undefined;
   }
-};
+}

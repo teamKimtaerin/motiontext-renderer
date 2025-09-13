@@ -1,6 +1,7 @@
 {
   "name": "spin",
   "version": "1.0.0",
+  "type": "channel",
   "pluginApi": "3.0",
   "minRenderer": "2.0.0",
   "entry": "index.mjs",

@@ -61,7 +61,7 @@
                 "compose": "add",
                 "params": {
                   "amplitudePx": 6,
-                  "frequency": 2
+                  "cycles": 2
                 },
                 "time_offset": [
                   0.001,

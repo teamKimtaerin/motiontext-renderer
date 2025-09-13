@@ -49,10 +49,10 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
-export default {
-  name: 'cwi-whisper',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'cwi-whisper';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     const host = el.parentElement;
     if (!host) return;
     
@@ -88,8 +88,9 @@ export default {
       t1: Number(opts?.t1 ?? 0),
       speaker: opts?.speaker
     };
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const state = el.__cwiWhisper;
     if (!state) return () => {};
     
@@ -122,10 +123,10 @@ export default {
       span.style.transform = `scale(${s}, ${s})`;
       span.style.opacity = '1';
     };
-  },
-  cleanup(el) {
-    if (el && el.__cwiWhisper) {
-      el.__cwiWhisper = undefined;
-    }
+}
+
+export function cleanup(el) {
+  if (el && el.__cwiWhisper) {
+    el.__cwiWhisper = undefined;
   }
-};
+}

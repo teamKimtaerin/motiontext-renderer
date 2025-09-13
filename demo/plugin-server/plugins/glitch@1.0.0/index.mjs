@@ -4,11 +4,10 @@
  * MotionText Renderer Plugin API v2.1
  */
 
-export default {
-  name: "glitch",
-  version: "1.0.0",
-  
-  init(el, options, ctx) {
+export const name = "glitch";
+export const version = "1.0.0";
+
+export function init(el, options, ctx) {
     // effectsRoot(el)에 초기 설정 적용
     if (!ctx.gsap) {
       console.error('GSAP is required for Glitch effect');
@@ -17,9 +16,9 @@ export default {
 
     // 글리치 효과를 위한 DOM 구조 생성
     setupGlitchStructure(el, options);
-  },
+}
 
-  animate(el, options, ctx, duration) {
+export function animate(el, options, ctx, duration) {
     if (!ctx.gsap || !el) {
       return (p) => {}; // 빈 함수 반환
     }
@@ -120,9 +119,9 @@ export default {
 
     // 상대 타임라인 반환 (호스트가 진행 제어)
     return tl;
-  },
+}
 
-  cleanup(el) {
+export function cleanup(el) {
     if (el && window.gsap) {
       window.gsap.killTweensOf(el.querySelectorAll('*'));
       // DOM 구조 복원
@@ -131,8 +130,7 @@ export default {
         el.innerHTML = originalText.textContent || '';
       }
     }
-  }
-};
+}
 
 /**
  * 글리치 효과를 위한 DOM 구조 생성

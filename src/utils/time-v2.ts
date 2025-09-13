@@ -63,12 +63,12 @@ export function progressInTimeRange(
 /**
  * 플러그인 실행 창 계산
  * @param displayTime - 노드의 [start, end] 표시 시간
- * @param timeOffset - 플러그인의 [offsetStart, offsetEnd] 오프셋
+ * @param timeOffset - 플러그인의 [offsetStart, offsetEnd] 상대 오프셋 (0~1)
  * @returns 플러그인의 절대 실행 시간 구간
  */
 export function computePluginWindow(
   displayTime: TimeRange,
-  timeOffset: TimeRange = [0, 0]
+  timeOffset: TimeRange = [0, 1]  // 기본값을 [0, 1]로 변경
 ): TimeRange {
   if (!Array.isArray(displayTime) || displayTime.length !== 2) {
     throw new TypeError('displayTime must be [start, end] array');
@@ -89,9 +89,10 @@ export function computePluginWindow(
     throw new TypeError('timeOffset values must be finite numbers');
   }
   
-  // 플러그인 실행 창 = 노드 시간 + 오프셋
-  const pluginStart = nodeStart + offsetStart;
-  const pluginEnd = nodeEnd + offsetEnd;
+  // time_offset는 0~1 상대 비율로 처리
+  const nodeDuration = nodeEnd - nodeStart;
+  const pluginStart = nodeStart + nodeDuration * offsetStart;
+  const pluginEnd = nodeStart + nodeDuration * offsetEnd;
   
   return [pluginStart, pluginEnd];
 }

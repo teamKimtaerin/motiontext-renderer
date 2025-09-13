@@ -4,11 +4,10 @@
  * MotionText Renderer Plugin API v2.1
  */
 
-export default {
-  name: "typewriter",
-  version: "1.0.0",
-  
-  init(el, options, ctx) {
+export const name = "typewriter";
+export const version = "1.0.0";
+
+export function init(el, options, ctx) {
     console.log('[Typewriter Plugin] ✅ INIT CALLED', { 
       el, 
       options, 
@@ -23,9 +22,9 @@ export default {
     console.log('[Typewriter Plugin] Setting up typewriter structure...');
     setupTypewriterStructure(el, options);
     console.log('[Typewriter Plugin] Structure setup complete');
-  },
+}
 
-  animate(el, options, ctx, duration) {
+export function animate(el, options, ctx, duration) {
     console.log('[Typewriter Plugin] 🎬 ANIMATE CALLED', { 
       el, 
       options, 
@@ -74,9 +73,9 @@ export default {
         cursor.style.opacity = String(blink);
       }
     };
-  },
+}
 
-  cleanup(el) {
+export function cleanup(el) {
     if (el && window.gsap) {
       window.gsap.killTweensOf(el.querySelectorAll('*'));
       const container = el.querySelector('.typewriter-container');
@@ -85,8 +84,7 @@ export default {
         el.innerHTML = textSpan.dataset.fullText;
       }
     }
-  }
-};
+}
 
 function setupTypewriterStructure(element, options) {
   if (!element) return;

@@ -49,10 +49,10 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
-export default {
-  name: 'cwi-bouncing',
-  version: '1.0.0',
-  init(el, opts, ctx) {
+export const name = 'cwi-bouncing';
+export const version = '1.0.0';
+
+export function init(el, opts, ctx) {
     const host = el.parentElement;
     if (!host) return;
     
@@ -89,8 +89,9 @@ export default {
       popScale: Number(opts?.popScale ?? 1.15),
       speaker: opts?.speaker
     };
-  },
-  animate(el, opts, ctx, duration) {
+}
+
+export function animate(el, opts, ctx, duration) {
     const state = el.__cwiBouncing;
     if (!state) return () => {};
     
@@ -129,10 +130,10 @@ export default {
       span.style.transform = `translate(0px, ${ty}px) scale(${s}, ${s})`;
       span.style.opacity = '1';
     };
-  },
-  cleanup(el) {
-    if (el && el.__cwiBouncing) {
-      el.__cwiBouncing = undefined;
-    }
+}
+
+export function cleanup(el) {
+  if (el && el.__cwiBouncing) {
+    el.__cwiBouncing = undefined;
   }
-};
+}

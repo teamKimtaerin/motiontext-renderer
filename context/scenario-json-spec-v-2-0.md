@@ -16,6 +16,12 @@
 - **채널 충돌 방지**: baseWrapper/effectsRoot DOM 분리로 안전한 플러그인 실행
 - **권한 기반 시스템**: capabilities와 targets를 통한 세밀한 권한 제어
 
+### 레이아웃 시스템 철학 (New in v2.0)
+- **Track as Policy Provider**: Track이 high-level 레이아웃 정책 제공
+- **Flutter-like Constraints**: Parent-child 간 크기 협상 메커니즘
+- **Portal/Breakout**: 제약을 벗어나는 동적 효과 지원
+- **상속과 오버라이드**: 계층적 레이아웃 규칙과 명시적 오버라이드 공존
+
 ---
 
 ## 📋 Top-level Schema
@@ -134,7 +140,7 @@
 
 ## 🎭 Track
 
-트랙은 역할별 레이어와 기본 스타일을 정의합니다.
+트랙은 역할별 레이어, 기본 스타일, 그리고 **레이아웃 제약조건(Layout Constraints)**을 정의합니다. v2.0에서는 Flutter-like constraints 시스템을 도입하여 parent-child 간 layout negotiation을 지원합니다.
 
 ```json
 {
@@ -145,6 +151,16 @@
   "defaultStyle": {
     "fontSizeRel": 0.05,
     "color": "define.brand_color"
+  },
+  "defaultConstraints": {
+    "mode": "flow",
+    "direction": "vertical",
+    "maxWidth": 0.8,
+    "anchor": "bc",
+    "gap": 0.02,
+    "constraintMode": "flexible",
+    "breakoutEnabled": false,
+    "safeArea": { "bottom": 0.1, "left": 0.05, "right": 0.05 }
   }
 }
 ```
@@ -170,6 +186,38 @@
 
 #### `defaultStyle` (object, optional)
 이 트랙의 모든 요소에 적용될 기본 스타일. Style 객체 규격 따름.
+
+#### `defaultConstraints` (object, optional)
+이 트랙의 모든 요소에 적용될 기본 레이아웃 제약조건. LayoutConstraints 객체 규격 따름.
+
+**트랙별 기본 제약조건**:
+
+**Subtitle Track** (자막 전용):
+```json
+{
+  "mode": "flow",
+  "direction": "vertical", 
+  "maxWidth": 0.8,
+  "maxHeight": 0.4,
+  "gap": 0.02,
+  "anchor": "bc",
+  "constraintMode": "flexible",
+  "breakoutEnabled": false,
+  "safeArea": { "bottom": 0.1, "left": 0.05, "right": 0.05 }
+}
+```
+
+**Free Track** (자유 배치):
+```json
+{
+  "mode": "absolute",
+  "maxWidth": 1.0,
+  "maxHeight": 1.0,
+  "anchor": "cc", 
+  "constraintMode": "breakout",
+  "breakoutEnabled": true
+}
+```
 
 ---
 
@@ -398,9 +446,25 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 
 ---
 
-## 🎨 Layout
+## 🎨 Layout & Constraints System
 
-레이아웃은 노드의 위치, 크기, 변환을 정의합니다.
+v2.0에서는 Flutter-like constraints 시스템을 도입하여 다음과 같은 계층적 레이아웃을 지원합니다:
+
+### 레이아웃 시스템 아키텍처
+
+```
+Track (High-level Policy)
+  ↓ defaultConstraints 제공
+Group Layout (Mid-level Container)
+  ↓ constraints negotiation
+Child Layouts (Low-level Elements)
+  ↓ portal/breakout (필요시)
+Stage/Layer (Escape mechanism)
+```
+
+### 레이아웃 정의
+
+레이아웃은 노드의 위치, 크기, 변환, 그리고 자식 요소들에 대한 제약조건을 정의합니다.
 
 ```json
 {
@@ -506,6 +570,111 @@ CSS 속성 직접 오버라이드.
   }
 }
 ```
+
+---
+
+## 🏗 Layout Constraints (New in v2.0)
+
+Layout Constraints는 Flutter-like 레이아웃 시스템의 핵심으로, parent-child 간 크기 협상과 breakout 메커니즘을 지원합니다.
+
+```json
+{
+  "defaultConstraints": {
+    "mode": "flow",
+    "direction": "vertical",
+    "maxWidth": 0.8,
+    "maxHeight": 0.4,
+    "minWidth": 0.1,
+    "minHeight": 0.05,
+    "gap": 0.02,
+    "padding": { "x": 0.02, "y": 0.015 },
+    "anchor": "bc",
+    "constraintMode": "flexible",
+    "breakoutEnabled": false,
+    "safeArea": { "bottom": 0.1, "left": 0.05, "right": 0.05 }
+  }
+}
+```
+
+### Fields
+
+#### `mode` (string, optional)
+레이아웃 모드:
+- `"flow"`: 수직/수평 플로우 레이아웃 (자막에 적합)
+- `"grid"`: 그리드 레이아웃 (복수 요소 정렬)
+- `"absolute"`: 절대 위치 레이아웃 (자유 배치)
+
+#### `direction` (string, optional)
+플로우 방향 (mode가 "flow"일 때):
+- `"vertical"`: 세로 배치 (기본값)
+- `"horizontal"`: 가로 배치
+
+#### `maxWidth`, `maxHeight` (number, optional)
+최대 크기 제한 (0~1 정규화값).
+
+#### `minWidth`, `minHeight` (number, optional)
+최소 크기 제한 (0~1 정규화값).
+
+#### `gap` (number, optional)
+자식 요소 간 간격 (0~1 정규화값).
+
+#### `padding` (object, optional)
+내부 여백:
+```json
+{ "x": 0.02, "y": 0.015 }
+```
+
+#### `anchor` (string, optional)
+자식 요소들의 기본 앵커 포인트.
+
+#### `constraintMode` (string, optional)
+제약 모드:
+- `"strict"`: 엄격한 제약 (자식이 부모 크기 초과 불가)
+- `"flexible"`: 유연한 제약 (일부 초과 허용)
+- `"breakout"`: breakout 허용 (portal 시스템 활용)
+
+#### `breakoutEnabled` (boolean, optional)
+자식 요소의 breakout 허용 여부.
+
+#### `safeArea` (object, optional)
+세이프 에어리어 설정:
+```json
+{ "top": 0.05, "bottom": 0.1, "left": 0.05, "right": 0.05 }
+```
+
+### Constraints 상속 시스템
+
+```
+1. Track defaultConstraints (기본 정책)
+   ↓
+2. Parent Layout constraints (컨테이너 제약)
+   ↓ 
+3. Node Layout (노드별 오버라이드)
+   ↓
+4. 실제 DOM 적용 (effective constraints)
+```
+
+### Breakout 시스템
+
+특정 조건에서 자식 요소가 부모 constraints를 벗어날 수 있습니다:
+
+```json
+{
+  "effectScope": {
+    "breakout": {
+      "mode": "portal",
+      "toLayer": 1000,
+      "coordSpace": "stage"
+    }
+  }
+}
+```
+
+**동작 원리**:
+1. 자식이 `constraintMode: "breakout"` 또는 `effectScope.breakout` 설정
+2. 렌더러가 해당 요소를 target layer로 portal
+3. 원래 좌표 공간 기준으로 위치 재계산
+4. 효과 완료 후 원래 위치로 복귀 (선택적)
 
 ---
 

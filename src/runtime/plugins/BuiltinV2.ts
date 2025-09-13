@@ -111,9 +111,6 @@ export function evaluateBuiltinPlugin(plugin: PluginSpec, progress: number): Cha
     case 'elastic':
       return evaluateElastic(p, options);
       
-    case 'spin':
-      return evaluateSpin(p, options);
-      
     case 'flip':
       return evaluateFlip(p, options);
       
@@ -368,7 +365,7 @@ export function getBuiltinPluginNames(): string[] {
     'pop', 'bounce', 'elastic',
     'waveY', 'waveX',
     'shakeX', 'shakeY',
-    'spin', 'flip'
+    'flip'
   ];
 }
 
@@ -397,7 +394,6 @@ export function getBuiltinPluginDefaults(pluginName: string): BuiltinPluginOptio
     waveX: { amplitude: 10, frequency: 2 },
     shakeX: { intensity: 5 },
     shakeY: { intensity: 5 },
-    spin: { turns: 1 },
     bounce: { easing: 'bounceOut' },
     elastic: { elasticity: 0.7 },
     flip: { direction: 'horizontal' }

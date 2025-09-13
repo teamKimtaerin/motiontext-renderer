@@ -4,17 +4,18 @@
  * - 플러그인 manifest.json을 기반으로 RendererConfig 생성
  */
 
-// 최소 RendererConfig 타입 (시나리오 v1.3 하위셋)
+// RendererConfig 타입 (시나리오 v2.0)
 export interface RendererConfig {
-  version: '1.3';
-  timebase: { unit: 'seconds' | 'tc'; fps?: number };
+  version: '2.0';
+  timebase: { unit: 'seconds'; fps?: number };
   stage: { baseAspect: '16:9' | '9:16' | 'auto'; backgroundColor?: string; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } };
   behavior?: { preloadMs?: number; resizeThrottleMs?: number; snapToFrame?: boolean };
   tracks: Array<{ id: string; type: 'subtitle' | 'free'; layer: number; defaultStyle?: any; safeArea?: { top?: number; bottom?: number; left?: number; right?: number } }>;
   cues: Array<{
     id: string;
     track: string;
-    hintTime?: { start?: number; end?: number };
+    displayTime?: [number, number];
+    domLifetime?: [number, number];
     root: any;
   }>;
 }
@@ -121,14 +122,14 @@ export function generatePreviewScenario(
   settings: PreviewSettings,
   duration: number = 3
 ): RendererConfig {
-  // 위치를 0-1 범위로 정규화 (640x360 기준)
-  const normalizedX = Math.max(0, Math.min(1, settings.position.x / 640))
-  const normalizedY = Math.max(0, Math.min(1, settings.position.y / 360))
+  // Center position (always use center for preview)
+  const normalizedX = 0.5;
+  const normalizedY = 0.5;
   const relW = Math.max(0, Math.min(1, settings.size.width / 640));
   const relH = Math.max(0, Math.min(1, settings.size.height / 360));
   
   return {
-    version: '1.3',
+    version: '2.0',
     timebase: { unit: 'seconds' },
     stage: { 
       baseAspect: '16:9',
@@ -145,12 +146,14 @@ export function generatePreviewScenario(
       {
         id: 'preview-cue',
         track: 'preview-track',
-        hintTime: { start: 0 },
+        displayTime: [0, duration],
+        domLifetime: [0, duration + 0.5],
         root: {
+          id: 'preview-group',
           e_type: 'group',
           layout: {
             position: { x: normalizedX, y: normalizedY },
-            anchor: 'tl',
+            anchor: 'cc',
             size: {
               width: relW,
               height: relH,
@@ -158,20 +161,20 @@ export function generatePreviewScenario(
           },
           children: [
             {
+              id: 'preview-text',
               e_type: 'text',
               text: settings.text,
-              absStart: 0,
-              absEnd: duration,
               style: {
-                fontSizeRel: 0.06,
+                fontSize: '1.5rem',
                 fontFamily: 'Arial, sans-serif',
                 color: '#ffffff',
-                align: 'center',
+                textAlign: 'center',
               },
               pluginChain: [
                 {
                   name: pluginName,
                   params: settings.pluginParams,
+                  time_offset: [0, 1],
                 },
               ],
             },
@@ -190,9 +193,9 @@ export function generateLoopedScenario(
   settings: PreviewSettings,
   duration: number = 3
 ): RendererConfig {
-  // 위치를 0-1 범위로 정규화 (640x360 기준)
-  const normalizedX = Math.max(0, Math.min(1, settings.position.x / 640))
-  const normalizedY = Math.max(0, Math.min(1, settings.position.y / 360))
+  // Center position (always use center for preview)
+  const normalizedX = 0.5;
+  const normalizedY = 0.5;
   const relW = Math.max(0, Math.min(1, settings.size.width / 640));
   const relH = Math.max(0, Math.min(1, settings.size.height / 360));
   
@@ -201,13 +204,12 @@ export function generateLoopedScenario(
     {
       name: pluginName,
       params: settings.pluginParams,
-      relStartPct: 0.0,
-      relEndPct: 1.0,
+      time_offset: [0.0, 1.0],
     }
   ];
   
   const scenario = {
-    version: '1.3',
+    version: '2.0',
     timebase: { unit: 'seconds' },
     stage: { 
       baseAspect: '16:9'
@@ -223,21 +225,23 @@ export function generateLoopedScenario(
       {
         id: 'preview-cue',
         track: 'free',
+        displayTime: [0, duration],
+        domLifetime: [0, duration + 0.5],
         root: {
+          id: 'looped-text',
           e_type: 'text',
           text: settings.text,
-          absStart: 0,
-          absEnd: duration,
+          displayTime: [0, duration],
           layout: {
             position: { x: normalizedX, y: normalizedY },
             anchor: 'cc',
             size: { width: relW, height: relH },
           },
           style: {
-            fontSizeRel: 0.07,
+            fontSize: '1.7rem',
             fontFamily: 'Arial, sans-serif',
             color: '#ffffff',
-            align: 'center'
+            textAlign: 'center'
           },
           pluginChain: pluginChain,
         },
