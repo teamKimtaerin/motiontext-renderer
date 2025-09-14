@@ -362,10 +362,7 @@ export class RendererV2 {
 
     for (const plugin of pluginChain) {
       // baseTime 우선순위: plugin.baseTime → node.baseTime → node.displayTime
-      const rawBase: any =
-        plugin.baseTime ??
-        node.baseTime ??
-        node.displayTime;
+      const rawBase: any = plugin.baseTime ?? node.baseTime ?? node.displayTime;
       const baseTime = this.resolveAllDefines(rawBase) as TimeRange;
 
       // timeOffset은 절대 초 또는 백분율('%') 허용
@@ -468,7 +465,6 @@ export class RendererV2 {
 
     let channels: Channels = {};
 
-
     // 채널 기반 플러그인
     if (pluginTypes.has('channel')) {
       const channelResult = this.evaluateChannelPlugin(
@@ -491,9 +487,7 @@ export class RendererV2 {
   /**
    * 플러그인 타입 감지 - v3.0 하이브리드 지원
    */
-  private detectPluginType(
-    plugin: PluginSpec
-  ): Set<'channel' | 'dom'> {
+  private detectPluginType(plugin: PluginSpec): Set<'channel' | 'dom'> {
     const types = new Set<'channel' | 'dom'>();
 
     // 외부 플러그인 확인
@@ -539,7 +533,6 @@ export class RendererV2 {
 
     return types;
   }
-
 
   /**
    * 채널 기반 플러그인 평가 (v3.0 API)

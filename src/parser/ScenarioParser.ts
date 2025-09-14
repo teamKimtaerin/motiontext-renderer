@@ -175,7 +175,7 @@ function normNode(node: any, path: Path): Node {
     if (t0 != null && t1 != null && !(t1 > t0))
       fail(`${path}.absEnd`, `must be > absStart`);
     const im: ImageNode = {
-      e_type: 'image',
+      eType: 'image',
       src,
       alt: node.alt,
       absStart: t0,
@@ -193,7 +193,7 @@ function normNode(node: any, path: Path): Node {
     if (t0 != null && t1 != null && !(t1 > t0))
       fail(`${path}.absEnd`, `must be > absStart`);
     const vn: VideoNode = {
-      e_type: 'video',
+      eType: 'video',
       src,
       absStart: t0,
       absEnd: t1,
@@ -276,7 +276,7 @@ export function parseScenario(input: any): ScenarioFileV1_3 {
         }
       : undefined;
     const root = normNode(
-      c.root ?? { e_type: 'group', children: [] },
+      c.root ?? { eType: 'group', children: [] },
       `cues[${i}].root`
     ) as GroupNode;
     return { id, track, hintTime, root } as Cue;

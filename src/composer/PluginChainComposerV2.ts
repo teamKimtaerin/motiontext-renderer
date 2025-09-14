@@ -153,7 +153,10 @@ export class PluginChainComposerV2 {
     // timeOffset 기반 플러그인 실행 창 계산
     // baseTime 우선순위: plugin.baseTime → displayTime
     const baseTime = (plugin.baseTime as TimeRange) || displayTime;
-    const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? ['0%', '100%'];
+    const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
+      '0%',
+      '100%',
+    ];
     const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
 
     const isActive = isWithinTimeRange(currentTime, pluginWindow);
@@ -304,7 +307,8 @@ export function isPluginActive(
   displayTime: TimeRange
 ): boolean {
   const baseTime = (plugin.baseTime as TimeRange) || displayTime;
-  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? ['0%',
+  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
+    '0%',
     '100%',
   ];
   const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);
@@ -324,7 +328,8 @@ export function getPluginProgress(
   displayTime: TimeRange
 ): number {
   const baseTime = (plugin.baseTime as TimeRange) || displayTime;
-  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? ['0%',
+  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
+    '0%',
     '100%',
   ];
   const pluginWindow = computePluginWindowFromBase(baseTime, timeOffset);

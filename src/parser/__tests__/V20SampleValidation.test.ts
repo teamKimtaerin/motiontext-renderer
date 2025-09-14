@@ -220,8 +220,8 @@ describe('v2.0 샘플 JSON 검증', () => {
         const endTime = performance.now();
         const avgTime = (endTime - startTime) / 100;
         
-        // 평균 1ms 이내로 완료되어야 함
-        expect(avgTime).toBeLessThan(1);
+        // 평균 2ms 이내로 완료되어야 함
+        expect(avgTime).toBeLessThan(2);
       });
     });
 

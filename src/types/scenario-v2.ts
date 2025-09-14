@@ -169,7 +169,12 @@ export interface Scenario {
 export interface ResolvedNode
   extends Omit<
     BaseNode,
-    'displayTime' | 'baseTime' | 'layout' | 'style' | 'pluginChain' | 'effectScope'
+    | 'displayTime'
+    | 'baseTime'
+    | 'layout'
+    | 'style'
+    | 'pluginChain'
+    | 'effectScope'
   > {
   displayTime: TimeRange;
   baseTime?: TimeRange;
