@@ -23,22 +23,13 @@
     {
       "id": "dual-test",
       "track": "main",
-      "displayTime": [
-        0,
-        10
-      ],
-      "domLifetime": [
-        0,
-        10
-      ],
+      "displayTime": [0, 10],
+      "domLifetime": [0, 10],
       "root": {
         "id": "test-text",
         "eType": "text",
         "text": "Spinning Typewriter!",
-        "displayTime": [
-          0,
-          10
-        ],
+        "displayTime": [0, 10],
         "layout": {
           "position": {
             "x": 0.5,
@@ -49,10 +40,7 @@
         "pluginChain": [
           {
             "name": "spin",
-            "timeOffset": [
-              "0%",
-              "100%"
-            ],
+            "timeOffset": ["0%", "100%"],
             "params": {
               "fullTurns": 2
             },
@@ -60,10 +48,7 @@
           },
           {
             "name": "typewriter@1.0.0",
-            "timeOffset": [
-              "0%",
-              "100%"
-            ],
+            "timeOffset": ["0%", "100%"],
             "params": {
               "typingSpeed": 0.1,
               "showCursor": true,
@@ -74,6 +59,5 @@
         ]
       }
     }
-  ],
-  "define": {}
+  ]
 }
