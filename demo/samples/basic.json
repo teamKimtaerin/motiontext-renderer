@@ -30,11 +30,11 @@
       "track": "subtitle",
       "root": {
         "id": "group1",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "text1",
-            "e_type": "text",
+            "eType": "text",
             "text": "안녕하세요! MotionText Renderer입니다.",
             "layout": {
               "position": [
@@ -59,11 +59,11 @@
       "track": "subtitle",
       "root": {
         "id": "group2",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "text2",
-            "e_type": "text",
+            "eType": "text",
             "text": "이것은 기본 자막 테스트입니다.",
             "layout": {
               "position": [
@@ -88,11 +88,11 @@
       "track": "subtitle",
       "root": {
         "id": "group3",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "text3",
-            "e_type": "text",
+            "eType": "text",
             "text": "정규화된 좌표계(0~1)를 사용합니다.",
             "layout": {
               "position": [

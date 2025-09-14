@@ -1,0 +1,19 @@
+{
+  "name": "glow",
+  "version": "2.0.0",
+  "type": "dom",
+  "pluginApi": "3.0",
+  "minRenderer": "2.0.0",
+  "entry": "index.mjs",
+  "targets": ["text"],
+  "capabilities": ["style-vars", "dom-manipulation"],
+  "peer": { "gsap": "^3.12.0" },
+  "preload": [],
+  "schema": {
+    "color": { "type": "string", "default": "#00ffff", "ui": { "control": "color" } },
+    "intensity": { "type": "number", "default": 0.4, "min": 0, "max": 1, "ui": { "control": "slider", "step": 0.01 } },
+    "pulse": { "type": "boolean", "default": true },
+    "cycles": { "type": "number", "default": 8, "min": 1, "max": 120, "ui": { "control": "slider", "step": 1 } }
+  }
+}
+

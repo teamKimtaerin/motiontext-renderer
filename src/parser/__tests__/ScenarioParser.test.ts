@@ -40,9 +40,9 @@ describe('M3: ScenarioParser', () => {
             track: 'subtitle',
             hintTime: { start: 0, end: 5 },
             root: {
-              e_type: 'group',
+              eType: 'group',
               children: [
-                { e_type: 'text', text: 'Hello', absStart: 0, absEnd: 2 }
+                { eType: 'text', text: 'Hello', absStart: 0, absEnd: 2 }
               ]
             }
           }
@@ -265,8 +265,8 @@ describe('M3: ScenarioParser', () => {
       const input = {
         tracks: [{ id: 'main', layer: 0 }],
         cues: [
-          { track: 'main', root: { e_type: 'group', children: [] } },
-          { track: 'main', root: { e_type: 'group', children: [] } }
+          { track: 'main', root: { eType: 'group', children: [] } },
+          { track: 'main', root: { eType: 'group', children: [] } }
         ]
       };
       
@@ -279,7 +279,7 @@ describe('M3: ScenarioParser', () => {
       const input = {
         tracks: [{ id: 'main', layer: 0 }],
         cues: [
-          { track: 'nonexistent', root: { e_type: 'group', children: [] } }
+          { track: 'nonexistent', root: { eType: 'group', children: [] } }
         ]
       };
       
@@ -290,7 +290,7 @@ describe('M3: ScenarioParser', () => {
       const input = {
         tracks: [{ id: 'track1', layer: 0 }, { id: 'track2', layer: 1 }],
         cues: [
-          { root: { e_type: 'group', children: [] } }
+          { root: { eType: 'group', children: [] } }
         ]
       };
       
@@ -305,7 +305,7 @@ describe('M3: ScenarioParser', () => {
           {
             track: 'main',
             hintTime: { start: '1.5', end: '3.5' },
-            root: { e_type: 'group', children: [] }
+            root: { eType: 'group', children: [] }
           }
         ]
       };
@@ -322,9 +322,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               absStart: 0,
               absEnd: 2,
@@ -338,7 +338,7 @@ describe('M3: ScenarioParser', () => {
       const result = parseScenario(input);
       const textNode = result.cues[0].root.children[0];
       
-      expect(textNode.e_type).toBe('text');
+      expect(textNode.eType).toBe('text');
       expect(textNode.text).toBe('Test');
       expect(textNode.absStart).toBe(0);
       expect(textNode.absEnd).toBe(2);
@@ -350,9 +350,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            type: 'group',  // legacy alias for e_type
+            type: 'group',  // legacy alias for eType
             children: [{
-              type: 'text',  // legacy alias for e_type
+              type: 'text',  // legacy alias for eType
               content: 'Legacy'  // legacy alias for text
             }]
           }
@@ -362,7 +362,7 @@ describe('M3: ScenarioParser', () => {
       const result = parseScenario(input);
       const textNode = result.cues[0].root.children[0];
       
-      expect(textNode.e_type).toBe('text');
+      expect(textNode.eType).toBe('text');
       expect(textNode.text).toBe('Legacy');
     });
 
@@ -372,9 +372,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               absStart: 5,
               absEnd: 2  // Invalid: end before start
@@ -392,9 +392,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'image',
+              eType: 'image',
               src: 'image.png',
               alt: 'Test image',
               absStart: 0,
@@ -407,7 +407,7 @@ describe('M3: ScenarioParser', () => {
       const result = parseScenario(input);
       const imageNode = result.cues[0].root.children[0];
       
-      expect(imageNode.e_type).toBe('image');
+      expect(imageNode.eType).toBe('image');
       expect(imageNode.src).toBe('image.png');
       expect(imageNode.alt).toBe('Test image');
     });
@@ -418,8 +418,8 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
-            children: [{ e_type: 'image' }]
+            eType: 'group',
+            children: [{ eType: 'image' }]
           }
         }]
       };
@@ -433,9 +433,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'video',
+              eType: 'video',
               src: 'video.mp4',
               mute: true,
               loop: false,
@@ -449,7 +449,7 @@ describe('M3: ScenarioParser', () => {
       const result = parseScenario(input);
       const videoNode = result.cues[0].root.children[0];
       
-      expect(videoNode.e_type).toBe('video');
+      expect(videoNode.eType).toBe('video');
       expect(videoNode.src).toBe('video.mp4');
       expect(videoNode.mute).toBe(true);
       expect(videoNode.loop).toBe(false);
@@ -461,13 +461,13 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             name: 'outer',
             children: [{
-              e_type: 'group',
+              eType: 'group',
               name: 'inner',
               children: [{
-                e_type: 'text',
+                eType: 'text',
                 text: 'Nested'
               }]
             }]
@@ -491,8 +491,8 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
-            children: [{ e_type: 'audio' }]
+            eType: 'group',
+            children: [{ eType: 'audio' }]
           }
         }]
       };
@@ -508,7 +508,7 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             layout: { position: [0.5, 0.8] },
             children: []
           }
@@ -525,7 +525,7 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             layout: { position: { x: 0.5, y: 0.8 } },
             children: []
           }
@@ -542,7 +542,7 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             layout: { position: ['invalid', 0.5] },
             children: []
           }
@@ -558,7 +558,7 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             layout: {
               mode: 'absolute',
               anchor: 'center',
@@ -593,7 +593,7 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             layout: { position: ['0.5', '0.8'] },
             children: []
           }
@@ -612,9 +612,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               plugin: {
                 name: 'fade',
@@ -644,9 +644,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               pluginChain: [
                 { name: 'fade', relStartPct: 0, relEndPct: 0.2 },
@@ -671,9 +671,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               plugin: { params: {} }
             }]
@@ -690,9 +690,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               plugin: { name: 'fade', relStartPct: 1.5 }
             }]
@@ -712,9 +712,9 @@ describe('M3: ScenarioParser', () => {
           cues: [{
             track: 'main',
             root: {
-              e_type: 'group',
+              eType: 'group',
               children: [{
-                e_type: 'text',
+                eType: 'text',
                 text: 'Test',
                 plugin: { name: 'fade', compose: mode }
               }]
@@ -731,9 +731,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               plugin: { name: 'fade', compose: 'overlay' }
             }]
@@ -752,9 +752,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               effectScope: {
                 breakout: {
@@ -789,9 +789,9 @@ describe('M3: ScenarioParser', () => {
           cues: [{
             track: 'main',
             root: {
-              e_type: 'group',
+              eType: 'group',
               children: [{
-                e_type: 'text',
+                eType: 'text',
                 text: 'Test',
                 effectScope: { breakout: { mode } }
               }]
@@ -808,9 +808,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               effectScope: { breakout: { mode: 'teleport' } }
             }]
@@ -827,9 +827,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               effectScope: {
                 breakout: { toLayer: '5', zLift: '50' }
@@ -878,9 +878,9 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               layout: { position: ['not', 'numbers'] }
             }]
@@ -898,11 +898,11 @@ describe('M3: ScenarioParser', () => {
         cues: [{
           track: 'main',
           root: {
-            e_type: 'group',
+            eType: 'group',
             children: [{
-              e_type: 'group',
+              eType: 'group',
               children: [{
-                e_type: 'text',
+                eType: 'text',
                 pluginChain: [
                   { name: 'valid' },
                   { name: 'invalid', relStartPct: 2 }

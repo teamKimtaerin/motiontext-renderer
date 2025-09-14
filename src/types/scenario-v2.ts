@@ -106,8 +106,9 @@ export interface Cue {
 
 export interface BaseNode {
   id: string; // MANDATORY in v2.0
-  e_type: 'group' | 'text' | 'image' | 'video';
+  eType: 'group' | 'text' | 'image' | 'video';
   displayTime?: DefineReference<TimeRange>; // [start, end] - inherited from parent if omitted
+  baseTime?: DefineReference<TimeRange>; // [start, end] - base time for time_offset calculations
   layout?: DefineReference<Layout>;
   style?: DefineReference<Style>;
   pluginChain?: DefineReference<PluginSpec[]>;
@@ -115,23 +116,23 @@ export interface BaseNode {
 }
 
 export interface GroupNode extends BaseNode {
-  e_type: 'group';
+  eType: 'group';
   children?: Node[];
 }
 
 export interface TextNode extends BaseNode {
-  e_type: 'text';
+  eType: 'text';
   text: DefineReference<string>;
 }
 
 export interface ImageNode extends BaseNode {
-  e_type: 'image';
+  eType: 'image';
   src: DefineReference<string>;
   alt?: DefineReference<string>;
 }
 
 export interface VideoNode extends BaseNode {
-  e_type: 'video';
+  eType: 'video';
   src: DefineReference<string>;
   autoplay?: DefineReference<boolean>;
   muted?: DefineReference<boolean>;
@@ -168,9 +169,15 @@ export interface Scenario {
 export interface ResolvedNode
   extends Omit<
     BaseNode,
-    'displayTime' | 'layout' | 'style' | 'pluginChain' | 'effectScope'
+    | 'displayTime'
+    | 'baseTime'
+    | 'layout'
+    | 'style'
+    | 'pluginChain'
+    | 'effectScope'
   > {
   displayTime: TimeRange;
+  baseTime?: TimeRange;
   layout?: Layout;
   style?: Style;
   pluginChain?: PluginSpec[];
@@ -178,18 +185,18 @@ export interface ResolvedNode
 }
 
 export interface ResolvedTextNode extends ResolvedNode {
-  e_type: 'text';
+  eType: 'text';
   text: string;
 }
 
 export interface ResolvedImageNode extends ResolvedNode {
-  e_type: 'image';
+  eType: 'image';
   src: string;
   alt?: string;
 }
 
 export interface ResolvedVideoNode extends ResolvedNode {
-  e_type: 'video';
+  eType: 'video';
   src: string;
   autoplay?: boolean;
   muted?: boolean;
@@ -197,7 +204,7 @@ export interface ResolvedVideoNode extends ResolvedNode {
 }
 
 export interface ResolvedGroupNode extends ResolvedNode {
-  e_type: 'group';
+  eType: 'group';
   children?: ResolvedNodeUnion[];
 }
 

@@ -105,8 +105,8 @@
 2. **필드명 리팩토링**
    - `hintTime` → `domLifetime: [start, end]`
    - `absStart/absEnd` → `displayTime: [start, end]`
-   - `relStart/relEnd` → `time_offset: [start, end]`
-   - 플러그인 `t0/t1` → `time_offset: [start, end]`
+   - `relStart/relEnd` → `timeOffset: [start, end]`
+   - 플러그인 `t0/t1` → `timeOffset: [start, end]`
 
 3. **노드 ID 의무화**
    - 모든 노드에 `id` 필드 필수 검증

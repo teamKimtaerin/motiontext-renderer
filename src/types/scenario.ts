@@ -65,11 +65,11 @@ export interface BaseNode {
 }
 
 export interface GroupNode extends BaseNode {
-  e_type: 'group';
+  eType: 'group';
 }
 
 export interface TextNode extends BaseNode {
-  e_type: 'text';
+  eType: 'text';
   text: string;
   absStart?: number;
   absEnd?: number;
@@ -77,7 +77,7 @@ export interface TextNode extends BaseNode {
 }
 
 export interface ImageNode extends BaseNode {
-  e_type: 'image';
+  eType: 'image';
   src: string;
   absStart?: number;
   absEnd?: number;
@@ -85,7 +85,7 @@ export interface ImageNode extends BaseNode {
 }
 
 export interface VideoNode extends BaseNode {
-  e_type: 'video';
+  eType: 'video';
   src: string;
   absStart?: number;
   absEnd?: number;

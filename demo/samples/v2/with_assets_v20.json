@@ -39,11 +39,11 @@
     "animations": {
       "slide_in": {
         "name": "slideInLeft",
-        "time_offset": ["0%", "60%"]
+        "timeOffset": ["0%", "60%"]
       },
       "fade_out": {
         "name": "fadeOut",
-        "time_offset": ["80%", "100%"]
+        "timeOffset": ["80%", "100%"]
       }
     },
     "layout": {
@@ -78,7 +78,7 @@
       "domLifetime": [0, 15],
       "root": {
         "id": "logo_container",
-        "e_type": "image",
+        "eType": "image",
         "src": "define.logo_image",
         "displayTime": [0.5, 14.5],
         "layout": {
@@ -93,7 +93,7 @@
       "domLifetime": [1, 8],
       "root": {
         "id": "title_text",
-        "e_type": "text",
+        "eType": "text",
         "text": "MotionText v2.0",
         "displayTime": [2, 7],
         "layout": {
@@ -112,12 +112,12 @@
       "domLifetime": [8, 15],
       "root": {
         "id": "subtitle_group1",
-        "e_type": "group",
+        "eType": "group",
         "displayTime": [9, 14],
         "children": [
           {
             "id": "subtitle_text1",
-            "e_type": "text",
+            "eType": "text",
             "text": "Define 시스템으로 에셋과 스타일을 관리합니다",
             "displayTime": [9, 12],
             "layout": {
@@ -128,7 +128,7 @@
           },
           {
             "id": "subtitle_text2", 
-            "e_type": "text",
+            "eType": "text",
             "text": "모든 시간은 [start, end] 배열로 표현됩니다",
             "displayTime": [12, 14],
             "layout": {

@@ -4,7 +4,7 @@
 
 **v2.0 주요 개선사항:**
 - Define 시스템으로 중복 제거 및 에셋 관리 통합  
-- 시간 필드 통일: `time_offset: [start, end]` 배열 형태
+- 시간 필드 통일: `timeOffset: [start, end]` 배열 형태
 - 노드 ID 의무화로 편집 도구 지원 강화
 - 상속 시스템으로 체계적인 값 우선순위 규칙
 - 플러그인 API v3.0 호환성
@@ -90,10 +90,10 @@ type BaseNode = {
 ### **Group / Text / Image / Video**
 
 ```tsx
-type GroupNode = BaseNode & { e_type: "group" }
+type GroupNode = BaseNode & { eType: "group" }
 
 type TextNode  = BaseNode & {
-  e_type: "text"
+  eType: "text"
   text: string
   absStart?: number
   absEnd?: number
@@ -101,7 +101,7 @@ type TextNode  = BaseNode & {
 }
 
 type ImageNode = BaseNode & {
-  e_type: "image"
+  eType: "image"
   src: string
   absStart?: number
   absEnd?: number
@@ -109,7 +109,7 @@ type ImageNode = BaseNode & {
 }
 
 type VideoNode = BaseNode & {
-  e_type: "video"
+  eType: "video"
   src: string
   absStart?: number
   absEnd?: number
@@ -335,7 +335,7 @@ type BindingRule = {
       "track": "subtitle-ko",
       "hintTime": { "start": 2.50, "end": 5.20 },
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "name": "caption-box",
         "layout": {
           "mode": "flow",
@@ -346,9 +346,9 @@ type BindingRule = {
           "zIndex": 0
         },
         "children": [
-          { "e_type": "text", "tokenId": 1, "text": "저는",        "absStart": 2.60, "absEnd": 3.00 },
+          { "eType": "text", "tokenId": 1, "text": "저는",        "absStart": 2.60, "absEnd": 3.00 },
           {
-            "e_type": "text",
+            "eType": "text",
             "tokenId": 2,
             "text": "개발자로",
             "absStart": 3.00,
@@ -378,9 +378,9 @@ type BindingRule = {
               }
             }
           },
-          { "e_type": "text", "tokenId": 3, "text": "일하고",      "absStart": 3.60, "absEnd": 4.00 },
-          { "e_type": "text", "tokenId": 4, "text": "있는",        "absStart": 4.00, "absEnd": 4.20 },
-          { "e_type": "text", "tokenId": 5, "text": "홍길동입니다", "absStart": 4.20, "absEnd": 4.90,
+          { "eType": "text", "tokenId": 3, "text": "일하고",      "absStart": 3.60, "absEnd": 4.00 },
+          { "eType": "text", "tokenId": 4, "text": "있는",        "absStart": 4.00, "absEnd": 4.20 },
+          { "eType": "text", "tokenId": 5, "text": "홍길동입니다", "absStart": 4.20, "absEnd": 4.90,
             "plugin": { "name": "wordHighlight", "params": { "style": "solid" } } }
         ]
       }
@@ -390,7 +390,7 @@ type BindingRule = {
       "id": "sticker-tilted-banner",
       "track": "free-stickers",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "name": "tilted-sticker",
         "layout": {
           "mode": "absolute",
@@ -404,7 +404,7 @@ type BindingRule = {
         },
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "개발자 홍길동 ✈️",
             "absStart": 2.00, "absEnd": 4.20,
             "style": {
@@ -417,7 +417,7 @@ type BindingRule = {
             "plugin": { "name": "handDrawReveal", "params": { "direction": "ltr", "duration": 0.9, "wobble": 0.015 } }
           },
           {
-            "e_type": "image",
+            "eType": "image",
             "src": "assets/paper_plane.png",
             "absStart": 2.20, "absEnd": 4.20,
             "layout": {

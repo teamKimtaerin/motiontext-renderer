@@ -47,7 +47,7 @@
       "track": "effect",
       "root": {
         "id": "glitch-group",
-        "e_type": "group",
+        "eType": "group",
         "effectScope": {
           "breakout": {
             "mode": "portal",
@@ -58,7 +58,7 @@
         "children": [
           {
             "id": "glitch-text",
-            "e_type": "text",
+            "eType": "text",
             "text": "G̸L̷I̶T̴C̵H̸ ̷E̴F̵F̷E̶C̶T̴",
             "layout": {
               "position": [
@@ -97,11 +97,11 @@
       "track": "subtitle",
       "root": {
         "id": "typewriter-group",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "typewriter-text",
-            "e_type": "text",
+            "eType": "text",
             "text": "타이프라이터 효과로 글자가 하나씩 나타납니다...",
             "layout": {
               "position": [
@@ -134,11 +134,11 @@
       "track": "effect",
       "root": {
         "id": "wave-group",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "wave-text",
-            "e_type": "text",
+            "eType": "text",
             "text": "🌊 웨이브 이펙트 🌊",
             "layout": {
               "position": [
@@ -177,11 +177,11 @@
       "track": "effect",
       "root": {
         "id": "particle-group",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "particle-text",
-            "e_type": "text",
+            "eType": "text",
             "text": "✨ 파티클 시스템 ✨",
             "layout": {
               "position": [

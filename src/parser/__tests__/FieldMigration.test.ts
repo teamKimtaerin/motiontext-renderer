@@ -15,7 +15,7 @@ describe('FieldMigration', () => {
           hintTime: 2.5,
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello World',
             absStart: 1.0,
             absEnd: 5.0
@@ -43,7 +43,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello',
             pluginChain: [
               { name: 'fadeIn', relStart: 0, relEnd: 0.5 },
@@ -57,15 +57,15 @@ describe('FieldMigration', () => {
       const result = FieldMigration.migrateV13ToV20(v13Scenario);
       const plugins = result.cues[0].root.pluginChain;
 
-      expect(plugins[0].time_offset).toEqual([0, 0.5]);
+      expect(plugins[0].timeOffset).toEqual([0, 0.5]);
       expect(plugins[0]).not.toHaveProperty('relStart');
       expect(plugins[0]).not.toHaveProperty('relEnd');
 
-      expect(plugins[1].time_offset).toEqual([0.8, 1.0]); // 80%, 100%
+      expect(plugins[1].timeOffset).toEqual([0.8, 1.0]); // 80%, 100%
       expect(plugins[1]).not.toHaveProperty('relStartPct');
       expect(plugins[1]).not.toHaveProperty('relEndPct');
 
-      expect(plugins[2].time_offset).toEqual([0.2, 0.8]);
+      expect(plugins[2].timeOffset).toEqual([0.2, 0.8]);
       expect(plugins[2]).not.toHaveProperty('t0');
       expect(plugins[2]).not.toHaveProperty('t1');
     });
@@ -79,12 +79,12 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'group1',
-            e_type: 'group',
+            eType: 'group',
             absStart: 1.0,
             absEnd: 5.0,
             children: [{
               id: 'text1',
-              e_type: 'text',
+              eType: 'text',
               text: 'Hello',
               absStart: 2.0,
               absEnd: 4.0,
@@ -102,7 +102,7 @@ describe('FieldMigration', () => {
 
       expect(root.displayTime).toEqual([1.0, 5.0]);
       expect(child.displayTime).toEqual([2.0, 4.0]);
-      expect(child.pluginChain[0].time_offset).toEqual([0, 0.3]);
+      expect(child.pluginChain[0].timeOffset).toEqual([0, 0.3]);
     });
   });
 
@@ -138,7 +138,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             // id 누락
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello'
           }
         }]
@@ -157,14 +157,14 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'group1',
-            e_type: 'group',
+            eType: 'group',
             children: [{
               id: 'text1',
-              e_type: 'text',
+              eType: 'text',
               text: 'Hello'
             }, {
               id: 'text1', // 중복 ID
-              e_type: 'text',
+              eType: 'text',
               text: 'World'
             }]
           }
@@ -189,7 +189,7 @@ describe('FieldMigration', () => {
           hintTime: 2,
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello World',
             absStart: 1.0,
             absEnd: 3.0
@@ -220,7 +220,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             // id 누락
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello'
           }
         }]
@@ -241,7 +241,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello',
             absStart: 2.5
             // absEnd 누락
@@ -262,7 +262,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello',
             pluginChain: []
           }
@@ -282,7 +282,7 @@ describe('FieldMigration', () => {
           track: 'subtitle',
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello',
             pluginChain: [
               { name: 'fadeIn', relStart: 0.2 } // relEnd 누락
@@ -292,7 +292,7 @@ describe('FieldMigration', () => {
       };
 
       const result = FieldMigration.migrateV13ToV20(v13Scenario);
-      expect(result.cues[0].root.pluginChain[0].time_offset).toEqual([0.2, 1]); // 기본값 1
+      expect(result.cues[0].root.pluginChain[0].timeOffset).toEqual([0.2, 1]); // 기본값 1
     });
   });
 });

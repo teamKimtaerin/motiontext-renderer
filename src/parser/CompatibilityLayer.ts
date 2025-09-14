@@ -203,7 +203,7 @@ export class CompatibilityLayer {
       if (Array.isArray(obj)) {
         obj.forEach(countNodes);
       } else if (typeof obj === 'object' && obj !== null) {
-        if (obj.e_type || obj.type) {
+        if (obj.eType || obj.type) {
           // 노드로 판단되는 객체
           nodeCount++;
           if (obj.id) nodesWithId++;

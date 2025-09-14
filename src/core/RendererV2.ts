@@ -40,10 +40,6 @@ import {
   applyDomSeparation,
   applyCSSVariableChannels,
 } from '../runtime/DomSeparation';
-import {
-  isBuiltinPlugin as isBuiltinPluginV2,
-  evaluateBuiltinPlugin,
-} from '../runtime/plugins/BuiltinV2';
 import { createLogger, setGlobalDebug } from '../utils/logger';
 
 /**
@@ -261,7 +257,7 @@ export class RendererV2 {
     }
 
     // group 노드의 children 재귀 처리
-    if (node.e_type === 'group' && node.children) {
+    if (node.eType === 'group' && node.children) {
       for (const child of node.children) {
         this.processNode(child, cue, track, currentTime, nodeId);
       }
@@ -310,8 +306,8 @@ export class RendererV2 {
 
     this.logger.debug(`[RendererV2] Mounted node: ${nodeId}`, {
       element: element,
-      nodetype: node.e_type,
-      text: node.e_type === 'text' ? (node as any).text : undefined,
+      nodetype: node.eType,
+      text: node.eType === 'text' ? (node as any).text : undefined,
       layout: node.layout,
       displayTime: node.displayTime,
       trackDefaults: track?.defaultStyle,
@@ -365,15 +361,12 @@ export class RendererV2 {
     const channels: Channels = {};
 
     for (const plugin of pluginChain) {
-      // base_time 우선순위: plugin.base_time → node.base_time → node.displayTime
-      const rawBase: any =
-        (plugin as any).base_time ??
-        (node as any).base_time ??
-        node.displayTime;
+      // baseTime 우선순위: plugin.baseTime → node.baseTime → node.displayTime
+      const rawBase: any = plugin.baseTime ?? node.baseTime ?? node.displayTime;
       const baseTime = this.resolveAllDefines(rawBase) as TimeRange;
 
-      // time_offset은 절대 초 또는 백분율('%') 허용
-      const rawOffset = (plugin as any).time_offset ?? ['0%', '100%'];
+      // timeOffset은 절대 초 또는 백분율('%') 허용
+      const rawOffset = plugin.timeOffset ?? ['0%', '100%'];
       const resolvedOffset = this.resolveAllDefines(rawOffset) as [
         unknown,
         unknown,
@@ -472,11 +465,6 @@ export class RendererV2 {
 
     let channels: Channels = {};
 
-    // 내장 플러그인
-    if (pluginTypes.has('builtin')) {
-      return this.evaluateBuiltinPlugin(resolvedPlugin, progress) || {};
-    }
-
     // 채널 기반 플러그인
     if (pluginTypes.has('channel')) {
       const channelResult = this.evaluateChannelPlugin(
@@ -499,16 +487,8 @@ export class RendererV2 {
   /**
    * 플러그인 타입 감지 - v3.0 하이브리드 지원
    */
-  private detectPluginType(
-    plugin: PluginSpec
-  ): Set<'builtin' | 'channel' | 'dom'> {
-    const types = new Set<'builtin' | 'channel' | 'dom'>();
-
-    // 내장 플러그인 확인
-    if (this.isBuiltinPlugin(plugin.name)) {
-      types.add('builtin');
-      return types;
-    }
+  private detectPluginType(plugin: PluginSpec): Set<'channel' | 'dom'> {
+    const types = new Set<'channel' | 'dom'>();
 
     // 외부 플러그인 확인
     const registeredPlugin = devRegistry.resolve(plugin.name);
@@ -552,25 +532,6 @@ export class RendererV2 {
     }
 
     return types;
-  }
-
-  /**
-   * 내장 플러그인인지 확인
-   */
-  private isBuiltinPlugin(name: string): boolean {
-    // BuiltinV2.ts와 동기화
-    return isBuiltinPluginV2(name);
-  }
-
-  /**
-   * 내장 플러그인 평가
-   */
-  private evaluateBuiltinPlugin(
-    plugin: PluginSpec,
-    progress: number
-  ): Channels | null {
-    // BuiltinV2.ts의 구현 사용 (21개 플러그인 지원)
-    return evaluateBuiltinPlugin(plugin, progress);
   }
 
   /**
@@ -1150,7 +1111,7 @@ export class RendererV2 {
   private createOriginalElement(node: ResolvedNodeUnion): HTMLElement {
     let element: HTMLElement;
 
-    switch (node.e_type) {
+    switch (node.eType) {
       case 'text':
         element = document.createElement('div');
         element.textContent = node.text || '';
@@ -1192,7 +1153,7 @@ export class RendererV2 {
     originalElement: HTMLElement,
     effectsRoot: HTMLElement
   ): void {
-    switch (node.e_type) {
+    switch (node.eType) {
       case 'text':
         // 텍스트를 effectsRoot로 이동
         effectsRoot.textContent = node.text || '';
@@ -1284,7 +1245,7 @@ export class RendererV2 {
     if (mergedStyle.align) element.style.textAlign = mergedStyle.align;
 
     // Apply default text styling for text nodes without explicit style
-    if (node.e_type === 'text' && !mergedStyle.fontSizeRel) {
+    if (node.eType === 'text' && !mergedStyle.fontSizeRel) {
       element.style.fontSize = '2rem'; // Default visible size
       element.style.color = element.style.color || '#ffffff'; // Default white text
       element.style.fontWeight = element.style.fontWeight || 'bold';

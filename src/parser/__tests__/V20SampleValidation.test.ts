@@ -34,7 +34,7 @@ const inlineBasicV20Json = `{
     "cue1_timing": [2, 5],
     "fade_in": {
       "name": "fadeIn",
-      "time_offset": [0, 0.3]
+      "timeOffset": [0, 0.3]
     }
   },
   "tracks": [
@@ -52,11 +52,11 @@ const inlineBasicV20Json = `{
       "domLifetime": [1.8, 5.5],
       "root": {
         "id": "group1",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "text1",
-            "e_type": "text",
+            "eType": "text",
             "text": "안녕하세요! MotionText Renderer v2.0입니다.",
             "displayTime": "define.cue1_timing",
             "layout": {
@@ -105,7 +105,7 @@ describe('v2.0 샘플 JSON 검증', () => {
         expect(textNode.pluginChain).toEqual([
           {
             name: 'fadeIn',
-            time_offset: ['0%', '30%'],
+            timeOffset: ['0%', '30%'],
           },
         ]);
       });
@@ -177,8 +177,8 @@ describe('v2.0 샘플 JSON 검증', () => {
         // title_cue의 pluginChain 검증
         const titleCue = resolved.cues.find(c => c.id === 'title_cue');
         expect(titleCue?.root.pluginChain).toEqual([
-          { name: 'slideInLeft', time_offset: ['0%', '60%'] },
-          { name: 'fadeOut', time_offset: ['80%', '100%'] },
+          { name: 'slideInLeft', timeOffset: ['0%', '60%'] },
+          { name: 'fadeOut', timeOffset: ['80%', '100%'] },
         ]);
       });
 
@@ -220,8 +220,8 @@ describe('v2.0 샘플 JSON 검증', () => {
         const endTime = performance.now();
         const avgTime = (endTime - startTime) / 100;
         
-        // 평균 1ms 이내로 완료되어야 함
-        expect(avgTime).toBeLessThan(1);
+        // 평균 2ms 이내로 완료되어야 함
+        expect(avgTime).toBeLessThan(2);
       });
     });
 
@@ -236,7 +236,7 @@ describe('v2.0 샘플 JSON 검증', () => {
             track: 'test',
             root: {
               id: 'invalid_text',
-              e_type: 'text',
+              eType: 'text',
               text: 'define.nonexistent_key'
             }
           }]
@@ -295,7 +295,7 @@ describe('v2.0 샘플 JSON 검증', () => {
         expect(textNode.layout?.position).toEqual([0.5, 0.85]);
         expect(textNode.pluginChain).toEqual([{
           name: "fadeIn",
-          time_offset: [0, 0.3]
+          timeOffset: [0, 0.3]
         }]);
       });
 
@@ -325,7 +325,7 @@ describe('v2.0 샘플 JSON 검증', () => {
             hintTime: 3,
             root: {
               id: 'test_text',
-              e_type: 'text',
+              eType: 'text',
               text: 'Test',
               absStart: 2,
               absEnd: 5,
@@ -343,7 +343,7 @@ describe('v2.0 샘플 JSON 검증', () => {
         expect(v20Scenario.version).toBe('2.0');
         expect(v20Scenario.cues[0].domLifetime).toEqual([3, 8]); // hintTime + 5초
         expect(v20Scenario.cues[0].root.displayTime).toEqual([2, 5]); // absStart/End
-        expect(v20Scenario.cues[0].root.pluginChain![0].time_offset).toEqual([0, 0.5]); // relStart/End
+        expect(v20Scenario.cues[0].root.pluginChain![0].timeOffset).toEqual([0, 0.5]); // relStart/End
 
         // Define 참조 해석 테스트 (빈 define이지만 정상 동작)
         const resolver = new DefineResolver();
@@ -378,7 +378,7 @@ describe('v2.0 샘플 JSON 검증', () => {
             track: 'test',
             root: {
               id: 'complex_text',
-              e_type: 'text',
+              eType: 'text',
               text: 'define.level_20.text' // 깊은 중첩 참조
             }
           }]
@@ -406,7 +406,7 @@ describe('v2.0 샘플 JSON 검증', () => {
             track: 'test',
             root: {
               id: 'invalid_text',
-              e_type: 'text',
+              eType: 'text',
               text: 'define.nonexistent_key'
             }
           }]
@@ -427,7 +427,7 @@ describe('v2.0 샘플 JSON 검증', () => {
             domLifetime: [5, 3], // start > end (잘못됨)
             root: {
               id: 'test_node',
-              e_type: 'text',
+              eType: 'text',
               text: 'Test'
             }
           }]

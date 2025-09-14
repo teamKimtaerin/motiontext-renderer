@@ -18,7 +18,7 @@
 
 핵심 원칙(요약)
 - **타임라인 소유권**: 렌더러가 전담. 플러그인은 상대 Timeline/seek만 제공.
-- **pluginChain**: `time_offset: [start, end]` 배열로 통일. 충돌은 기본 last‑wins, 필요 시 compose:"add"/"multiply".
+- **pluginChain**: `timeOffset: [start, end]` 배열로 통일. 충돌은 기본 last‑wins, 필요 시 compose:"add"/"multiply".
 - **breakout**: 기본 transfer:"move".
 - **Define 시스템**: `"define.키"` 참조로 중복 제거, 에셋 관리 통합.
 - **상속 시스템**: 직접 명시 > define 참조 > 상속 > 기본값.

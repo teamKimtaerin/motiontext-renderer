@@ -25,10 +25,10 @@
       "id": "free-top-left",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "좌상단 pop",
             "layout": {
               "position": {
@@ -44,14 +44,14 @@
                 "params": {
                   "maxScale": 1.3
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.35%"
                 ]
               },
               {
                 "name": "fadeIn",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.2%"
                 ]
@@ -71,10 +71,10 @@
       "id": "free-top-right",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "우상단 wave",
             "layout": {
               "position": {
@@ -91,7 +91,7 @@
                   "amplitudePx": 8,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]
@@ -111,10 +111,10 @@
       "id": "free-center-shake",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "센터 shakeX",
             "layout": {
               "position": {
@@ -131,7 +131,7 @@
                   "amplitudePx": 6,
                   "cycles": 8
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]

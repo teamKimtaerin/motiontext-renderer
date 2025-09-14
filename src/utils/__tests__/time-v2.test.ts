@@ -240,7 +240,7 @@ describe('time-v2.ts', () => {
     });
 
     describe('legacyRelToTimeOffset', () => {
-      it('converts relStart/relEnd to time_offset', () => {
+      it('converts relStart/relEnd to timeOffset', () => {
         expect(legacyRelToTimeOffset(0, 1)).toEqual([0, 1]);
       });
 

@@ -70,18 +70,18 @@ export async function loadPluginManifest(pluginName: string, opts: ManifestLoadO
 
     const tryUrls: string[] = [];
     if (mode === 'server' || mode === 'auto') {
-      if (serverBase) tryUrls.push(`${serverBase}/plugins/${encodeURIComponent(key)}/manifest.json`);
       if (serverBase) tryUrls.push(`${serverBase}/plugins/${key}/manifest.json`);
+      if (serverBase) tryUrls.push(`${serverBase}/plugins/${encodeURIComponent(key)}/manifest.json`);
     }
     if (mode === 'local' || mode === 'auto') {
       if (localBase) {
         const base = localBase.endsWith('/') ? localBase : localBase + '/';
-        tryUrls.push(`${base}${encodeURIComponent(key)}/manifest.json`);
         tryUrls.push(`${base}${key}/manifest.json`);
+        tryUrls.push(`${base}${encodeURIComponent(key)}/manifest.json`);
       }
       // Optional conventional absolute path
-      tryUrls.push(`/plugin-server/plugins/${encodeURIComponent(key)}/manifest.json`);
       tryUrls.push(`/plugin-server/plugins/${key}/manifest.json`);
+      tryUrls.push(`/plugin-server/plugins/${encodeURIComponent(key)}/manifest.json`);
     }
 
     let lastErr: unknown = null;
@@ -159,7 +159,7 @@ export function generatePreviewScenario(
         domLifetime: [0, duration + 0.5],
         root: {
           id: 'preview-group',
-          e_type: 'group',
+          eType: 'group',
           layout: {
             mode: 'absolute',
             position: { x: normalizedX, y: normalizedY },
@@ -180,7 +180,7 @@ export function generatePreviewScenario(
           children: [
             {
               id: 'preview-text',
-              e_type: 'text',
+              eType: 'text',
               text: settings.text,
               // layout 제거 - flow 모드 정렬에 완전히 의존
               style: {
@@ -193,7 +193,7 @@ export function generatePreviewScenario(
                 {
                   name: pluginName,
                   params: settings.pluginParams,
-                  time_offset: ['0%', '100%'],
+                  timeOffset: ['0%', '100%'],
                 },
               ],
             },
@@ -223,7 +223,7 @@ export function generateLoopedScenario(
     {
       name: pluginName,
       params: settings.pluginParams,
-      time_offset: ['0%', '100%'],
+      timeOffset: ['0%', '100%'],
     }
   ];
   
@@ -257,7 +257,7 @@ export function generateLoopedScenario(
         domLifetime: [0, duration + 0.5],
         root: {
           id: 'looped-group',
-          e_type: 'group',
+          eType: 'group',
           displayTime: [0, duration],
           layout: {
             mode: 'absolute',
@@ -279,7 +279,7 @@ export function generateLoopedScenario(
           children: [
             {
               id: 'looped-text',
-              e_type: 'text',
+              eType: 'text',
               text: settings.text,
               // layout 제거 - flow 모드 정렬에 완전히 의존
               style: {

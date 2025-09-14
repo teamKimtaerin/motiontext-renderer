@@ -125,14 +125,14 @@ function normEffectScope(es: any, path: Path) {
 }
 
 function normNode(node: any, path: Path): Node {
-  const eType = node.e_type ?? node.type;
+  const eType = node.eType ?? node.type;
   if (eType === 'group') {
     const childrenIn = Array.isArray(node.children) ? node.children : [];
     const children = childrenIn.map((ch: any, i: number) =>
       normNode(ch, `${path}.children[${i}]`)
     );
     const g: GroupNode = {
-      e_type: 'group',
+      eType: 'group',
       name: node.name,
       style: node.style,
       layout: normLayout(node.layout, path),
@@ -147,7 +147,7 @@ function normNode(node: any, path: Path): Node {
     if (t0 != null && t1 != null && !(t1 > t0))
       fail(`${path}.absEnd`, `must be > absStart`);
     const tn: TextNode = {
-      e_type: 'text',
+      eType: 'text',
       text,
       absStart: t0,
       absEnd: t1,
@@ -175,7 +175,7 @@ function normNode(node: any, path: Path): Node {
     if (t0 != null && t1 != null && !(t1 > t0))
       fail(`${path}.absEnd`, `must be > absStart`);
     const im: ImageNode = {
-      e_type: 'image',
+      eType: 'image',
       src,
       alt: node.alt,
       absStart: t0,
@@ -193,7 +193,7 @@ function normNode(node: any, path: Path): Node {
     if (t0 != null && t1 != null && !(t1 > t0))
       fail(`${path}.absEnd`, `must be > absStart`);
     const vn: VideoNode = {
-      e_type: 'video',
+      eType: 'video',
       src,
       absStart: t0,
       absEnd: t1,
@@ -276,7 +276,7 @@ export function parseScenario(input: any): ScenarioFileV1_3 {
         }
       : undefined;
     const root = normNode(
-      c.root ?? { e_type: 'group', children: [] },
+      c.root ?? { eType: 'group', children: [] },
       `cues[${i}].root`
     ) as GroupNode;
     return { id, track, hintTime, root } as Cue;

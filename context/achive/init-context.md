@@ -175,7 +175,7 @@ sequenceDiagram
 ### v3.0 주요 개선사항
 
 * **Define 시스템**: 중복 제거 및 에셋 관리 통합
-* **시간 표현 통일**: `time_offset: [start, end]` 배열 형태
+* **시간 표현 통일**: `timeOffset: [start, end]` 배열 형태
 * **노드 ID 의무화**: 편집 도구 지원을 위한 고유 식별자
 * **상속 시스템**: 체계적인 값 우선순위 규칙
 * **DOM 경계 분리**: baseWrapper/effectsRoot 완전 분리
@@ -183,7 +183,7 @@ sequenceDiagram
 * **에셋 확장**: audio 타입 추가, preload/lazyLoad 분리
 * **무결성 검증**: SHA-384 기본화 (개발 환경 제외)
 * **스키마 확장**: UI 메타데이터, 다국어 지원, dependencies
-* **pluginChain**: `time_offset` 지원, compose 규칙 적용
+* **pluginChain**: `timeOffset` 지원, compose 규칙 적용
 * **충돌 규칙**: 기본 last-wins, 필요 시 compose:"add"/"multiply" 지정
 
 *최종 업데이트: 2025-01-16 - v2.0 메이저 업데이트 완료*

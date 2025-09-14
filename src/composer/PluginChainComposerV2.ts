@@ -150,10 +150,10 @@ export class PluginChainComposerV2 {
     evaluator: PluginEvaluator,
     context?: PluginEvaluationContext
   ): PluginEvaluationResult {
-    // time_offset 기반 플러그인 실행 창 계산
-    // base_time 우선순위: plugin.base_time → displayTime
-    const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-    const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+    // timeOffset 기반 플러그인 실행 창 계산
+    // baseTime 우선순위: plugin.baseTime → displayTime
+    const baseTime = (plugin.baseTime as TimeRange) || displayTime;
+    const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
       '0%',
       '100%',
     ];
@@ -306,8 +306,8 @@ export function isPluginActive(
   currentTime: number,
   displayTime: TimeRange
 ): boolean {
-  const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+  const baseTime = (plugin.baseTime as TimeRange) || displayTime;
+  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
     '0%',
     '100%',
   ];
@@ -327,8 +327,8 @@ export function getPluginProgress(
   currentTime: number,
   displayTime: TimeRange
 ): number {
-  const baseTime = ((plugin as any).base_time as TimeRange) || displayTime;
-  const timeOffset = ((plugin as any).time_offset as [unknown, unknown]) ?? [
+  const baseTime = (plugin.baseTime as TimeRange) || displayTime;
+  const timeOffset = (plugin.timeOffset as [unknown, unknown]) ?? [
     '0%',
     '100%',
   ];

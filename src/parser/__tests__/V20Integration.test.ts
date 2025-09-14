@@ -27,7 +27,7 @@ describe('v2.0 Integration Tests', () => {
           hintTime: 2.0,
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello World',
             absStart: 1.0,
             absEnd: 3.0,
@@ -51,7 +51,7 @@ describe('v2.0 Integration Tests', () => {
       // 참조 사용으로 변경
       v20Scenario.tracks[0].defaultStyle!.color = 'define.brand_color';
       v20Scenario.cues[0].root.text = 'define.common_text';
-      v20Scenario.cues[0].root.pluginChain![0].time_offset = 'define.fade_duration';
+      v20Scenario.cues[0].root.pluginChain![0].timeOffset = 'define.fade_duration';
 
       // 2. Define 참조 해석
       const resolver = new DefineResolver();
@@ -63,7 +63,7 @@ describe('v2.0 Integration Tests', () => {
       expect(resolved.cues[0].root.displayTime).toEqual([1.0, 3.0]); // absStart/End 변환됨
       expect(resolved.tracks[0].defaultStyle?.color).toBe('#ff6b35'); // Define 해석됨
       expect(resolved.cues[0].root.text).toBe('Hello v2.0'); // Define 해석됨
-      expect(resolved.cues[0].root.pluginChain?.[0].time_offset).toEqual([0, 0.8]); // Define 해석됨
+      expect(resolved.cues[0].root.pluginChain?.[0].timeOffset).toEqual([0, 0.8]); // Define 해석됨
     });
 
     it('복잡한 중첩 Define 참조를 올바르게 해석한다', () => {
@@ -83,11 +83,11 @@ describe('v2.0 Integration Tests', () => {
           animations: {
             entrance: {
               name: 'fadeIn',
-              time_offset: [0, 0.5]
+              timeOffset: [0, 0.5]
             },
             exit: {
               name: 'fadeOut', 
-              time_offset: [0.8, 1.0]
+              timeOffset: [0.8, 1.0]
             }
           }
         },
@@ -106,7 +106,7 @@ describe('v2.0 Integration Tests', () => {
           track: 'title',
           root: {
             id: 'title_text',
-            e_type: 'text',
+            eType: 'text',
             text: 'Main Title',
             pluginChain: [
               'define.animations.entrance',
@@ -128,11 +128,11 @@ describe('v2.0 Integration Tests', () => {
       const plugins = resolved.cues[0].root.pluginChain as any[];
       expect(plugins[0]).toEqual({
         name: 'fadeIn',
-        time_offset: [0, 0.5]
+        timeOffset: [0, 0.5]
       });
       expect(plugins[1]).toEqual({
         name: 'fadeOut',
-        time_offset: [0.8, 1.0]
+        timeOffset: [0.8, 1.0]
       });
     });
   });
@@ -162,7 +162,7 @@ describe('v2.0 Integration Tests', () => {
           hintTime: 2,
           root: {
             id: 'group1',
-            e_type: 'group',
+            eType: 'group',
             absStart: 1.0,
             absEnd: 5.0,
             layout: {
@@ -171,7 +171,7 @@ describe('v2.0 Integration Tests', () => {
             },
             children: [{
               id: 'text1',
-              e_type: 'text',
+              eType: 'text',
               text: 'Hello Basic v2.0',
               absStart: 1.5,
               absEnd: 4.5
@@ -257,7 +257,7 @@ describe('v2.0 Integration Tests', () => {
           track: 'custom',
           root: {
             id: 'custom_text',
-            e_type: 'text',
+            eType: 'text',
             text: 'Custom Font Text',
             displayTime: [2.0, 6.0]
           }
@@ -322,7 +322,7 @@ describe('v2.0 Integration Tests', () => {
           track: 'subtitle',
           root: {
             // id 누락으로 마이그레이션 실패
-            e_type: 'text',
+            eType: 'text',
             text: 'Invalid'
           }
         }]
@@ -347,7 +347,7 @@ describe('v2.0 Integration Tests', () => {
           track: 'test',
           root: {
             id: 'test_node',
-            e_type: 'text',
+            eType: 'text',
             text: 'define.a' // 순환 참조 사용
           }
         }]
@@ -380,7 +380,7 @@ describe('v2.0 Integration Tests', () => {
           track: 'test',
           root: {
             id: 'perf_node',
-            e_type: 'text',
+            eType: 'text',
             text: 'define.key_50.text' // 중간 키의 text 속성 참조
           }
         }]

@@ -5,7 +5,7 @@
 참고 스펙 문서:
 - 시나리오(JSON) v2.0: `context/scenario-json-spec-v-2-0.md`
 - 플러그인 시스템 v3.0: `context/plugin-system-architecture-v-3-0.md`
-- 개요: `context/init-context.md`
+- 개요(시작 가이드): `context/ai-bootstrap-prompt.md`
 
 핵심 원칙:
 - 타임라인 소유권은 렌더러. 플러그인은 상대 진행도/seek만 제공.
@@ -123,7 +123,7 @@
 
 ### composer
 - PluginChainComposer.ts — v1.3 기반 합성기. 상태: 레거시(테스트/참고용).
-- PluginChainComposerV2.ts — v2.0 time_offset 기반 플러그인 창 계산 → 진행도 평가 → 채널 병합(ComposeMode 적용) 및 디버그 로깅/최대 활성 개수 제한 제공.
+- PluginChainComposerV2.ts — v2.0 timeOffset 기반 플러그인 창 계산 → 진행도 평가 → 채널 병합(ComposeMode 적용) 및 디버그 로깅/최대 활성 개수 제한 제공.
 
 ### core
 - RendererV2.ts — v2.0 네이티브 렌더러: 타임라인 tick에 맞춰 큐/노드 마운트·업데이트·정리, 채널 적용과 DOM/채널 플러그인 호출, Define 참조 해석, 디버그 로깅을 조율.

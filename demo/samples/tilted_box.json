@@ -25,10 +25,10 @@
       "id": "tilted-30deg",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "기울어진 텍스트 30°",
             "layout": {
               "position": {
@@ -45,7 +45,7 @@
             "pluginChain": [
               {
                 "name": "fadeIn",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.2%"
                 ]
@@ -56,7 +56,7 @@
                 "params": {
                   "maxScale": 1.15
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.3%"
                 ]
@@ -68,7 +68,7 @@
                   "amplitudePx": 10,
                   "cycles": 1.5
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0.1%",
                   "0.9%"
                 ]

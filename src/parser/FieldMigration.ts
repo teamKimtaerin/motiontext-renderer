@@ -6,8 +6,10 @@ import type { Scenario as ScenarioV2, TimeRange } from '../types/scenario-v2';
  * v1.3 → v2.0 필드명 변환 유틸리티
  * - hintTime → domLifetime: [start, end]
  * - absStart/absEnd → displayTime: [start, end]
- * - relStart/relEnd → time_offset: [start, end]
- * - 플러그인 t0/t1 → time_offset: [start, end]
+ * - relStart/relEnd → timeOffset: [start, end]
+ * - e_type → eType
+ * - base_time → baseTime
+ * - 플러그인 t0/t1 → timeOffset: [start, end]
  */
 export class FieldMigration {
   /**
@@ -61,6 +63,18 @@ export class FieldMigration {
    * @param node 마이그레이션할 Node 객체
    */
   private static migrateNode(node: any): void {
+    // e_type → eType 변환
+    if ('e_type' in node) {
+      node.eType = node.e_type;
+      delete node.e_type;
+    }
+
+    // base_time → baseTime 변환
+    if ('base_time' in node) {
+      node.baseTime = node.base_time;
+      delete node.base_time;
+    }
+
     // absStart/absEnd → displayTime 변환
     if ('absStart' in node || 'absEnd' in node) {
       const start = node.absStart ?? 0;
@@ -90,29 +104,41 @@ export class FieldMigration {
    * @param plugin 마이그레이션할 플러그인 객체
    */
   private static migratePlugin(plugin: any): void {
-    // relStart/relEnd → time_offset 변환
+    // time_offset → timeOffset 변환
+    if ('time_offset' in plugin) {
+      plugin.timeOffset = plugin.time_offset;
+      delete plugin.time_offset;
+    }
+
+    // base_time → baseTime 변환
+    if ('base_time' in plugin) {
+      plugin.baseTime = plugin.base_time;
+      delete plugin.base_time;
+    }
+
+    // relStart/relEnd → timeOffset 변환
     if ('relStart' in plugin || 'relEnd' in plugin) {
       const start = plugin.relStart ?? 0;
       const end = plugin.relEnd ?? 1;
-      plugin.time_offset = [start, end] as TimeRange;
+      plugin.timeOffset = [start, end] as TimeRange;
       delete plugin.relStart;
       delete plugin.relEnd;
     }
 
-    // relStartPct/relEndPct → time_offset 변환
+    // relStartPct/relEndPct → timeOffset 변환
     if ('relStartPct' in plugin || 'relEndPct' in plugin) {
       const start = (plugin.relStartPct ?? 0) / 100;
       const end = (plugin.relEndPct ?? 100) / 100;
-      plugin.time_offset = [start, end] as TimeRange;
+      plugin.timeOffset = [start, end] as TimeRange;
       delete plugin.relStartPct;
       delete plugin.relEndPct;
     }
 
-    // t0/t1 → time_offset 변환 (레거시 형태)
+    // t0/t1 → timeOffset 변환 (레거시 형태)
     if ('t0' in plugin || 't1' in plugin) {
       const start = plugin.t0 ?? 0;
       const end = plugin.t1 ?? 1;
-      plugin.time_offset = [start, end] as TimeRange;
+      plugin.timeOffset = [start, end] as TimeRange;
       delete plugin.t0;
       delete plugin.t1;
     }

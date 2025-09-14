@@ -13,8 +13,8 @@ RendererV2에서 채널 기반 플러그인(Channel-based)과 DOM 기반 플러�
 ```json
 {
   "pluginChain": [
-    { "name": "spin", "time_offset": [0, 1] },        // Channel-based
-    { "name": "typewriter@1.0.0", "time_offset": [0, 1] }  // DOM-based
+    { "name": "spin", "timeOffset": [0, 1] },        // Channel-based
+    { "name": "typewriter@1.0.0", "timeOffset": [0, 1] }  // DOM-based
   ]
 }
 ```
@@ -70,7 +70,7 @@ private createElement(node: ResolvedNodeUnion): HTMLElement {
   const { baseWrapper, effectsRoot } = applyDomSeparation(originalElement);
   
   // 3. 텍스트 내용을 effectsRoot로 이동
-  if (node.e_type === 'text') {
+  if (node.eType === 'text') {
     effectsRoot.textContent = node.text || '';
     originalElement.textContent = ''; // 중복 제거
   }
@@ -244,7 +244,7 @@ private createElement(node: ResolvedNodeUnion): HTMLElement {
      
      for (const plugin of pluginChain) {
        const [start, end] = node.displayTime ?? [-Infinity, Infinity];
-       const pluginWindow = computePluginWindow([start, end], plugin.time_offset);
+       const pluginWindow = computePluginWindow([start, end], plugin.timeOffset);
        
        if (isWithinTimeRange(currentTime, pluginWindow)) {
          const progress = progressInTimeRange(currentTime, pluginWindow);

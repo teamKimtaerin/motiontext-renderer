@@ -25,10 +25,10 @@
       "id": "spin-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Spin Demo",
             "layout": {
               "position": {
@@ -43,7 +43,7 @@
                 "params": {
                   "fullTurns": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -63,10 +63,10 @@
       "id": "bobY-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "BobY Demo",
             "layout": {
               "position": {
@@ -82,7 +82,7 @@
                   "amplitudePx": 12,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -102,10 +102,10 @@
       "id": "pulse-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Pulse Demo",
             "layout": {
               "position": {
@@ -121,7 +121,7 @@
                   "maxScale": 1.2,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -141,10 +141,10 @@
       "id": "flames-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Flames Demo",
             "layout": {
               "position": {
@@ -161,7 +161,7 @@
                   "flicker": 0.3,
                   "cycles": 10
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -181,10 +181,10 @@
       "id": "glow-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Glow Demo",
             "layout": {
               "position": {
@@ -202,7 +202,7 @@
                   "pulse": true,
                   "cycles": 8
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -222,10 +222,10 @@
       "id": "combo-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Combo Demo (Multiple Plugins)",
             "layout": {
               "position": {
@@ -243,7 +243,7 @@
                   "pulse": true,
                   "cycles": 6
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -255,7 +255,7 @@
                   "cycles": 3
                 },
                 "compose": "multiply",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -267,7 +267,7 @@
                   "cycles": 3
                 },
                 "compose": "add",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -277,7 +277,7 @@
                 "params": {
                   "fullTurns": 1
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -297,10 +297,10 @@
       "id": "multi-area-demo",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "TL Spin",
             "layout": {
               "position": {
@@ -315,7 +315,7 @@
                 "params": {
                   "fullTurns": 1
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -328,7 +328,7 @@
             "id": "cue-6-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "TR BobY",
             "layout": {
               "position": {
@@ -344,7 +344,7 @@
                   "amplitudePx": 14,
                   "cycles": 3
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -357,7 +357,7 @@
             "id": "cue-6-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "BL Pulse",
             "layout": {
               "position": {
@@ -373,7 +373,7 @@
                   "maxScale": 1.2,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
@@ -386,7 +386,7 @@
             "id": "cue-6-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "BR Glow",
             "layout": {
               "position": {
@@ -404,7 +404,7 @@
                   "pulse": true,
                   "cycles": 10
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "100%"
                 ]
