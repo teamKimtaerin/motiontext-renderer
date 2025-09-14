@@ -15,6 +15,9 @@ export function init(el, options, ctx) {
     }
 
     // 글리치 효과를 위한 DOM 구조 생성
+    if (el && !el.hasAttribute('data-glitch')) {
+      el.setAttribute('data-glitch', '');
+    }
     setupGlitchStructure(el, options);
 }
 
@@ -128,6 +131,9 @@ export function cleanup(el) {
       const originalText = el.querySelector('.glitch-original');
       if (originalText) {
         el.innerHTML = originalText.textContent || '';
+      }
+      if (el.hasAttribute('data-glitch')) {
+        el.removeAttribute('data-glitch');
       }
     }
 }

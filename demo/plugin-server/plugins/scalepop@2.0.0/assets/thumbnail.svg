@@ -1,0 +1,188 @@
+<svg width="320" height="240" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="240" fill="#1a1a1a"/>
+  
+  <!-- Background effects -->
+  <defs>
+    <radialGradient id="popGradient" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:0.1"/>
+      <stop offset="50%" style="stop-color:#f39c12;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0"/>
+    </radialGradient>
+    
+    <!-- Glow effect for letters -->
+    <filter id="scaleGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Burst effect -->
+    <filter id="burstGlow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="320" height="240" fill="url(#popGradient)"/>
+  
+  <!-- Scaling letters spelling "SCALE POP" -->
+  <!-- S -->
+  <text x="40" y="100" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    S
+    <animate attributeName="opacity" values="0;0;1;1;1;1;1;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;1.5;1;1;1;1;1"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#f39c12;#ffffff;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- C -->
+  <text x="70" y="100" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    C
+    <animate attributeName="opacity" values="0;0;0;1;1;1;1;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;1.5;1;1;1;1"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#f39c12;#ffffff;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- A -->
+  <text x="100" y="100" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    A
+    <animate attributeName="opacity" values="0;0;0;0;1;1;1;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;1.5;1;1;1"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- L -->
+  <text x="130" y="100" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    L
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;0;1.5;1;1"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- E -->
+  <text x="160" y="100" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    E
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;0;0;1.5;1"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- P (POP) -->
+  <text x="200" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    P
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;0;0;0;1.8;1.2"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- O -->
+  <text x="230" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    O
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;0;0;0;0;1.8;1.2"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- P -->
+  <text x="260" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#e74c3c" opacity="0" filter="url(#scaleGlow)">
+    P
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;0;1" dur="3s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0;0;0;0;0;0;0;0;0;1.8;1.2"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#e74c3c;#f39c12;#ffffff" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Burst effects -->
+  <circle cx="160" cy="120" r="0" fill="#f39c12" opacity="0" filter="url(#burstGlow)">
+    <animate attributeName="r" values="0;0;0;0;0;20;0;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0;0;0;0.6;0;0" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="230" cy="140" r="0" fill="#e74c3c" opacity="0" filter="url(#burstGlow)">
+    <animate attributeName="r" values="0;0;0;0;0;0;0;30;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0.4;0" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Impact lines -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;0;0" dur="3s" repeatCount="indefinite"/>
+    
+    <path d="M 160 120 L 140 100" stroke="#f39c12" stroke-width="2"/>
+    <path d="M 160 120 L 180 100" stroke="#f39c12" stroke-width="2"/>
+    <path d="M 160 120 L 140 140" stroke="#f39c12" stroke-width="2"/>
+    <path d="M 160 120 L 180 140" stroke="#f39c12" stroke-width="2"/>
+  </g>
+  
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0;0" dur="3s" repeatCount="indefinite"/>
+    
+    <path d="M 230 140 L 210 120" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 250 120" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 210 160" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 250 160" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 230 115" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 230 165" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 205 140" stroke="#e74c3c" stroke-width="3"/>
+    <path d="M 230 140 L 255 140" stroke="#e74c3c" stroke-width="3"/>
+  </g>
+  
+  <!-- Scale indicators -->
+  <circle cx="80" cy="180" r="2" fill="#4a90e2" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;0;0;0;0;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;2;8;2;2;2;2;2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="160" cy="180" r="2" fill="#9b59b6" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;1;0;0;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;2;2;2;10;2;2;2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="240" cy="180" r="2" fill="#e67e22" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;2;2;2;2;2;2;12;2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+</svg>

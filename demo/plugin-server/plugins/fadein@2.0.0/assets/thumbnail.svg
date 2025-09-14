@@ -1,0 +1,176 @@
+<svg width="320" height="240" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="240" fill="#1a1a1a"/>
+  
+  <!-- Subtle gradient overlay -->
+  <defs>
+    <radialGradient id="fadeGradient" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:0.1"/>
+      <stop offset="50%" style="stop-color:#4a90e2;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0"/>
+    </radialGradient>
+    
+    <!-- Enhanced glow effect for pure fade -->
+    <filter id="pureGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Brightness filter -->
+    <filter id="brightness" x="-50%" y="-50%" width="200%" height="200%">
+      <feComponentTransfer>
+        <feFuncA type="discrete" tableValues="0.3 0.5 0.7 1"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  
+  <rect width="320" height="240" fill="url(#fadeGradient)"/>
+  
+  <!-- Pure fade in letters spelling "FADE IN" - no movement, only opacity and scale -->
+  <!-- F -->
+  <text x="40" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    F
+    <animate attributeName="opacity" values="0;0;1;1;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;1.03;1;1;1;1;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- A -->
+  <text x="80" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    A
+    <animate attributeName="opacity" values="0;0;0;1;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;0.9;1.03;1;1;1;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#999999;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- D -->
+  <text x="120" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    D
+    <animate attributeName="opacity" values="0;0;0;0;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;0.9;0.9;1.03;1;1;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#999999;#999999;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- E -->
+  <text x="160" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    E
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;0.9;0.9;0.9;1.03;1;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#999999;#999999;#999999;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Space indicator (gentle pulse) -->
+  <circle cx="190" cy="120" r="2" fill="#9b59b6" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0.5;0.5;0.5" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="2;2;2;2;2;3;2;2" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- I -->
+  <text x="220" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    I
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;0.9;0.9;0.9;0.9;1.03;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#999999;#999999;#999999;#999999;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- N -->
+  <text x="260" y="120" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#999999" opacity="0" filter="url(#pureGlow)">
+    N
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9;0.9;0.9;0.9;0.9;0.9;0.9;1.03;1"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#999999;#999999;#999999;#999999;#999999;#999999;#999999;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Fade progress rings -->
+  <circle cx="40" cy="140" r="8" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0.6;0.3;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="80" cy="140" r="8" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0.6;0.3;0;0;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="120" cy="140" r="8" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0.6;0.3;0;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="160" cy="140" r="8" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0.6;0.3;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="220" cy="140" r="8" stroke="#9b59b6" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0.6;0.3" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="260" cy="140" r="8" stroke="#9b59b6" stroke-width="1" fill="none" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0.6;0.3" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Ambient glow effects -->
+  <ellipse cx="40" cy="120" rx="15" ry="8" fill="#4a90e2" opacity="0">
+    <animate attributeName="opacity" values="0;0;0.2;0.1;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="120" cy="120" rx="15" ry="8" fill="#4a90e2" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0.2;0.1;0;0" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="220" cy="120" rx="15" ry="8" fill="#9b59b6" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0.2;0.1" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <!-- Gentle pulse overlay -->
+  <circle cx="160" cy="120" r="0" fill="none" stroke="#ffffff" stroke-width="1" opacity="0">
+    <animate attributeName="r" values="0;0;0;0;0;30;60;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;0;0;0;0.3;0;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Brightness indicators -->
+  <rect x="30" y="180" width="20" height="3" rx="1.5" fill="#4a90e2" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;0.5;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#4a90e2;#4a90e2;#ffffff;#4a90e2" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="150" y="180" width="20" height="3" rx="1.5" fill="#9b59b6" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;1;0.5;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#9b59b6;#9b59b6;#9b59b6;#9b59b6;#9b59b6;#ffffff;#9b59b6" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="250" y="180" width="20" height="3" rx="1.5" fill="#9b59b6" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0.5" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#9b59b6;#9b59b6;#9b59b6;#9b59b6;#9b59b6;#9b59b6;#9b59b6;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </rect>
+</svg>

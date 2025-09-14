@@ -1,0 +1,176 @@
+<svg width="320" height="240" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="240" fill="#1a1a1a"/>
+  
+  <!-- Background effects -->
+  <defs>
+    <linearGradient id="slideGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:0.1"/>
+      <stop offset="50%" style="stop-color:#2980b9;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0"/>
+    </linearGradient>
+    
+    <!-- Motion blur filter -->
+    <filter id="motionBlur" x="-50%" y="-100%" width="200%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0,2"/>
+    </filter>
+    
+    <!-- Glow effect for letters -->
+    <filter id="slideGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="320" height="240" fill="url(#slideGradient)"/>
+  
+  <!-- Sliding letters spelling "SLIDE UP" -->
+  <!-- S -->
+  <text x="40" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    S
+    <animate attributeName="opacity" values="0;0;1;1;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="40 170; 40 170; 40 115; 40 120; 40 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- L -->
+  <text x="75" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    L
+    <animate attributeName="opacity" values="0;0;0;1;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="75 170; 75 170; 75 170; 75 115; 75 120; 75 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- I -->
+  <text x="105" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    I
+    <animate attributeName="opacity" values="0;0;0;0;1;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="105 170; 105 170; 105 170; 105 170; 105 115; 105 120; 105 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#cccccc;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- D -->
+  <text x="140" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    D
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="140 170; 140 170; 140 170; 140 170; 140 170; 140 115; 140 120; 140 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- E -->
+  <text x="175" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    E
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="175 170; 175 170; 175 170; 175 170; 175 170; 175 170; 175 115; 175 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#ffffff;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- U (UP) -->
+  <text x="220" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    U
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="220 170; 220 170; 220 170; 220 170; 220 170; 220 170; 220 170; 220 115; 220 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- P -->
+  <text x="255" y="120" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0" filter="url(#slideGlow)">
+    P
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;1" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="255 170; 255 170; 255 170; 255 170; 255 170; 255 170; 255 170; 255 170; 255 115; 255 120"
+      dur="4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="fill" values="#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#cccccc;#ffffff" dur="4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Motion trail effects -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0.3;0;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <rect x="35" y="130" width="10" height="20" fill="#3498db" opacity="0.3"/>
+    <rect x="70" y="135" width="10" height="15" fill="#3498db" opacity="0.2"/>
+    <rect x="100" y="140" width="10" height="10" fill="#3498db" opacity="0.1"/>
+  </g>
+  
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0.3;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <rect x="135" y="130" width="10" height="20" fill="#2980b9" opacity="0.3"/>
+    <rect x="170" y="135" width="10" height="15" fill="#2980b9" opacity="0.2"/>
+  </g>
+  
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0.3;0" dur="4s" repeatCount="indefinite"/>
+    <rect x="215" y="130" width="10" height="20" fill="#1abc9c" opacity="0.3"/>
+    <rect x="250" y="135" width="10" height="15" fill="#1abc9c" opacity="0.2"/>
+  </g>
+  
+  <!-- Directional arrows -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;0.6;0.6;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+    
+    <path d="M 60 150 L 60 140 L 55 145 M 60 140 L 65 145" stroke="#3498db" stroke-width="2" fill="none"/>
+    <path d="M 120 150 L 120 140 L 115 145 M 120 140 L 125 145" stroke="#2980b9" stroke-width="2" fill="none"/>
+    <path d="M 200 150 L 200 140 L 195 145 M 200 140 L 205 145" stroke="#1abc9c" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Ground line -->
+  <line x1="20" y1="170" x2="280" y2="170" stroke="#3498db" stroke-width="1" opacity="0.3">
+    <animate attributeName="opacity" values="0.3;0.3;0.6;0.6;0.3;0.3;0.3;0.3" dur="4s" repeatCount="indefinite"/>
+  </line>
+  
+  <!-- Sliding indicators -->
+  <circle cx="40" cy="180" r="2" fill="#3498db" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;0;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="180;180;175;180;180" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="140" cy="180" r="2" fill="#2980b9" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;1;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="180;180;180;180;175;180;180" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="240" cy="180" r="2" fill="#1abc9c" opacity="0">
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="180;180;180;180;180;180;180;175;180" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Ambient light effect -->
+  <ellipse cx="160" cy="200" rx="100" ry="10" fill="url(#slideGradient)" opacity="0.2">
+    <animate attributeName="opacity" values="0.2;0.2;0.4;0.4;0.2;0.2;0.2;0.2" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+</svg>
