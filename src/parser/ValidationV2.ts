@@ -164,7 +164,7 @@ function validateNodeTimeArrays(node: Node, path: string): void {
   }
 
   // group 노드의 children 재귀 검증
-  if (node.e_type === 'group' && node.children) {
+  if (node.eType === 'group' && node.children) {
     for (let i = 0; i < node.children.length; i++) {
       validateNodeTimeArrays(node.children[i], `${path}.children[${i}]`);
     }
@@ -230,7 +230,7 @@ function validateNodeIdRecursive(
   idPaths.set(node.id, path);
 
   // group 노드의 children 재귀
-  if (node.e_type === 'group' && node.children) {
+  if (node.eType === 'group' && node.children) {
     for (let i = 0; i < node.children.length; i++) {
       validateNodeIdRecursive(
         node.children[i],
@@ -331,7 +331,7 @@ function validateDomLifetimeCoversNodes(
   }
 
   // group 노드의 children 재귀
-  if (node.e_type === 'group' && node.children) {
+  if (node.eType === 'group' && node.children) {
     for (let i = 0; i < node.children.length; i++) {
       validateDomLifetimeCoversNodes(
         node.children[i],

@@ -25,10 +25,10 @@
       "id": "dev-plugins",
       "track": "free",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Local Dev Plugins Demo",
             "layout": {
               "position": {
@@ -43,7 +43,7 @@
                 "params": {
                   "fullTurns": 1
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]
@@ -55,7 +55,7 @@
                   "amplitudePx": 10,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]
@@ -67,7 +67,7 @@
                   "maxScale": 1.15,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]
@@ -80,7 +80,7 @@
                   "pulse": true,
                   "cycles": 6
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]

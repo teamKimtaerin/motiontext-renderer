@@ -66,7 +66,7 @@ describe('V13ToV20Migrator', () => {
       expect(textNode.displayTime).toEqual([2, 6]);
     });
 
-    it('플러그인 relStart/relEnd를 time_offset으로 변환', () => {
+    it('플러그인 relStart/relEnd를 timeOffset으로 변환', () => {
       const v13Scenario = {
         version: '1.3',
         cues: [{
@@ -89,7 +89,7 @@ describe('V13ToV20Migrator', () => {
       
       expect('relStart' in plugin).toBe(false);
       expect('relEnd' in plugin).toBe(false);
-      expect(plugin.time_offset).toEqual([0.1, 0.8]);
+      expect(plugin.timeOffset).toEqual([0.1, 0.8]);
     });
   });
 

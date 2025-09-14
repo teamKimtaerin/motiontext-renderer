@@ -1,0 +1,53 @@
+{
+  "name": "cwi-bouncing",
+  "version": "2.0.0",
+  "type": "dom",
+  "pluginApi": "3.0",
+  "minRenderer": "2.0.0",
+  "entry": "index.mjs",
+  "targets": ["text"],
+  "capabilities": ["style-vars", "dom-manipulation"],
+  "preload": [],
+  "schema": {
+    "speaker": {
+      "type": "string",
+      "default": "",
+      "ui": { "control": "text", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "화자 ID", "en": "Speaker ID" },
+        "description": { "ko": "화자별 색상을 적용할 때 사용되는 화자 식별자", "en": "Speaker identifier for color mapping" }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "default": {},
+      "ui": { "control": "object", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "색상 팔레트", "en": "Color Palette" },
+        "description": { "ko": "화자별 색상 매핑 객체", "en": "Speaker-to-color mapping object" }
+      }
+    },
+    "color": {
+      "type": "string",
+      "default": "",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "ui": { "control": "color", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "고정 색상", "en": "Fixed Color" },
+        "description": { "ko": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)", "en": "Direct color specification (overrides palette)" }
+      }
+    },
+    "popScale": {
+      "type": "number",
+      "default": 1.15,
+      "min": 1,
+      "max": 2,
+      "step": 0.05,
+      "ui": { "control": "slider", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "팝 스케일", "en": "Pop Scale" },
+        "description": { "ko": "바운싱 시 최대 크기 배율", "en": "Maximum scale factor during bounce" }
+      }
+    }
+  }
+}

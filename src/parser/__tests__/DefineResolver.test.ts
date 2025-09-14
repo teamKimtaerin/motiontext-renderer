@@ -100,7 +100,7 @@ describe('DefineResolver', () => {
       const defines: DefineSection = {
         fade_effect: {
           name: 'fadeIn',
-          time_offset: [0, 0.5]
+          timeOffset: [0, 0.5]
         }
       };
       const resolver = new DefineResolver(defines);
@@ -113,7 +113,7 @@ describe('DefineResolver', () => {
           track: 'subtitle',
           root: {
             id: 'text1',
-            e_type: 'text',
+            eType: 'text',
             text: 'Hello',
             pluginChain: ['define.fade_effect']
           }
@@ -123,7 +123,7 @@ describe('DefineResolver', () => {
       const result = resolver.resolveScenario(scenario);
       expect(result.cues[0].root.pluginChain).toEqual([{
         name: 'fadeIn',
-        time_offset: [0, 0.5]
+        timeOffset: [0, 0.5]
       }]);
     });
   });

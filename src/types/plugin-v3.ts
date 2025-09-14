@@ -2,7 +2,7 @@
 // Reference: context/plugin-system-architecture-v-3-0.md
 //
 // v2.1 → v3.0 주요 변경사항:
-// - time_offset: [start, end] 배열로 시간 표현 통일
+// - timeOffset: [start, end] 배열로 시간 표현 통일
 // - 강화된 권한 시스템 (7개 capabilities)
 // - 에셋 관리 통합 (무결성 검증, FontFace 자동화)
 // - Define 시스템 연동
@@ -43,7 +43,8 @@ export type PluginTarget =
 export interface PluginSpec {
   name: string;
   type?: 'channel' | 'dom' | 'hybrid'; // v3.0 플러그인 타입 명시 (성능 최적화)
-  time_offset?: DefineReference<TimeRange>; // [start, end] - v3.0 시간 표현 통일
+  timeOffset?: DefineReference<TimeRange>; // [start, end] - v3.0 시간 표현 통일
+  baseTime?: DefineReference<TimeRange>; // [start, end] - base time for timeOffset calculations
   params?: DefineReference<Record<string, unknown>>;
   compose?: DefineReference<ComposeMode>; // default 'replace'
   domScope?: DefineReference<DomScope>; // default 'effectsRoot'

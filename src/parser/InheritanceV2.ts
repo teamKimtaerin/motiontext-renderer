@@ -144,7 +144,7 @@ function applyNodeInheritance(
   if (debugMode) {
     // eslint-disable-next-line no-console
     console.log(`[Inheritance] Processing node: ${node.id || 'unknown'}`, {
-      nodeType: node.e_type,
+      nodeType: node.eType,
       hasDisplayTime: !!(node as any).displayTime,
       parentDisplayTime: parent?.displayTime,
       cueDisplayTime,
@@ -176,9 +176,9 @@ function applyNodeInheritance(
   }
 
   // 노드 타입별 처리
-  if (node.e_type === 'group') {
+  if (node.eType === 'group') {
     const groupNode = inheritedNode as ResolvedNodeUnion & {
-      e_type: 'group';
+      eType: 'group';
       children?: Node[];
     };
 
@@ -340,7 +340,7 @@ function collectDisplayTimes(node: Node, collected: TimeRange[]): void {
     }
   }
 
-  if (node.e_type === 'group' && node.children) {
+  if (node.eType === 'group' && node.children) {
     for (const child of node.children) {
       collectDisplayTimes(child, collected);
     }
@@ -426,7 +426,7 @@ function analyzeNodeInheritance(
   }
 
   // group 노드 재귀
-  if (original.e_type === 'group' && inherited.e_type === 'group') {
+  if (original.eType === 'group' && inherited.eType === 'group') {
     const originalChildren = original.children || [];
     const inheritedChildren = inherited.children || [];
 

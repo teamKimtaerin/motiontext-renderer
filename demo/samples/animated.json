@@ -86,11 +86,11 @@
       "track": "subtitle",
       "root": {
         "id": "subtitle-group-1",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "subtitle-text-1",
-            "e_type": "text",
+            "eType": "text",
             "text": "다양한 애니메이션 효과를 지원합니다",
             "layout": {
               "position": [
@@ -115,11 +115,11 @@
       "track": "title",
       "root": {
         "id": "moving-group",
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
             "id": "moving-text",
-            "e_type": "text",
+            "eType": "text",
             "text": "← 움직이는 텍스트 →",
             "layout": {
               "position": [

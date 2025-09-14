@@ -5,13 +5,13 @@
 ## 🆕 v2.0 주요 변경사항
 
 ### Breaking Changes
-- **필드명 변경**: `hintTime` → `domLifetime`, `absStart/absEnd` → `displayTime`, `relStart/relEnd` → `time_offset`
+- **필드명 변경**: `hintTime` → `domLifetime`, `absStart/absEnd` → `displayTime`, `relStart/relEnd` → `timeOffset`
 - **시간 표현 통일**: 모든 시간은 `[start, end]` 배열 형태로 통일
-- **time_offset 철학 변경 (중요)**:
-  - `time_offset`은 이제 노드의 `displayTime`과 독립적인 기준인 `base_time`을 사용합니다.
+- **timeOffset 철학 변경 (중요)**:
+  - `timeOffset`은 이제 노드의 `displayTime`과 독립적인 기준인 `baseTime`을 사용합니다.
   - 오프셋 요소는 두 가지 표기만 허용합니다: 절대 초(number; 음수 허용) 또는 퍼센트 문자열(`"50%"`).
-  - 퍼센트(`%`)는 `base_time` 길이에 대한 비율입니다. `base_time`이 없으면 노드의 `displayTime`을 기준으로 사용합니다.
-  - 숫자는 초 단위 절대 오프셋으로 해석됩니다(기준은 `base_time` 시작 시각).
+  - 퍼센트(`%`)는 `baseTime` 길이에 대한 비율입니다. `baseTime`이 없으면 노드의 `displayTime`을 기준으로 사용합니다.
+  - 숫자는 초 단위 절대 오프셋으로 해석됩니다(기준은 `baseTime` 시작 시각).
 - **노드 ID 의무화**: 모든 노드에 `id` 필드 필수
 - **Define 시스템**: 중복 제거 및 에셋 관리를 위한 변수 시스템 도입
 - **상속 시스템**: 체계적인 값 우선순위 및 상속 규칙 정립
@@ -110,7 +110,7 @@
     "common_timing": [2.0, 5.0],
     "fade_effect": {
       "name": "fadeIn",
-      "time_offset": ["0%", "50%"],
+      "timeOffset": ["0%", "50%"],
       "params": { "startOpacity": 0.0 }
     }
   }
@@ -289,7 +289,7 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 #### `id` (string, required)
 노드의 고유 식별자. 편집 도구에서 노드 식별에 사용.
 
-#### `e_type` (string, required)
+#### `eType` (string, required)
 노드 타입:
 - `"group"`: 그룹 노드 (자식 노드들의 컨테이너)
 - `"text"`: 텍스트 노드
@@ -329,7 +329,7 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 ```json
 {
   "id": "main_caption",
-  "e_type": "group",
+  "eType": "group",
   "displayTime": [0.0, 5.0],
   "layout": {
     "position": { "x": 0.5, "y": 0.9 },
@@ -342,14 +342,14 @@ function calculateDomLifetime(cue: Cue): [number, number] {
   "children": [
     {
       "id": "word_1",
-      "e_type": "text",
+      "eType": "text",
       "text": "안녕하세요"
       // displayTime 생략 → [0.0, 5.0] 상속
       // style 상속받음
     },
     {
       "id": "word_2",
-      "e_type": "text",
+      "eType": "text",
       "text": "반갑습니다",
       "displayTime": [1.0, 3.0], // 명시적 지정
       "style": {
@@ -374,13 +374,13 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 ```json
 {
   "id": "greeting_text",
-  "e_type": "text",
+  "eType": "text",
   "text": "안녕하세요!",
   "displayTime": [1.0, 3.0],
   "pluginChain": [
     {
       "name": "fadeIn",
-      "time_offset": ["0%", "50%"],
+      "timeOffset": ["0%", "50%"],
       "params": { "startOpacity": 0.0 }
     }
   ]
@@ -401,7 +401,7 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 ```json
 {
   "id": "logo_image",
-  "e_type": "image",
+  "eType": "image",
   "src": "define.company_logo",
   "displayTime": [2.0, 8.0],
   "layout": {
@@ -427,7 +427,7 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 ```json
 {
   "id": "intro_video",
-  "e_type": "video",
+  "eType": "video",
   "src": "define.intro_clip",
   "displayTime": [0.0, 10.0],
   "autoplay": true,
@@ -819,7 +819,7 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
   "pluginChain": [
     {
       "name": "fadeIn",
-      "time_offset": ["0%", "50%"],
+      "timeOffset": ["0%", "50%"],
       "params": { 
         "startOpacity": 0.0,
         "endOpacity": 1.0
@@ -831,7 +831,7 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
     },
     {
       "name": "slideUp", 
-      "time_offset": ["20%", "80%"],
+      "timeOffset": ["20%", "80%"],
       "params": {
         "distance": "20%",
         "easing": "back.out(1.7)"
@@ -850,17 +850,17 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
 #### `name` (string, required)
 플러그인 이름. 로더에서 플러그인을 식별하는 데 사용.
 
-#### `base_time` (array, optional)
+#### `baseTime` (array, optional)
 플러그인 오프셋의 기준 시간 구간 `[start, end]` (초). 생략 시 현재 노드의 `displayTime`이 기준이 됩니다.
 
-#### `time_offset` (array, required)
+#### `timeOffset` (array, required)
 플러그인 실행 오프셋 `[start, end]`. 각 항목은 다음 두 표기 중 하나를 사용합니다:
-- 숫자(number): 기준 시작 시각(`base_time[0]`)으로부터의 "초" 단위 절대 오프셋 (음수 허용)
-- 퍼센트 문자열(`"50%"`): `base_time` 길이에 대한 비율
+- 숫자(number): 기준 시작 시각(`baseTime[0]`)으로부터의 "초" 단위 절대 오프셋 (음수 허용)
+- 퍼센트 문자열(`"50%"`): `baseTime` 길이에 대한 비율
 
 **절대 시간으로 변환 규칙**:
 ```ts
-// base_time = [b0, b1], duration = (b1 - b0)
+// baseTime = [b0, b1], duration = (b1 - b0)
 // bound 가 퍼센트면 b0 + duration * (pct/100)
 // bound 가 숫자면   b0 + seconds
 ```
@@ -868,16 +868,16 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
 예시:
 ```json
 {
-  "base_time": [2.0, 6.0],
-  "time_offset": ["0%", "50%"]   // 최종 실행 창: [2.0, 4.0]
+  "baseTime": [2.0, 6.0],
+  "timeOffset": ["0%", "50%"]   // 최종 실행 창: [2.0, 4.0]
 }
 {
-  "base_time": [2.0, 6.0],
-  "time_offset": [-1.0, 2.0]      // 최종 실행 창: [1.0, 4.0]
+  "baseTime": [2.0, 6.0],
+  "timeOffset": [-1.0, 2.0]      // 최종 실행 창: [1.0, 4.0]
 }
-// base_time 미지정 → node.displayTime 사용
+// baseTime 미지정 → node.displayTime 사용
 {
-  "time_offset": ["80%", "100%"] // 노드 구간의 80%~100%
+  "timeOffset": ["80%", "100%"] // 노드 구간의 80%~100%
 }
 ```
 
@@ -920,8 +920,8 @@ v2.0에서는 Plugin API v3.0을 기반으로 하며, DOM 분리 구조를 통�
 - 숫자 리터럴은 단위가 있는 "절대값"으로 해석됩니다.
 - 시간 관련 필드에서 이 원칙이 우선 적용됩니다:
   - `displayTime`: 절대 초 배열, 단 자식 노드에서는 부모 대비 `%` 상대 표기 허용
-  - `base_time`: 절대 초 배열
-  - `time_offset`: 각 원소가 초(숫자) 또는 퍼센트 문자열(기준은 `base_time`)
+  - `baseTime`: 절대 초 배열
+  - `timeOffset`: 각 원소가 초(숫자) 또는 퍼센트 문자열(기준은 `baseTime`)
 
 ---
 
@@ -1022,7 +1022,7 @@ v2.0의 핵심 기능 중 하나인 체계적인 값 상속과 우선순위 시�
     {
       "root": {
         "id": "parent_group",
-        "e_type": "group",
+        "eType": "group",
         "displayTime": [0.0, 5.0],
         "style": {
           "color": "define.brand_color",  // #ff6b35 (define 참조)
@@ -1031,7 +1031,7 @@ v2.0의 핵심 기능 중 하나인 체계적인 값 상속과 우선순위 시�
         "children": [
           {
             "id": "child1",
-            "e_type": "text",
+            "eType": "text",
             "text": "자식 노드 1"
             // displayTime: [0.0, 5.0] (상속)
             // color: #ff6b35 (상속)
@@ -1040,7 +1040,7 @@ v2.0의 핵심 기능 중 하나인 체계적인 값 상속과 우선순위 시�
           },
           {
             "id": "child2",
-            "e_type": "text", 
+            "eType": "text", 
             "text": "자식 노드 2",
             "displayTime": [1.0, 3.0],    // 직접 명시 (최고 우선순위)
             "style": {
@@ -1167,8 +1167,8 @@ v1.3 시나리오를 v2.0으로 마이그레이션하는 자동 변환 규칙입
 |------|------|------|
 | `hintTime` | `domLifetime: [start, end]` | 배열 형태로 변환 |
 | `absStart`, `absEnd` | `displayTime: [start, end]` | 배열로 통합 |
-| `relStart`, `relEnd` | `time_offset: [start, end]` | 퍼센트 문자열 권장(`"0%"~"100%"`) |
-| 플러그인 `t0`, `t1` | `time_offset: [start, end]` | 초 단위(숫자) 또는 퍼센트 문자열 |
+| `relStart`, `relEnd` | `timeOffset: [start, end]` | 퍼센트 문자열 권장(`"0%"~"100%"`) |
+| 플러그인 `t0`, `t1` | `timeOffset: [start, end]` | 초 단위(숫자) 또는 퍼센트 문자열 |
 
 #### 자동 변환 스크립트
 
@@ -1210,7 +1210,7 @@ function migrateV13ToV20(scenario: ScenarioV13): ScenarioV20 {
 function migrateNode(node: NodeV13): NodeV20 {
   const newNode: NodeV20 = {
     id: node.id || generateId(), // ID 의무화
-    e_type: node.e_type,
+    eType: node.eType,
     ...node
   };
 
@@ -1226,18 +1226,18 @@ function migrateNode(node: NodeV13): NodeV20 {
     newNode.pluginChain = node.pluginChain.map(plugin => {
       const newPlugin = { ...plugin };
 
-      // relStart/relEnd → time_offset 변환 (퍼센트 문자열)
+      // relStart/relEnd → timeOffset 변환 (퍼센트 문자열)
       if (plugin.relStart !== undefined || plugin.relEnd !== undefined) {
         const s = plugin.relStart ?? 0;
         const e = plugin.relEnd ?? 0;
-        newPlugin.time_offset = [`${s * 100}%`, `${e * 100}%`];
+        newPlugin.timeOffset = [`${s * 100}%`, `${e * 100}%`];
         delete newPlugin.relStart;
         delete newPlugin.relEnd;
       }
 
-      // 매개변수 내 t0/t1 → time_offset 변환 (초 단위)
+      // 매개변수 내 t0/t1 → timeOffset 변환 (초 단위)
       if (plugin.params?.t0 !== undefined || plugin.params?.t1 !== undefined) {
-        newPlugin.time_offset = [plugin.params.t0 || 0, plugin.params.t1 || 0];
+        newPlugin.timeOffset = [plugin.params.t0 || 0, plugin.params.t1 || 0];
         delete newPlugin.params.t0;
         delete newPlugin.params.t1;
       }
@@ -1312,7 +1312,7 @@ function migrateNode(node: NodeV13): NodeV20 {
     "main_timing": [1.0, 8.0],
     "entrance_effect": {
       "name": "slideUpFade",
-      "time_offset": ["0%", "80%"],
+      "timeOffset": ["0%", "80%"],
       "params": {
         "distance": "30px",
         "startOpacity": 0.0,
@@ -1348,7 +1348,7 @@ function migrateNode(node: NodeV13): NodeV20 {
       "domLifetime": [0.5, 8.5],
       "root": {
         "id": "intro_group",
-        "e_type": "group",
+        "eType": "group",
         "displayTime": "define.main_timing",
         "layout": {
           "position": { "x": 0.5, "y": 0.85 },
@@ -1358,7 +1358,7 @@ function migrateNode(node: NodeV13): NodeV20 {
         "children": [
           {
             "id": "greeting_word",
-            "e_type": "text",
+            "eType": "text",
             "text": "안녕하세요",
             "displayTime": [1.0, 4.0],
             "style": {
@@ -1370,7 +1370,7 @@ function migrateNode(node: NodeV13): NodeV20 {
           },
           {
             "id": "name_word", 
-            "e_type": "text",
+            "eType": "text",
             "text": "김철수입니다",
             "displayTime": [3.0, 7.0],
             "style": {
@@ -1380,7 +1380,7 @@ function migrateNode(node: NodeV13): NodeV20 {
             "pluginChain": [
               {
                 "name": "slideUpFade",
-                "time_offset": ["0%", "60%"],
+                "timeOffset": ["0%", "60%"],
                 "params": {
                   "distance": "20px",
                   "delay": 0.2
@@ -1388,7 +1388,7 @@ function migrateNode(node: NodeV13): NodeV20 {
               },
               {
                 "name": "emphasis",
-                "time_offset": ["70%", "100%"],
+                "timeOffset": ["70%", "100%"],
                 "params": {
                   "scale": 1.1,
                   "glowColor": "define.brand_colors.accent"
@@ -1405,7 +1405,7 @@ function migrateNode(node: NodeV13): NodeV20 {
       "domLifetime": [0.0, 10.0],
       "root": {
         "id": "logo_container",
-        "e_type": "image",
+        "eType": "image",
         "src": "define.company_logo",
         "displayTime": [0.5, 9.5],
         "layout": {
@@ -1419,7 +1419,7 @@ function migrateNode(node: NodeV13): NodeV20 {
         "pluginChain": [
           {
             "name": "fadeIn",
-            "time_offset": ["0%", "50%"]
+            "timeOffset": ["0%", "50%"]
           }
         ],
         "effectScope": {

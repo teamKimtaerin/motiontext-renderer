@@ -25,10 +25,10 @@
       "id": "sub-1",
       "track": "subtitle",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "애니메이션 자막 – fadeIn + pop + wave",
             "layout": {
               "position": {
@@ -40,7 +40,7 @@
             "pluginChain": [
               {
                 "name": "fadeIn",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.25%"
                 ]
@@ -51,7 +51,7 @@
                 "params": {
                   "maxScale": 1.25
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.35%"
                 ]
@@ -63,7 +63,7 @@
                   "amplitudePx": 6,
                   "cycles": 2
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0.1%",
                   "0.9%"
                 ]
@@ -83,10 +83,10 @@
       "id": "sub-2",
       "track": "subtitle",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "두 번째 자막 – 흔들림",
             "layout": {
               "position": {
@@ -98,7 +98,7 @@
             "pluginChain": [
               {
                 "name": "fadeIn",
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "0.2%"
                 ]
@@ -110,7 +110,7 @@
                   "amplitudePx": 4,
                   "cycles": 6
                 },
-                "time_offset": [
+                "timeOffset": [
                   "0%",
                   "1%"
                 ]

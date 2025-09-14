@@ -43,7 +43,7 @@
       "id": "cwi-seg_001",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -51,7 +51,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "You",
             "layout": {
               "anchor": "bc"
@@ -83,7 +83,7 @@
             "id": "cue-0-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "know,",
             "layout": {
               "anchor": "bc"
@@ -115,7 +115,7 @@
             "id": "cue-0-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "we",
             "layout": {
               "anchor": "bc"
@@ -147,7 +147,7 @@
             "id": "cue-0-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "should",
             "layout": {
               "anchor": "bc"
@@ -179,7 +179,7 @@
             "id": "cue-0-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "all",
             "layout": {
               "anchor": "bc"
@@ -211,7 +211,7 @@
             "id": "cue-0-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "do.",
             "layout": {
               "anchor": "bc"
@@ -243,7 +243,7 @@
             "id": "cue-0-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Go",
             "layout": {
               "anchor": "bc"
@@ -275,7 +275,7 @@
             "id": "cue-0-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "see",
             "layout": {
               "anchor": "bc"
@@ -307,7 +307,7 @@
             "id": "cue-0-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -339,7 +339,7 @@
             "id": "cue-0-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "musical.",
             "layout": {
               "anchor": "bc"
@@ -378,7 +378,7 @@
       "id": "cwi-seg_002",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -386,7 +386,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Sure.",
             "layout": {
               "anchor": "bc"
@@ -425,7 +425,7 @@
       "id": "cwi-seg_003",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -433,7 +433,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "And",
             "layout": {
               "anchor": "bc"
@@ -465,7 +465,7 @@
             "id": "cue-2-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -497,7 +497,7 @@
             "id": "cue-2-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "know",
             "layout": {
               "anchor": "bc"
@@ -529,7 +529,7 @@
             "id": "cue-2-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "which",
             "layout": {
               "anchor": "bc"
@@ -561,7 +561,7 @@
             "id": "cue-2-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "one",
             "layout": {
               "anchor": "bc"
@@ -593,7 +593,7 @@
             "id": "cue-2-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "we",
             "layout": {
               "anchor": "bc"
@@ -625,7 +625,7 @@
             "id": "cue-2-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "should",
             "layout": {
               "anchor": "bc"
@@ -657,7 +657,7 @@
             "id": "cue-2-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "see?",
             "layout": {
               "anchor": "bc"
@@ -689,7 +689,7 @@
             "id": "cue-2-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "The",
             "layout": {
               "anchor": "bc"
@@ -721,7 +721,7 @@
             "id": "cue-2-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "1996",
             "layout": {
               "anchor": "bc"
@@ -753,7 +753,7 @@
             "id": "cue-2-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Tony",
             "layout": {
               "anchor": "bc"
@@ -785,7 +785,7 @@
             "id": "cue-2-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Award",
             "layout": {
               "anchor": "bc"
@@ -817,7 +817,7 @@
             "id": "cue-2-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "winner.",
             "layout": {
               "anchor": "bc"
@@ -856,7 +856,7 @@
       "id": "cwi-seg_004",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -864,7 +864,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Do",
             "layout": {
               "anchor": "bc"
@@ -896,7 +896,7 @@
             "id": "cue-3-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -928,7 +928,7 @@
             "id": "cue-3-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "happen",
             "layout": {
               "anchor": "bc"
@@ -960,7 +960,7 @@
             "id": "cue-3-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "to",
             "layout": {
               "anchor": "bc"
@@ -992,7 +992,7 @@
             "id": "cue-3-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "know",
             "layout": {
               "anchor": "bc"
@@ -1024,7 +1024,7 @@
             "id": "cue-3-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "the",
             "layout": {
               "anchor": "bc"
@@ -1056,7 +1056,7 @@
             "id": "cue-3-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "name",
             "layout": {
               "anchor": "bc"
@@ -1088,7 +1088,7 @@
             "id": "cue-3-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "of",
             "layout": {
               "anchor": "bc"
@@ -1120,7 +1120,7 @@
             "id": "cue-3-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "that",
             "layout": {
               "anchor": "bc"
@@ -1152,7 +1152,7 @@
             "id": "cue-3-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "one?",
             "layout": {
               "anchor": "bc"
@@ -1191,7 +1191,7 @@
       "id": "cwi-seg_005",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1199,7 +1199,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -1231,7 +1231,7 @@
             "id": "cue-4-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "don't",
             "layout": {
               "anchor": "bc"
@@ -1263,7 +1263,7 @@
             "id": "cue-4-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "know,",
             "layout": {
               "anchor": "bc"
@@ -1295,7 +1295,7 @@
             "id": "cue-4-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Greece.",
             "layout": {
               "anchor": "bc"
@@ -1334,7 +1334,7 @@
       "id": "cwi-seg_006",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1342,7 +1342,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "No.",
             "layout": {
               "anchor": "bc"
@@ -1381,7 +1381,7 @@
       "id": "cwi-seg_007",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1389,7 +1389,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Rent.",
             "layout": {
               "anchor": "bc"
@@ -1428,7 +1428,7 @@
       "id": "cwi-seg_008",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1436,7 +1436,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Yes!",
             "layout": {
               "anchor": "bc"
@@ -1468,7 +1468,7 @@
             "id": "cue-7-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Rent!",
             "layout": {
               "anchor": "bc"
@@ -1507,7 +1507,7 @@
       "id": "cwi-seg_009",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1515,7 +1515,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Okay,",
             "layout": {
               "anchor": "bc"
@@ -1547,7 +1547,7 @@
             "id": "cue-8-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "so",
             "layout": {
               "anchor": "bc"
@@ -1579,7 +1579,7 @@
             "id": "cue-8-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "when",
             "layout": {
               "anchor": "bc"
@@ -1611,7 +1611,7 @@
             "id": "cue-8-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "do",
             "layout": {
               "anchor": "bc"
@@ -1643,7 +1643,7 @@
             "id": "cue-8-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -1675,7 +1675,7 @@
             "id": "cue-8-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "want",
             "layout": {
               "anchor": "bc"
@@ -1707,7 +1707,7 @@
             "id": "cue-8-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "to",
             "layout": {
               "anchor": "bc"
@@ -1739,7 +1739,7 @@
             "id": "cue-8-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "go?",
             "layout": {
               "anchor": "bc"
@@ -1778,7 +1778,7 @@
       "id": "cwi-seg_010",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -1786,7 +1786,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "What?",
             "layout": {
               "anchor": "bc"
@@ -1818,7 +1818,7 @@
             "id": "cue-9-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Oh,",
             "layout": {
               "anchor": "bc"
@@ -1850,7 +1850,7 @@
             "id": "cue-9-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I'm",
             "layout": {
               "anchor": "bc"
@@ -1882,7 +1882,7 @@
             "id": "cue-9-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "sorry",
             "layout": {
               "anchor": "bc"
@@ -1914,7 +1914,7 @@
             "id": "cue-9-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -1946,7 +1946,7 @@
             "id": "cue-9-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "can't,",
             "layout": {
               "anchor": "bc"
@@ -1978,7 +1978,7 @@
             "id": "cue-9-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I'm",
             "layout": {
               "anchor": "bc"
@@ -2010,7 +2010,7 @@
             "id": "cue-9-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "busy.",
             "layout": {
               "anchor": "bc"
@@ -2049,7 +2049,7 @@
       "id": "cwi-seg_011",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -2057,7 +2057,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Hey,",
             "layout": {
               "anchor": "bc"
@@ -2089,7 +2089,7 @@
             "id": "cue-10-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "man,",
             "layout": {
               "anchor": "bc"
@@ -2121,7 +2121,7 @@
             "id": "cue-10-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it",
             "layout": {
               "anchor": "bc"
@@ -2153,7 +2153,7 @@
             "id": "cue-10-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "is",
             "layout": {
               "anchor": "bc"
@@ -2185,7 +2185,7 @@
             "id": "cue-10-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "so",
             "layout": {
               "anchor": "bc"
@@ -2217,7 +2217,7 @@
             "id": "cue-10-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "hard",
             "layout": {
               "anchor": "bc"
@@ -2249,7 +2249,7 @@
             "id": "cue-10-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "to",
             "layout": {
               "anchor": "bc"
@@ -2281,7 +2281,7 @@
             "id": "cue-10-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "shop",
             "layout": {
               "anchor": "bc"
@@ -2313,7 +2313,7 @@
             "id": "cue-10-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -2345,7 +2345,7 @@
             "id": "cue-10-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "girls.",
             "layout": {
               "anchor": "bc"
@@ -2384,7 +2384,7 @@
       "id": "cwi-seg_012",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -2392,7 +2392,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Yes,",
             "layout": {
               "anchor": "bc"
@@ -2424,7 +2424,7 @@
             "id": "cue-11-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it",
             "layout": {
               "anchor": "bc"
@@ -2456,7 +2456,7 @@
             "id": "cue-11-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "is",
             "layout": {
               "anchor": "bc"
@@ -2488,7 +2488,7 @@
             "id": "cue-11-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "at",
             "layout": {
               "anchor": "bc"
@@ -2520,7 +2520,7 @@
             "id": "cue-11-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "office",
             "layout": {
               "anchor": "bc"
@@ -2552,7 +2552,7 @@
             "id": "cue-11-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "max.",
             "layout": {
               "anchor": "bc"
@@ -2591,7 +2591,7 @@
       "id": "cwi-seg_013",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -2599,7 +2599,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "What",
             "layout": {
               "anchor": "bc"
@@ -2631,7 +2631,7 @@
             "id": "cue-12-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "did",
             "layout": {
               "anchor": "bc"
@@ -2663,7 +2663,7 @@
             "id": "cue-12-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -2695,7 +2695,7 @@
             "id": "cue-12-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "get",
             "layout": {
               "anchor": "bc"
@@ -2727,7 +2727,7 @@
             "id": "cue-12-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her?",
             "layout": {
               "anchor": "bc"
@@ -2766,7 +2766,7 @@
       "id": "cwi-seg_014",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -2774,7 +2774,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "A",
             "layout": {
               "anchor": "bc"
@@ -2806,7 +2806,7 @@
             "id": "cue-13-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "pen.",
             "layout": {
               "anchor": "bc"
@@ -2838,7 +2838,7 @@
             "id": "cue-13-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "It's",
             "layout": {
               "anchor": "bc"
@@ -2870,7 +2870,7 @@
             "id": "cue-13-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "two",
             "layout": {
               "anchor": "bc"
@@ -2902,7 +2902,7 @@
             "id": "cue-13-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "gifts",
             "layout": {
               "anchor": "bc"
@@ -2934,7 +2934,7 @@
             "id": "cue-13-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "in",
             "layout": {
               "anchor": "bc"
@@ -2966,7 +2966,7 @@
             "id": "cue-13-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "one.",
             "layout": {
               "anchor": "bc"
@@ -2998,7 +2998,7 @@
             "id": "cue-13-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "It's",
             "layout": {
               "anchor": "bc"
@@ -3030,7 +3030,7 @@
             "id": "cue-13-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -3062,7 +3062,7 @@
             "id": "cue-13-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "pen.",
             "layout": {
               "anchor": "bc"
@@ -3094,7 +3094,7 @@
             "id": "cue-13-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "That's",
             "layout": {
               "anchor": "bc"
@@ -3126,7 +3126,7 @@
             "id": "cue-13-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "also",
             "layout": {
               "anchor": "bc"
@@ -3158,7 +3158,7 @@
             "id": "cue-13-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -3190,7 +3190,7 @@
             "id": "cue-13-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "clock.",
             "layout": {
               "anchor": "bc"
@@ -3229,7 +3229,7 @@
       "id": "cwi-seg_015",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -3237,7 +3237,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "You",
             "layout": {
               "anchor": "bc"
@@ -3269,7 +3269,7 @@
             "id": "cue-14-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "can't",
             "layout": {
               "anchor": "bc"
@@ -3301,7 +3301,7 @@
             "id": "cue-14-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "give",
             "layout": {
               "anchor": "bc"
@@ -3333,7 +3333,7 @@
             "id": "cue-14-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her",
             "layout": {
               "anchor": "bc"
@@ -3365,7 +3365,7 @@
             "id": "cue-14-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "that.",
             "layout": {
               "anchor": "bc"
@@ -3397,7 +3397,7 @@
             "id": "cue-14-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Why",
             "layout": {
               "anchor": "bc"
@@ -3429,7 +3429,7 @@
             "id": "cue-14-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "not?",
             "layout": {
               "anchor": "bc"
@@ -3461,7 +3461,7 @@
             "id": "cue-14-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Because",
             "layout": {
               "anchor": "bc"
@@ -3493,7 +3493,7 @@
             "id": "cue-14-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "she's",
             "layout": {
               "anchor": "bc"
@@ -3525,7 +3525,7 @@
             "id": "cue-14-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "not",
             "layout": {
               "anchor": "bc"
@@ -3557,7 +3557,7 @@
             "id": "cue-14-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "11.",
             "layout": {
               "anchor": "bc"
@@ -3589,7 +3589,7 @@
             "id": "cue-14-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "And",
             "layout": {
               "anchor": "bc"
@@ -3621,7 +3621,7 @@
             "id": "cue-14-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it's",
             "layout": {
               "anchor": "bc"
@@ -3653,7 +3653,7 @@
             "id": "cue-14-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "not",
             "layout": {
               "anchor": "bc"
@@ -3685,7 +3685,7 @@
             "id": "cue-14-1-child-13-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "the",
             "layout": {
               "anchor": "bc"
@@ -3717,7 +3717,7 @@
             "id": "cue-14-1-child-14-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "seventh",
             "layout": {
               "anchor": "bc"
@@ -3749,7 +3749,7 @@
             "id": "cue-14-1-child-15-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "night",
             "layout": {
               "anchor": "bc"
@@ -3781,7 +3781,7 @@
             "id": "cue-14-1-child-16-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "of",
             "layout": {
               "anchor": "bc"
@@ -3813,7 +3813,7 @@
             "id": "cue-14-1-child-17-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Hanukkah.",
             "layout": {
               "anchor": "bc"
@@ -3852,7 +3852,7 @@
       "id": "cwi-seg_016",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -3860,7 +3860,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Honey,",
             "layout": {
               "anchor": "bc"
@@ -3892,7 +3892,7 @@
             "id": "cue-15-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "what",
             "layout": {
               "anchor": "bc"
@@ -3924,7 +3924,7 @@
             "id": "cue-15-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "he",
             "layout": {
               "anchor": "bc"
@@ -3956,7 +3956,7 @@
             "id": "cue-15-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "means",
             "layout": {
               "anchor": "bc"
@@ -3988,7 +3988,7 @@
             "id": "cue-15-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "by",
             "layout": {
               "anchor": "bc"
@@ -4020,7 +4020,7 @@
             "id": "cue-15-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "that",
             "layout": {
               "anchor": "bc"
@@ -4052,7 +4052,7 @@
             "id": "cue-15-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "is,",
             "layout": {
               "anchor": "bc"
@@ -4084,7 +4084,7 @@
             "id": "cue-15-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "while",
             "layout": {
               "anchor": "bc"
@@ -4116,7 +4116,7 @@
             "id": "cue-15-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "this",
             "layout": {
               "anchor": "bc"
@@ -4148,7 +4148,7 @@
             "id": "cue-15-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "is",
             "layout": {
               "anchor": "bc"
@@ -4180,7 +4180,7 @@
             "id": "cue-15-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -4212,7 +4212,7 @@
             "id": "cue-15-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "very",
             "layout": {
               "anchor": "bc"
@@ -4244,7 +4244,7 @@
             "id": "cue-15-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "nice",
             "layout": {
               "anchor": "bc"
@@ -4276,7 +4276,7 @@
             "id": "cue-15-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "gift,",
             "layout": {
               "anchor": "bc"
@@ -4308,7 +4308,7 @@
             "id": "cue-15-1-child-13-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "maybe",
             "layout": {
               "anchor": "bc"
@@ -4340,7 +4340,7 @@
             "id": "cue-15-1-child-14-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it's",
             "layout": {
               "anchor": "bc"
@@ -4372,7 +4372,7 @@
             "id": "cue-15-1-child-15-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "just",
             "layout": {
               "anchor": "bc"
@@ -4404,7 +4404,7 @@
             "id": "cue-15-1-child-16-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "not",
             "layout": {
               "anchor": "bc"
@@ -4436,7 +4436,7 @@
             "id": "cue-15-1-child-17-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "something",
             "layout": {
               "anchor": "bc"
@@ -4468,7 +4468,7 @@
             "id": "cue-15-1-child-18-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -4500,7 +4500,7 @@
             "id": "cue-15-1-child-19-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "boyfriend",
             "layout": {
               "anchor": "bc"
@@ -4532,7 +4532,7 @@
             "id": "cue-15-1-child-20-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "gives?",
             "layout": {
               "anchor": "bc"
@@ -4571,7 +4571,7 @@
       "id": "cwi-seg_017",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -4579,7 +4579,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Sure",
             "layout": {
               "anchor": "bc"
@@ -4611,7 +4611,7 @@
             "id": "cue-16-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it",
             "layout": {
               "anchor": "bc"
@@ -4643,7 +4643,7 @@
             "id": "cue-16-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "is.",
             "layout": {
               "anchor": "bc"
@@ -4675,7 +4675,7 @@
             "id": "cue-16-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "She",
             "layout": {
               "anchor": "bc"
@@ -4707,7 +4707,7 @@
             "id": "cue-16-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "needs",
             "layout": {
               "anchor": "bc"
@@ -4739,7 +4739,7 @@
             "id": "cue-16-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -4771,7 +4771,7 @@
             "id": "cue-16-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "pen",
             "layout": {
               "anchor": "bc"
@@ -4803,7 +4803,7 @@
             "id": "cue-16-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -4835,7 +4835,7 @@
             "id": "cue-16-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "work.",
             "layout": {
               "anchor": "bc"
@@ -4867,7 +4867,7 @@
             "id": "cue-16-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "She's",
             "layout": {
               "anchor": "bc"
@@ -4899,7 +4899,7 @@
             "id": "cue-16-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "writing.",
             "layout": {
               "anchor": "bc"
@@ -4931,7 +4931,7 @@
             "id": "cue-16-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "She",
             "layout": {
               "anchor": "bc"
@@ -4963,7 +4963,7 @@
             "id": "cue-16-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "turns",
             "layout": {
               "anchor": "bc"
@@ -4995,7 +4995,7 @@
             "id": "cue-16-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it",
             "layout": {
               "anchor": "bc"
@@ -5027,7 +5027,7 @@
             "id": "cue-16-1-child-13-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "over.",
             "layout": {
               "anchor": "bc"
@@ -5059,7 +5059,7 @@
             "id": "cue-16-1-child-14-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Whoa!",
             "layout": {
               "anchor": "bc"
@@ -5091,7 +5091,7 @@
             "id": "cue-16-1-child-15-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "It's",
             "layout": {
               "anchor": "bc"
@@ -5123,7 +5123,7 @@
             "id": "cue-16-1-child-16-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "time",
             "layout": {
               "anchor": "bc"
@@ -5155,7 +5155,7 @@
             "id": "cue-16-1-child-17-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -5187,7 +5187,7 @@
             "id": "cue-16-1-child-18-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "my",
             "layout": {
               "anchor": "bc"
@@ -5219,7 +5219,7 @@
             "id": "cue-16-1-child-19-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "date",
             "layout": {
               "anchor": "bc"
@@ -5251,7 +5251,7 @@
             "id": "cue-16-1-child-20-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "with",
             "layout": {
               "anchor": "bc"
@@ -5283,7 +5283,7 @@
             "id": "cue-16-1-child-21-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Joey!",
             "layout": {
               "anchor": "bc"
@@ -5322,7 +5322,7 @@
       "id": "cwi-seg_018",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -5330,7 +5330,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "All",
             "layout": {
               "anchor": "bc"
@@ -5362,7 +5362,7 @@
             "id": "cue-17-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "right,",
             "layout": {
               "anchor": "bc"
@@ -5394,7 +5394,7 @@
             "id": "cue-17-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "look,",
             "layout": {
               "anchor": "bc"
@@ -5426,7 +5426,7 @@
             "id": "cue-17-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "look.",
             "layout": {
               "anchor": "bc"
@@ -5458,7 +5458,7 @@
             "id": "cue-17-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "What",
             "layout": {
               "anchor": "bc"
@@ -5490,7 +5490,7 @@
             "id": "cue-17-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "did",
             "layout": {
               "anchor": "bc"
@@ -5522,7 +5522,7 @@
             "id": "cue-17-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -5554,7 +5554,7 @@
             "id": "cue-17-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "get",
             "layout": {
               "anchor": "bc"
@@ -5586,7 +5586,7 @@
             "id": "cue-17-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -5618,7 +5618,7 @@
             "id": "cue-17-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Angela",
             "layout": {
               "anchor": "bc"
@@ -5650,7 +5650,7 @@
             "id": "cue-17-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Delvecchio",
             "layout": {
               "anchor": "bc"
@@ -5682,7 +5682,7 @@
             "id": "cue-17-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -5714,7 +5714,7 @@
             "id": "cue-17-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her",
             "layout": {
               "anchor": "bc"
@@ -5746,7 +5746,7 @@
             "id": "cue-17-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "birthday?",
             "layout": {
               "anchor": "bc"
@@ -5785,7 +5785,7 @@
       "id": "cwi-seg_019",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -5793,7 +5793,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "She",
             "layout": {
               "anchor": "bc"
@@ -5825,7 +5825,7 @@
             "id": "cue-18-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "didn't",
             "layout": {
               "anchor": "bc"
@@ -5857,7 +5857,7 @@
             "id": "cue-18-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "have",
             "layout": {
               "anchor": "bc"
@@ -5889,7 +5889,7 @@
             "id": "cue-18-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -5921,7 +5921,7 @@
             "id": "cue-18-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "birthday",
             "layout": {
               "anchor": "bc"
@@ -5953,7 +5953,7 @@
             "id": "cue-18-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "while",
             "layout": {
               "anchor": "bc"
@@ -5985,7 +5985,7 @@
             "id": "cue-18-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "we",
             "layout": {
               "anchor": "bc"
@@ -6017,7 +6017,7 @@
             "id": "cue-18-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "were",
             "layout": {
               "anchor": "bc"
@@ -6049,7 +6049,7 @@
             "id": "cue-18-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "going",
             "layout": {
               "anchor": "bc"
@@ -6081,7 +6081,7 @@
             "id": "cue-18-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "out.",
             "layout": {
               "anchor": "bc"
@@ -6113,7 +6113,7 @@
             "id": "cue-18-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "For",
             "layout": {
               "anchor": "bc"
@@ -6145,7 +6145,7 @@
             "id": "cue-18-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "three",
             "layout": {
               "anchor": "bc"
@@ -6177,7 +6177,7 @@
             "id": "cue-18-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "years,",
             "layout": {
               "anchor": "bc"
@@ -6216,7 +6216,7 @@
       "id": "cwi-seg_020",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -6224,7 +6224,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Look,",
             "layout": {
               "anchor": "bc"
@@ -6256,7 +6256,7 @@
             "id": "cue-19-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it's",
             "layout": {
               "anchor": "bc"
@@ -6288,7 +6288,7 @@
             "id": "cue-19-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "too",
             "layout": {
               "anchor": "bc"
@@ -6320,7 +6320,7 @@
             "id": "cue-19-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "late",
             "layout": {
               "anchor": "bc"
@@ -6352,7 +6352,7 @@
             "id": "cue-19-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "and",
             "layout": {
               "anchor": "bc"
@@ -6384,7 +6384,7 @@
             "id": "cue-19-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -6416,7 +6416,7 @@
             "id": "cue-19-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "got",
             "layout": {
               "anchor": "bc"
@@ -6448,7 +6448,7 @@
             "id": "cue-19-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "an",
             "layout": {
               "anchor": "bc"
@@ -6480,7 +6480,7 @@
             "id": "cue-19-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "audition.",
             "layout": {
               "anchor": "bc"
@@ -6512,7 +6512,7 @@
             "id": "cue-19-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -6544,7 +6544,7 @@
             "id": "cue-19-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "can't",
             "layout": {
               "anchor": "bc"
@@ -6576,7 +6576,7 @@
             "id": "cue-19-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "shop",
             "layout": {
               "anchor": "bc"
@@ -6608,7 +6608,7 @@
             "id": "cue-19-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "anymore.",
             "layout": {
               "anchor": "bc"
@@ -6647,7 +6647,7 @@
       "id": "cwi-seg_021",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -6655,7 +6655,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -6687,7 +6687,7 @@
             "id": "cue-20-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "will",
             "layout": {
               "anchor": "bc"
@@ -6719,7 +6719,7 @@
             "id": "cue-20-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "go",
             "layout": {
               "anchor": "bc"
@@ -6751,7 +6751,7 @@
             "id": "cue-20-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "out",
             "layout": {
               "anchor": "bc"
@@ -6783,7 +6783,7 @@
             "id": "cue-20-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "and",
             "layout": {
               "anchor": "bc"
@@ -6815,7 +6815,7 @@
             "id": "cue-20-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "I",
             "layout": {
               "anchor": "bc"
@@ -6847,7 +6847,7 @@
             "id": "cue-20-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "will",
             "layout": {
               "anchor": "bc"
@@ -6879,7 +6879,7 @@
             "id": "cue-20-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "try",
             "layout": {
               "anchor": "bc"
@@ -6911,7 +6911,7 @@
             "id": "cue-20-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "to",
             "layout": {
               "anchor": "bc"
@@ -6943,7 +6943,7 @@
             "id": "cue-20-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "find",
             "layout": {
               "anchor": "bc"
@@ -6975,7 +6975,7 @@
             "id": "cue-20-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "something",
             "layout": {
               "anchor": "bc"
@@ -7007,7 +7007,7 @@
             "id": "cue-20-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "for",
             "layout": {
               "anchor": "bc"
@@ -7039,7 +7039,7 @@
             "id": "cue-20-1-child-11-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her,",
             "layout": {
               "anchor": "bc"
@@ -7071,7 +7071,7 @@
             "id": "cue-20-1-child-12-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "okay?",
             "layout": {
               "anchor": "bc"
@@ -7103,7 +7103,7 @@
             "id": "cue-20-1-child-13-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Thanks,",
             "layout": {
               "anchor": "bc"
@@ -7135,7 +7135,7 @@
             "id": "cue-20-1-child-14-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "man.",
             "layout": {
               "anchor": "bc"
@@ -7174,7 +7174,7 @@
       "id": "cwi-seg_022",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -7182,7 +7182,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "And",
             "layout": {
               "anchor": "bc"
@@ -7214,7 +7214,7 @@
             "id": "cue-21-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "oh,",
             "layout": {
               "anchor": "bc"
@@ -7246,7 +7246,7 @@
             "id": "cue-21-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "while",
             "layout": {
               "anchor": "bc"
@@ -7278,7 +7278,7 @@
             "id": "cue-21-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you're",
             "layout": {
               "anchor": "bc"
@@ -7310,7 +7310,7 @@
             "id": "cue-21-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "at",
             "layout": {
               "anchor": "bc"
@@ -7342,7 +7342,7 @@
             "id": "cue-21-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it,",
             "layout": {
               "anchor": "bc"
@@ -7374,7 +7374,7 @@
             "id": "cue-21-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "could",
             "layout": {
               "anchor": "bc"
@@ -7406,7 +7406,7 @@
             "id": "cue-21-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -7438,7 +7438,7 @@
             "id": "cue-21-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "get",
             "layout": {
               "anchor": "bc"
@@ -7470,7 +7470,7 @@
             "id": "cue-21-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her",
             "layout": {
               "anchor": "bc"
@@ -7502,7 +7502,7 @@
             "id": "cue-21-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -7534,7 +7534,7 @@
             "id": "cue-21-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "card?",
             "layout": {
               "anchor": "bc"
@@ -7573,7 +7573,7 @@
       "id": "cwi-seg_023",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -7581,7 +7581,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Would",
             "layout": {
               "anchor": "bc"
@@ -7613,7 +7613,7 @@
             "id": "cue-22-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"
@@ -7645,7 +7645,7 @@
             "id": "cue-22-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "like",
             "layout": {
               "anchor": "bc"
@@ -7677,7 +7677,7 @@
             "id": "cue-22-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "me",
             "layout": {
               "anchor": "bc"
@@ -7709,7 +7709,7 @@
             "id": "cue-22-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "to",
             "layout": {
               "anchor": "bc"
@@ -7741,7 +7741,7 @@
             "id": "cue-22-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "write",
             "layout": {
               "anchor": "bc"
@@ -7773,7 +7773,7 @@
             "id": "cue-22-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "her",
             "layout": {
               "anchor": "bc"
@@ -7805,7 +7805,7 @@
             "id": "cue-22-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -7837,7 +7837,7 @@
             "id": "cue-22-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "little",
             "layout": {
               "anchor": "bc"
@@ -7869,7 +7869,7 @@
             "id": "cue-22-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "poem",
             "layout": {
               "anchor": "bc"
@@ -7901,7 +7901,7 @@
             "id": "cue-22-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "as",
             "layout": {
               "anchor": "bc"
@@ -7933,7 +7933,7 @@
             "id": "cue-22-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "well?",
             "layout": {
               "anchor": "bc"
@@ -7972,7 +7972,7 @@
       "id": "cwi-seg_024",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -7980,7 +7980,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "Or",
             "layout": {
               "anchor": "bc"
@@ -8012,7 +8012,7 @@
             "id": "cue-23-1-child-0-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "just",
             "layout": {
               "anchor": "bc"
@@ -8044,7 +8044,7 @@
             "id": "cue-23-1-child-1-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "get",
             "layout": {
               "anchor": "bc"
@@ -8076,7 +8076,7 @@
             "id": "cue-23-1-child-2-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -8108,7 +8108,7 @@
             "id": "cue-23-1-child-3-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "card",
             "layout": {
               "anchor": "bc"
@@ -8140,7 +8140,7 @@
             "id": "cue-23-1-child-4-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "that",
             "layout": {
               "anchor": "bc"
@@ -8172,7 +8172,7 @@
             "id": "cue-23-1-child-5-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "has",
             "layout": {
               "anchor": "bc"
@@ -8204,7 +8204,7 @@
             "id": "cue-23-1-child-6-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "a",
             "layout": {
               "anchor": "bc"
@@ -8236,7 +8236,7 @@
             "id": "cue-23-1-child-7-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "poem",
             "layout": {
               "anchor": "bc"
@@ -8268,7 +8268,7 @@
             "id": "cue-23-1-child-8-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "already",
             "layout": {
               "anchor": "bc"
@@ -8300,7 +8300,7 @@
             "id": "cue-23-1-child-9-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "in",
             "layout": {
               "anchor": "bc"
@@ -8332,7 +8332,7 @@
             "id": "cue-23-1-child-10-1"
           },
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "it?",
             "layout": {
               "anchor": "bc"
@@ -8371,7 +8371,7 @@
       "id": "cwi-seg_025",
       "track": "captions",
       "root": {
-        "e_type": "group",
+        "eType": "group",
         "style": {
           "boxBg": "rgba(0,0,0,0.9)",
           "border": "define.style_1"
@@ -8379,7 +8379,7 @@
         "layout": "define.layout_2",
         "children": [
           {
-            "e_type": "text",
+            "eType": "text",
             "text": "you",
             "layout": {
               "anchor": "bc"

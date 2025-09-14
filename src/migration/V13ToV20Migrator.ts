@@ -493,7 +493,7 @@ export class V13ToV20Migrator {
    * 시간 배열 검증
    */
   private validateTimeArrays(obj: any, path = ''): void {
-    const timeFields = ['displayTime', 'domLifetime', 'time_offset'];
+    const timeFields = ['displayTime', 'domLifetime', 'timeOffset'];
 
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {

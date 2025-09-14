@@ -45,7 +45,7 @@
     "common_timing": [2.0, 5.0],
     "fade_animation": {
       "name": "fadeIn",
-      "time_offset": [0, 0.5],
+      "timeOffset": [0, 0.5],
       "capabilities": ["style-vars"]
     }
   },
@@ -62,7 +62,7 @@
     {
       "root": {
         "id": "group1", 
-        "e_type": "group",
+        "eType": "group",
         "style": "define.caption_style",
         "displayTime": "define.common_timing",
         "pluginChain": ["define.fade_animation"]
@@ -85,8 +85,8 @@
 |-----------|-----------|------|
 | `hintTime` | `domLifetime: [start, end]` | Cue DOM 요소의 생성/삭제 시점 |
 | `absStart/absEnd` | `displayTime: [start, end]` | 노드가 화면에 표시될 시간 구간 |
-| `relStart/relEnd` | `time_offset: [start, end]` | 플러그인 실행 시점 오프셋 |
-| `t0/t1` | `time_offset: [start, end]` | 플러그인 매개변수 통일 |
+| `relStart/relEnd` | `timeOffset: [start, end]` | 플러그인 실행 시점 오프셋 |
+| `t0/t1` | `timeOffset: [start, end]` | 플러그인 매개변수 통일 |
 
 ---
 
@@ -104,7 +104,7 @@
 {
   "root": {
     "id": "parent_group",
-    "e_type": "group", 
+    "eType": "group", 
     "displayTime": [0.0, 5.0],
     "style": {
       "color": "#ffffff",
@@ -113,14 +113,14 @@
     "children": [
       {
         "id": "child1",
-        "e_type": "text",
+        "eType": "text",
         "text": "전체 구간 표시",
         // displayTime 생략 → [0.0, 5.0] 상속
         // style 상속받음
       },
       {
         "id": "child2", 
-        "e_type": "text",
+        "eType": "text",
         "text": "부분 구간 표시",
         "displayTime": [1.0, 3.0], // 명시적 지정
         "style": {
@@ -150,7 +150,7 @@
 ```json
 {
   "displayTime": [2.0, 5.0],
-  "time_offset": [0.0, 1.0]
+  "timeOffset": [0.0, 1.0]
 }
 ```
 
@@ -172,11 +172,11 @@
 {
   "root": {
     "id": "main_caption", // 필수 필드
-    "e_type": "group",
+    "eType": "group",
     "children": [
       {
         "id": "word_1", // 모든 노드에 ID 필수
-        "e_type": "text",
+        "eType": "text",
         "text": "안녕하세요"
       }
     ]
@@ -200,7 +200,7 @@
   "pluginChain": [
     {
       "name": "fadeIn",
-      "time_offset": [0, 0.5],
+      "timeOffset": [0, 0.5],
       "params": { "startOpacity": 0.0 },
       "compose": "replace", // v2.1 합성 규칙
       "domScope": "effectsRoot", // DOM 조작 범위 명시
@@ -209,7 +209,7 @@
     },
     {
       "name": "slideUp",
-      "time_offset": [0.2, 0.8],
+      "timeOffset": [0.2, 0.8],
       "params": { "distance": "20%" },
       "compose": "add", // 변환값 누적
       "domScope": "effectsRoot",
@@ -274,7 +274,7 @@
             "pluginChain": [
               {
                 "name": "fadeIn",
-                "time_offset": [-0.2, 0.0] // 표시 전 0.2초부터 시작
+                "timeOffset": [-0.2, 0.0] // 표시 전 0.2초부터 시작
               }
             ]
           }
@@ -319,8 +319,8 @@ function calculateDomLifetime(cue: Cue): [number, number] {
 |------|------|
 | `hintTime` | `domLifetime: [start, end]` |
 | `absStart, absEnd` | `displayTime: [start, end]` |
-| `relStart, relEnd` | `time_offset: [start, end]` |
-| 플러그인 `t0, t1` | `time_offset: [start, end]` |
+| `relStart, relEnd` | `timeOffset: [start, end]` |
+| 플러그인 `t0, t1` | `timeOffset: [start, end]` |
 
 ### 자동 변환 스크립트
 
@@ -353,14 +353,14 @@ function migrateV13ToV14(scenario: ScenarioV13): ScenarioV14 {
   walkNodes(scenario, node => {
     if (node.pluginChain) {
       node.pluginChain.forEach(plugin => {
-        // 다양한 시간 표현 → time_offset 통일
+        // 다양한 시간 표현 → timeOffset 통일
         if (plugin.relStart !== undefined || plugin.relEnd !== undefined) {
-          plugin.time_offset = [plugin.relStart || 0, plugin.relEnd || 0];
+          plugin.timeOffset = [plugin.relStart || 0, plugin.relEnd || 0];
           delete plugin.relStart;
           delete plugin.relEnd;
         }
         if (plugin.params?.t0 !== undefined || plugin.params?.t1 !== undefined) {
-          plugin.time_offset = [plugin.params.t0 || 0, plugin.params.t1 || 0];
+          plugin.timeOffset = [plugin.params.t0 || 0, plugin.params.t1 || 0];
           delete plugin.params.t0;
           delete plugin.params.t1;
         }
@@ -377,7 +377,7 @@ function migrateV13ToV14(scenario: ScenarioV13): ScenarioV14 {
 ### **Phase 1: 기반 구조** (v1.4.0-alpha)
 - Define 필드 및 참조 해석기 구현
 - 버전 관리 체계 (`version: "1.4"`, `pluginApiVersion: "2.1"`)
-- 필드명 변경 (domLifetime, displayTime, time_offset)
+- 필드명 변경 (domLifetime, displayTime, timeOffset)
 - 상속 및 우선순위 시스템
 
 ### **Phase 2: 플러그인 통합** (v1.4.0-beta)  

@@ -5,8 +5,8 @@
 참조 문서
 - **시나리오 JSON 상세 스펙** → `context/scenario-json-spec-v-2-0.md`
 - **플러그인 시스템 상세 스펙** → `context/plugin-system-architecture-v-3-0.md`
-- **레거시 스펙 (참조용)** → `context/scenario-json-spec-v-1-3.md`, `context/plugin-system-architecture-v-2-1.md`
-- 개요 요약: `context/init-context.md`
+- **레거시 스펙 (참조용)** → `context/achive/scenario-json-spec-v-1-3.md`, `context/achive/plugin-system-architecture-v-2-1.md`
+- 개요 요약(시작 가이드): `context/ai-bootstrap-prompt.md`
 - 폴더/파일 역할: `context/folder-structure.md`
 
 핵심 규칙(요약)
