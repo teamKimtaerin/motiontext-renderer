@@ -27,7 +27,7 @@ import {
   createPluginContextV3,
   type PluginContextV3,
 } from '../runtime/PluginContextV3';
-import { applyLayoutWithConstraints } from '../layout/LayoutEngine';
+import { applyLayoutWithConstraints, applyChildrenLayout } from '../layout/LayoutEngine';
 import { getDefaultTrackConstraints } from '../layout/DefaultConstraints';
 import {
   TimelineControllerV2,
@@ -65,6 +65,8 @@ export interface MountedElement {
   element: HTMLElement;
   cueId: string;
   mountTime: number;
+  parentNodeId?: string;
+  parentElement?: HTMLElement | null;
 }
 
 /**
@@ -285,12 +287,6 @@ export class RendererV2 {
     } catch (_e) {
       void 0;
     }
-    this.mountedElements.set(nodeId, {
-      node,
-      element,
-      cueId: cue.id,
-      mountTime: this.lastUpdateTime,
-    });
     // Determine parent DOM element (group nesting support)
     let parentEl: HTMLElement | null = null;
     if (parentNodeId) {
@@ -298,11 +294,30 @@ export class RendererV2 {
       parentEl = parentMounted?.element || null;
     }
 
+    this.mountedElements.set(nodeId, {
+      node,
+      element,
+      cueId: cue.id,
+      mountTime: this.lastUpdateTime,
+      parentNodeId,
+      parentElement: parentEl || this.container,
+    });
+
     // Fallback to root container when no valid parent
     (parentEl || this.container).appendChild(element);
 
     // 기본 스타일 적용 (레이아웃 + 트랙 기본값)
     this.applyBaseStyle(element, node, track);
+
+    // If appended under a group with childrenLayout, re-apply children layout
+    if (parentNodeId) {
+      const parentMounted = this.mountedElements.get(parentNodeId);
+      const parentLayout = (parentMounted?.node as any)?.layout;
+      const cl = parentLayout?.childrenLayout;
+      if (parentMounted?.element && cl) {
+        applyChildrenLayout(parentMounted.element, cl);
+      }
+    }
 
     this.logger.debug(`[RendererV2] Mounted node: ${nodeId}`, {
       element: element,
@@ -1274,11 +1289,38 @@ export class RendererV2 {
     // DOM 플러그인 정리
     this.cleanupDomPlugin(nodeId);
 
+    // Capture parent info before removal
+    const parentNodeId = mounted.parentNodeId;
+    const parentEl = mounted.element.parentElement;
+
     mounted.element.remove();
     this.mountedElements.delete(nodeId);
 
     if (this.options.debugMode) {
       this.logger.debug(`Unmounted node: ${nodeId}`);
+    }
+
+    // Re-apply parent children layout to normalize spacing after removal
+    if (parentNodeId) {
+      const parentMounted = this.mountedElements.get(parentNodeId);
+      const cl = (parentMounted?.node as any)?.layout?.childrenLayout;
+      if (parentMounted?.element && cl) {
+        try {
+          applyChildrenLayout(parentMounted.element, cl);
+        } catch (_e) {
+          /* noop */
+        }
+      } else if (parentEl) {
+        // Fallback: try from DOM parent if it is still present
+        const maybeCl = (parentEl as any).__mtxChildrenLayout;
+        if (maybeCl) {
+          try {
+            applyChildrenLayout(parentEl as HTMLElement, maybeCl);
+          } catch (_e) {
+            /* noop */
+          }
+        }
+      }
     }
   }
 

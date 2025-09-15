@@ -63,7 +63,7 @@
           "childrenLayout": {
             "mode": "flow",
             "direction": "horizontal",
-            "gap": 0.012,
+            "gap": 0.005,
             "align": "center",
             "justify": "center"
           }
@@ -194,6 +194,7 @@
           "childrenLayout": {
             "mode": "flow",
             "direction": "horizontal",
+            "wrap": true,
             "gap": 0.012,
             "align": "center",
             "justify": "center"
@@ -235,6 +236,7 @@
           "childrenLayout": {
             "mode": "flow",
             "direction": "horizontal",
+            "wrap": true,
             "gap": 0.012,
             "align": "center",
             "justify": "center"

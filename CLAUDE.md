@@ -8,12 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **MotionText Renderer**는 동영상 위에 정교한 자막과 애니메이션 효과를 렌더링하는 TypeScript 라이브러리입니다.
 
-### 📊 현재 상태 (2025-09-13)
+### 📊 현재 상태 (2025-09-15)
 - **✅ M1-M6 완료**: 타입 시스템, 시간 유틸리티, 파서, 플러그인 체인 합성, v2.0 네이티브 렌더러
 - **🧪 120개 테스트 통과**: 모든 핵심 모듈 검증 완료
 - **🎬 17개 플러그인**: 내장 플러그인 + 외부 플러그인 로더 시스템
 - **🎮 커스텀 컨트롤러**: YouTube 스타일 UI/UX 구현
 - **⚡ v2.0 Native**: v2.0 JSON을 직접 처리하는 네이티브 렌더러 완성
+- **🚧 진행 중**: DOM 플러그인 래퍼 시스템 마이그레이션 (dom-manage-refac-plan.md)
 
 ---
 
@@ -149,6 +150,12 @@ resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
 ---
 
 ## 🚀 다음 마일스톤
+
+### DOM 플러그인 래퍼 시스템 (진행 중)
+- **목적**: DOM 플러그인의 생명주기를 렌더러가 중앙 관리
+- **방식**: 각 플러그인마다 전용 래퍼 엘리먼트 생성/제거
+- **효과**: 재초기화 루프 방지, 일관된 DOM 관리
+- **계획**: dom-manage-refac-plan.md 참조
 
 ### M7: 테스트 마이그레이션 및 최적화 (진행 예정)
 - 모든 테스트를 v2.0 기준으로 재작성
@@ -355,6 +362,19 @@ registerExternalPlugin({
 
 ---
 
-*최종 업데이트: 2025-09-13 - M6 v2.0 네이티브 렌더러 완성*
-- @refactoringv2.md 앞쪽에 서술된 프롬프트를 보고 컨텍스트를 불러올 것, @refactoringv2.md 에 작업 완료사항을 업데이트할 것
-- 패키지매니저로 pnpm을 쓸 것
+*최종 업데이트: 2025-09-15 - DOM 플러그인 래퍼 시스템 진행 중*
+
+## 📌 개발 가이드라인
+
+### 중요 참조 문서
+- **@refactoringv2.md**: v2.0 리팩토링 계획 및 진행 상황
+- **@dom-manage-refac-plan.md**: DOM 플러그인 래퍼 마이그레이션 계획
+- **context/folder-structure.md**: 프로젝트 구조와 각 모듈의 책임
+- **context/scenario-json-spec-v-2-0.md**: v2.0 JSON 시나리오 스펙
+- **context/plugin-system-architecture-v-3-0.md**: Plugin API v3.0 스펙
+
+### 개발 원칙
+- 패키지 매니저: **pnpm** (npm/yarn 사용 금지)
+- 버전 관리: v2.0 네이티브 중심 (v1.3 레거시 코드 점진적 제거)
+- 테스트: Vitest + jsdom 환경
+- 타입 안전성: TypeScript strict mode 준수
