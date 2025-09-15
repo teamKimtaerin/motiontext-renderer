@@ -225,7 +225,8 @@ export function applyLayoutWithConstraints(
   if (layout?.childrenLayout) {
     // If wrapping is requested (explicit or implied for horizontal), constrain container max width
     const cl: any = layout.childrenLayout as any;
-    const wantWrap = (cl?.wrap ?? (cl?.direction === 'horizontal')) && !!el.parentElement;
+    const wantWrap =
+      (cl?.wrap ?? cl?.direction === 'horizontal') && !!el.parentElement;
     if (wantWrap) {
       const pw = el.parentElement.clientWidth || 0;
       const safe = constraints?.safeArea || {};
@@ -234,7 +235,8 @@ export function applyLayoutWithConstraints(
       // 1) ratio-based limit
       const widthFactorFromSafe = Math.max(0, 1 - (safeL + safeR));
       const widthFactorFromConstraint = constraints?.maxWidth ?? 1;
-      const widthFactorFromLayoutRel = typeof cl.maxWidthRel === 'number' ? Math.max(0, cl.maxWidthRel) : 1;
+      const widthFactorFromLayoutRel =
+        typeof cl.maxWidthRel === 'number' ? Math.max(0, cl.maxWidthRel) : 1;
       const widthFactorFromPercent =
         typeof cl.maxWidth === 'string' && /%$/.test(cl.maxWidth)
           ? Math.max(0, Math.min(1, parseFloat(cl.maxWidth) / 100))
@@ -247,9 +249,10 @@ export function applyLayoutWithConstraints(
       );
       const ratioPx = Math.round(pw * ratioLimit);
       // 2) absolute px limit
-      const absPx = typeof cl.maxWidth === 'number' && Number.isFinite(cl.maxWidth)
-        ? Math.max(0, Math.round(cl.maxWidth))
-        : Number.POSITIVE_INFINITY;
+      const absPx =
+        typeof cl.maxWidth === 'number' && Number.isFinite(cl.maxWidth)
+          ? Math.max(0, Math.round(cl.maxWidth))
+          : Number.POSITIVE_INFINITY;
       // 3) final limit
       const mw = Math.min(ratioPx, absPx);
       el.style.maxWidth = `${mw}px`;
@@ -485,7 +488,11 @@ export function applyChildrenLayout(
   childrenLayout: NonNullable<Layout['childrenLayout']>
 ): void {
   // Persist layout spec on the element for later refresh after mutations
-  try { (el as any).__mtxChildrenLayout = childrenLayout; } catch { /* noop */ }
+  try {
+    (el as any).__mtxChildrenLayout = childrenLayout;
+  } catch {
+    /* noop */
+  }
   const cw: any = childrenLayout as any;
   const {
     mode = 'flow',
@@ -494,14 +501,15 @@ export function applyChildrenLayout(
     align = 'center',
     justify = 'center',
   } = childrenLayout;
-  const wrap = cw?.wrap ?? (direction === 'horizontal');
+  const wrap = cw?.wrap ?? direction === 'horizontal';
 
   switch (mode) {
     case 'flow': {
       // Set up flexbox for children
       el.style.display = 'flex';
       el.style.flexDirection = direction === 'horizontal' ? 'row' : 'column';
-      el.style.flexWrap = wrap && direction === 'horizontal' ? 'wrap' : 'nowrap';
+      el.style.flexWrap =
+        wrap && direction === 'horizontal' ? 'wrap' : 'nowrap';
 
       // Alignment
       const alignItems =

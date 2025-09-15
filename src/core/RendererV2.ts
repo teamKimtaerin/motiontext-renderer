@@ -27,7 +27,10 @@ import {
   createPluginContextV3,
   type PluginContextV3,
 } from '../runtime/PluginContextV3';
-import { applyLayoutWithConstraints, applyChildrenLayout } from '../layout/LayoutEngine';
+import {
+  applyLayoutWithConstraints,
+  applyChildrenLayout,
+} from '../layout/LayoutEngine';
 import { getDefaultTrackConstraints } from '../layout/DefaultConstraints';
 import {
   TimelineControllerV2,
@@ -1276,7 +1279,7 @@ export class RendererV2 {
         'fontWeight',
         'align',
         'fontSize',
-        'textAlign'
+        'textAlign',
       ]);
 
       // Apply all other CSS properties from the style object
@@ -1292,7 +1295,11 @@ export class RendererV2 {
               element.style.setProperty(cssProperty, String(value));
             } catch (e2) {
               if (this.options.debugMode) {
-                console.warn(`Failed to apply style property ${key}:`, value, e2);
+                console.warn(
+                  `Failed to apply style property ${key}:`,
+                  value,
+                  e2
+                );
               }
             }
           }
