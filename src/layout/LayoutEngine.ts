@@ -231,11 +231,27 @@ export function applyLayoutWithConstraints(
       const safe = constraints?.safeArea || {};
       const safeL = Math.max(0, Number(safe.left || 0));
       const safeR = Math.max(0, Number(safe.right || 0));
+      // 1) ratio-based limit
       const widthFactorFromSafe = Math.max(0, 1 - (safeL + safeR));
       const widthFactorFromConstraint = constraints?.maxWidth ?? 1;
-      const widthFactorFromLayout = typeof cl.maxWidthRel === 'number' ? cl.maxWidthRel : 1;
-      const widthFactor = Math.min(widthFactorFromSafe, widthFactorFromConstraint, widthFactorFromLayout);
-      const mw = Math.round(pw * widthFactor);
+      const widthFactorFromLayoutRel = typeof cl.maxWidthRel === 'number' ? Math.max(0, cl.maxWidthRel) : 1;
+      const widthFactorFromPercent =
+        typeof cl.maxWidth === 'string' && /%$/.test(cl.maxWidth)
+          ? Math.max(0, Math.min(1, parseFloat(cl.maxWidth) / 100))
+          : 1;
+      const ratioLimit = Math.min(
+        widthFactorFromSafe,
+        widthFactorFromConstraint,
+        widthFactorFromLayoutRel,
+        widthFactorFromPercent
+      );
+      const ratioPx = Math.round(pw * ratioLimit);
+      // 2) absolute px limit
+      const absPx = typeof cl.maxWidth === 'number' && Number.isFinite(cl.maxWidth)
+        ? Math.max(0, Math.round(cl.maxWidth))
+        : Number.POSITIVE_INFINITY;
+      // 3) final limit
+      const mw = Math.min(ratioPx, absPx);
       el.style.maxWidth = `${mw}px`;
       // Allow natural height growth for multi-line
       el.style.width = 'auto';

@@ -58,7 +58,8 @@ export interface Layout {
     direction?: 'horizontal' | 'vertical';
     gap?: number; // normalized
     wrap?: boolean; // allow multi-line wrapping for flow horizontal
-    maxWidthRel?: number; // optional max width (relative to parent width)
+    maxWidth?: number | string; // number=px, "%"=percent of parent width
+    maxWidthRel?: number; // legacy: relative to parent width (kept for backward compat)
     align?: 'start' | 'center' | 'end';
     justify?: 'start' | 'center' | 'end' | 'space-between';
   };

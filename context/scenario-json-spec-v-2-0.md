@@ -799,7 +799,7 @@ Layout Constraints는 Flutter-like 레이아웃 시스템의 핵심으로, paren
     "direction": "horizontal",
     "wrap": true,           // [확장] 수평 플로우에서 줄바꿈 허용
     "gap": 0.012,           // 자식 간 간격(정규화)
-    "maxWidthRel": 0.9,     // [확장] 컨테이너 최대폭(부모 폭 대비 비율)
+    "maxWidth": "90%",      // [확장] 컨테이너 최대폭: 숫자=px, "%"=비율
     "align": "center",
     "justify": "center"
   }
@@ -808,8 +808,11 @@ Layout Constraints는 Flutter-like 레이아웃 시스템의 핵심으로, paren
 
 - `wrap` (boolean, optional) — 수평 플로우에서 여러 줄 줄바꿈을 허용합니다.
   - 기본값: `false` (명시 사용 권장)
-- `maxWidthRel` (number, optional) — 컨테이너의 최대 폭을 부모 폭 대비 비율로 지정합니다.
-  - 생략 시 트랙 제약과 세이프 에어리어로부터 자동 산출됩니다.
+- `maxWidth` (number | string, optional) — 컨테이너 최대 폭.
+  - 숫자(number): 절대 px 값으로 해석합니다. 예) 680 → 680px
+  - 퍼센트 문자열("%") : 부모 폭에 대한 비율로 해석합니다. 예) "90%" → 0.9 × parentWidth
+  - 생략 시 트랙 제약과 세이프 에어리어만으로 산출합니다.
+  - (이전 호환) `maxWidthRel`(number)을 사용하던 경우 부모 폭 비율로 동작합니다.
 - `gap` (number, optional) — 자식 간 간격(정규화 값).
   - 해석 기준: 수평 플로우에서는 부모 “폭”, 수직 플로우에서는 부모 “높이” 기준으로 px 환산.
 
@@ -818,11 +821,20 @@ Layout Constraints는 Flutter-like 레이아웃 시스템의 핵심으로, paren
 컨테이너의 실제 최대 폭 `effectiveMaxWidth`는 아래 요소의 최솟값으로 계산합니다.
 
 ```
-effectiveMaxWidth = min(
-  track.defaultConstraints.maxWidth,
-  1 - safeArea.left - safeArea.right,
-  childrenLayout.maxWidthRel? // 명시된 경우만 고려
-) × parentWidth
+// 1) 비율 기반 상한(트랙/세이프/퍼센트형 입력)
+ratioLimit = min(
+  track.defaultConstraints.maxWidth,        // (비율)
+  1 - safeArea.left - safeArea.right,        // (비율)
+  percent(childrenLayout.maxWidth)? : 1,     // ("90%" → 0.9)
+  childrenLayout.maxWidthRel? : 1            // (이전 호환: 비율)
+)
+ratioPx = ratioLimit × parentWidth
+
+// 2) 절대 px 상한(숫자형 입력)
+absPx = number(childrenLayout.maxWidth)? : +∞
+
+// 3) 최종 상한
+effectiveMaxWidth = min(ratioPx, absPx)
 ```
 
 - `layout.size.width`가 명시된 경우, 그 폭은 존중하고 `max-width`는 상한으로만 적용합니다.
