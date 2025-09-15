@@ -1215,6 +1215,13 @@ export class RendererV2 {
   }
 
   /**
+   * camelCase를 kebab-case로 변환
+   */
+  private camelToKebab(str: string): string {
+    return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  }
+
+  /**
    * 기본 스타일 적용 (새로운 constraints 시스템 사용)
    */
   private applyBaseStyle(
@@ -1245,7 +1252,7 @@ export class RendererV2 {
     const nodeStyle = node.style || {};
     const mergedStyle = { ...trackDefaults, ...nodeStyle } as any;
 
-    // Apply merged styles
+    // Apply text-related styles (all node types)
     if (mergedStyle.fontSizeRel) {
       // Convert relative size to pixels based on container size
       const container = this.container;
@@ -1258,6 +1265,40 @@ export class RendererV2 {
     if (mergedStyle.fontWeight)
       element.style.fontWeight = String(mergedStyle.fontWeight);
     if (mergedStyle.align) element.style.textAlign = mergedStyle.align;
+
+    // Apply box-related styles only for group nodes
+    if (node.eType === 'group') {
+      // Known text-related properties to skip
+      const textProperties = new Set([
+        'fontSizeRel',
+        'color',
+        'fontFamily',
+        'fontWeight',
+        'align',
+        'fontSize',
+        'textAlign'
+      ]);
+
+      // Apply all other CSS properties from the style object
+      for (const [key, value] of Object.entries(mergedStyle)) {
+        if (!textProperties.has(key) && value !== undefined && value !== null) {
+          // Convert camelCase to kebab-case for CSS property names
+          const cssProperty = this.camelToKebab(key);
+          try {
+            (element.style as any)[key] = String(value);
+          } catch (e) {
+            // Fallback to kebab-case if camelCase fails
+            try {
+              element.style.setProperty(cssProperty, String(value));
+            } catch (e2) {
+              if (this.options.debugMode) {
+                console.warn(`Failed to apply style property ${key}:`, value, e2);
+              }
+            }
+          }
+        }
+      }
+    }
 
     // Apply default text styling for text nodes without explicit style
     if (node.eType === 'text' && !mergedStyle.fontSizeRel) {
