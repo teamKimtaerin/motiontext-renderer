@@ -396,7 +396,8 @@ export class RendererV2 {
         resolvedOffset
       );
 
-      if (isWithinTimeRange(currentTime, pluginWindow)) {
+      const active = isWithinTimeRange(currentTime, pluginWindow);
+      if (active) {
         const progress = progressInTimeRange(currentTime, pluginWindow);
 
         const pluginChannels = this.evaluatePlugin(plugin, progress, element);
@@ -407,10 +408,51 @@ export class RendererV2 {
           pluginChannels,
           plugin.compose || 'replace'
         );
+      } else {
+        // DOM 플러그인은 윈도우를 벗어났을 때도 상태가 잔류하지 않도록
+        // 이미 초기화된 경우에만 p=0 또는 p=1을 적용한다 (새 초기화는 하지 않음)
+        const registered = devRegistry.resolve(plugin.name);
+        if (registered?.module && typeof registered.module.animate === 'function') {
+          const before = currentTime < pluginWindow[0];
+          const p = before ? 0 : 1;
+          this.applyDomPluginProgressIfInitialized(plugin, element, p);
+        }
       }
     }
 
     return channels;
+  }
+
+  /**
+   * 이미 초기화된 DOM 플러그인에만 진행도를 적용한다.
+   * 플러그인을 새로 초기화하지 않는다 (메모리/DOM 누수 방지).
+   */
+  private applyDomPluginProgressIfInitialized(
+    plugin: PluginSpec,
+    element: HTMLElement,
+    progress: number
+  ): void {
+    const nodeId = (element.dataset.nodeKey || element.dataset.nodeId)!;
+    if (!nodeId) return;
+    const nodeStates = this.domPluginStates.get(nodeId) || (() => {
+      // Backward compatibility: prior to fix, keys used bare node.id
+      const fallbackId = nodeId.includes(':') ? nodeId.split(':')[1] : undefined;
+      return fallbackId ? this.domPluginStates.get(fallbackId) : undefined;
+    })();
+    if (!nodeStates) return;
+    const state = nodeStates.get(plugin.name);
+    if (!state || !state.initialized || !state.seekFunction) return;
+
+    try {
+      const fn = state.seekFunction as any;
+      if (typeof fn === 'function') {
+        fn(progress);
+      } else if (fn && typeof fn.progress === 'function') {
+        fn.progress(progress);
+      }
+    } catch (_e) {
+      // non-fatal; skip
+    }
   }
 
   /**

@@ -18,6 +18,7 @@ import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
 import cwiDemoFull from './samples/cwi_demo_full.json';
 import dualChannelTest from './samples/dual_channel_test.json';
+import cwiSentenceWave from './samples/cwi_sentence_wave.json';
 // v2.0 샘플들
 import basicV20 from './samples/v2/basic_v20.json';
 import withAssetsV20 from './samples/v2/with_assets_v20.json';
@@ -91,6 +92,7 @@ const sampleConfigs: Record<string, RendererConfig> = {
   
   // Dual-channel test (spin + typewriter)
   'dual_channel_test (v2.0)': dualChannelTest as RendererConfig,
+  'cwi_sentence_wave (v2.0)': cwiSentenceWave as RendererConfig,
 
   animated: {
     version: '1.3',

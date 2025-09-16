@@ -11,10 +11,85 @@
   "preload": [],
   "timeOffset": [-0.3, 0.3],
   "schema": {
-    "color": { "type": "string", "default": "#00ffff", "ui": { "control": "color" } },
-    "intensity": { "type": "number", "default": 0.4, "min": 0, "max": 1, "ui": { "control": "slider", "step": 0.01 } },
-    "pulse": { "type": "boolean", "default": true },
-    "cycles": { "type": "number", "default": 8, "min": 1, "max": 120, "ui": { "control": "slider", "step": 1 } }
+    "color": {
+      "type": "string",
+      "default": "#00ffff",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "ui": {
+        "control": "color",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "글로우 색상",
+          "en": "Glow Color"
+        },
+        "description": {
+          "ko": "텍스트 주변의 빛나는 효과 색상",
+          "en": "Color of the glowing effect around text"
+        }
+      }
+    },
+    "intensity": {
+      "type": "number",
+      "default": 0.4,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "글로우 강도",
+          "en": "Glow Intensity"
+        },
+        "description": {
+          "ko": "빛나는 효과의 강도 (0: 없음, 1: 최대)",
+          "en": "Intensity of the glow effect (0: none, 1: maximum)"
+        }
+      }
+    },
+    "pulse": {
+      "type": "boolean",
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "맥동 효과",
+          "en": "Pulse Effect"
+        },
+        "description": {
+          "ko": "글로우 효과가 맥동하며 변화합니다",
+          "en": "Glow effect pulsates and changes"
+        }
+      }
+    },
+    "cycles": {
+      "type": "number",
+      "default": 8,
+      "min": 1,
+      "max": 120,
+      "step": 1,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "맥동 횟수",
+          "en": "Pulse Cycles"
+        },
+        "description": {
+          "ko": "글로우가 맥동하는 총 횟수",
+          "en": "Total number of glow pulse cycles"
+        }
+      }
+    }
   }
 }
 

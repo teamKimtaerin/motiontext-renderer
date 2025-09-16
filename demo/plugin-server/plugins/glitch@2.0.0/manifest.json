@@ -13,42 +13,105 @@
   "schema": {
     "glitchIntensity": {
       "type": "number",
-      "label": "글리치 강도",
-      "description": "텍스트가 흔들리는 정도를 조절합니다",
       "default": 5,
       "min": 1,
       "max": 20,
-      "step": 1
+      "step": 1,
+      "ui": {
+        "control": "slider",
+        "unit": "px",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "글리치 강도",
+          "en": "Glitch Intensity"
+        },
+        "description": {
+          "ko": "텍스트가 흔들리는 정도를 조절합니다",
+          "en": "Controls the degree of text distortion"
+        }
+      }
     },
     "animationDuration": {
       "type": "number",
-      "label": "애니메이션 주기",
-      "description": "글리치 패턴이 반복되는 주기 (초)",
       "default": 2,
       "min": 0.5,
       "max": 5,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "애니메이션 주기",
+          "en": "Animation Cycle"
+        },
+        "description": {
+          "ko": "글리치 패턴이 반복되는 주기 (초)",
+          "en": "Cycle duration of glitch pattern repetition (seconds)"
+        }
+      }
     },
     "glitchFrequency": {
       "type": "number",
-      "label": "글리치 빈도",
-      "description": "글리치 효과가 발생하는 간격 (초)",
       "default": 0.3,
       "min": 0.1,
       "max": 1,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "글리치 빈도",
+          "en": "Glitch Frequency"
+        },
+        "description": {
+          "ko": "글리치 효과가 발생하는 간격 (초)",
+          "en": "Interval between glitch effect occurrences (seconds)"
+        }
+      }
     },
     "colorSeparation": {
       "type": "boolean",
-      "label": "색상 분리 효과",
-      "description": "빨강/시안 색상 분리 효과를 적용합니다",
-      "default": true
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "색상 분리 효과",
+          "en": "Color Separation Effect"
+        },
+        "description": {
+          "ko": "빨강/시안 색상 분리 효과를 적용합니다",
+          "en": "Applies red/cyan color separation effect"
+        }
+      }
     },
     "noiseEffect": {
       "type": "boolean",
-      "label": "노이즈 효과",
-      "description": "디지털 노이즈 레이어를 추가합니다",
-      "default": true
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "노이즈 효과",
+          "en": "Noise Effect"
+        },
+        "description": {
+          "ko": "디지털 노이즈 레이어를 추가합니다",
+          "en": "Adds digital noise layer"
+        }
+      }
     }
   }
 }

@@ -49,24 +49,61 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+function clamp01(x) {
+  return Math.min(1, Math.max(0, x));
+}
+
+function ensureLetterSpans(span) {
+  if (!span) return [];
+  const existing = span.querySelectorAll(':scope > .cwi-letter');
+  if (existing.length) return Array.from(existing);
+
+  const text = span.textContent ?? '';
+  span.textContent = '';
+
+  const letters = [];
+  for (const ch of text) {
+    const letter = h('span', { class: 'cwi-letter' });
+    letter.textContent = ch === ' ' ? '\u00A0' : ch;
+    Object.assign(letter.style, {
+      display: 'inline-block',
+      color: WHITE90,
+      transform: 'translate3d(0, 0, 0)',
+    });
+    letters.push(letter);
+    span.appendChild(letter);
+  }
+
+  if (!letters.length) {
+    const placeholder = h('span', { class: 'cwi-letter' }, '\u00A0');
+    Object.assign(placeholder.style, { display: 'inline-block', color: WHITE90 });
+    letters.push(placeholder);
+    span.appendChild(placeholder);
+  }
+
+  span.dataset.cwiLetterized = 'true';
+  return letters;
+}
+
 export const name = 'cwi-bouncing';
 export const version = '1.0.0';
 
 export function init(el, opts, ctx) {
-    const host = el.parentElement;
-    if (!host) return;
+    const root = el; // effectsRoot
+    if (!root) return;
     
-    // Wrap text content in a span so we can transform without touching host/base transform
-    let span = host.querySelector(':scope > .cwi-word');
+    // Wrap text content in a span within effectsRoot
+    let span = root.querySelector(':scope > .cwi-word');
     if (!span) {
-      // Preserve effectsRoot if present
-      const effectsRoot = host.querySelector(':scope > [data-mtx-effects-root]');
-      // Gather existing text nodes into a single string
       let text = '';
-      for (const node of Array.from(host.childNodes)) {
+      for (const node of Array.from(root.childNodes)) {
         if (node.nodeType === 3 /* TEXT_NODE */) {
           text += node.textContent || '';
-          host.removeChild(node);
+          root.removeChild(node);
         }
       }
       span = h('span', { class: 'cwi-word' });
@@ -76,17 +113,25 @@ export function init(el, opts, ctx) {
         color: WHITE90,
         transformOrigin: '50% 50%'
       });
-      if (effectsRoot) host.insertBefore(span, effectsRoot);
-      else host.appendChild(span);
+      root.appendChild(span);
     }
     
+    const letters = ensureLetterSpans(span);
+    for (const letter of letters) {
+      letter.style.color = 'inherit';
+      letter.style.transform = 'translate3d(0px, 0px, 0px)';
+    }
+
+    const waveHeight = Number(opts?.waveHeight ?? (opts?.popScale ? opts.popScale * 8 : 12));
+
     el.__cwiBouncing = {
-      host,
+      root,
       span,
+      letters,
       palette: opts?.palette || {},
       t0: Number(opts?.t0 ?? 0),
       t1: Number(opts?.t1 ?? 0),
-      popScale: Number(opts?.popScale ?? 1.15),
+      waveHeight: Number.isFinite(waveHeight) ? waveHeight : 12,
       speaker: opts?.speaker
     };
 }
@@ -96,38 +141,43 @@ export function animate(el, opts, ctx, duration) {
     if (!state) return () => {};
     
     const span = state.span;
-    const D = Math.max(0.0001, Number(duration) || 0.0001);
-    const t0 = Math.max(0, Number(state.t0 || 0));
-    const t1 = Math.max(t0, Number(state.t1 || 0));
+    const letters = state.letters || [];
 
     // Initial baseline
     span.style.color = WHITE90;
-    span.style.transform = 'translate(0px, 0px) scale(1, 1)';
+    span.style.transform = 'translate3d(0px, 0px, 0px)';
     span.style.opacity = '1';
 
     // Seek-applier driven by host progress p (0..1)
     return (p) => {
-      const now = p * D;
-      const active = now >= t0 && now < t1;
-      
-      if (!active) {
-        // Outside window, reset geometry
-        span.style.transform = 'translate(0px, 0px) scale(1, 1)';
+      const local = Math.max(0, Math.min(1, p || 0));
+      span.style.color = colorFor(state, opts, el);
+
+      if (!letters.length) {
         span.style.opacity = '1';
         return;
       }
 
-      // Active window transforms
-      span.style.color = colorFor(state, opts, el);
-      
-      const w = Math.max(0.0001, (t1 - t0) || 0.0001);
-      const pw = (now - t0) / w;
-      
-      // Pop (default) with bouncing
-      const popScale = state.popScale || 1.15;
-      const s = 1 + (popScale - 1) * (1 - Math.pow(1 - Math.min(1, pw * 1.2), 3));
-      const ty = Math.sin(pw * Math.PI * 2) * 3;
-      span.style.transform = `translate(0px, ${ty}px) scale(${s}, ${s})`;
+      const total = letters.length || 1;
+      const waveHeight = Math.max(0, Number(state.waveHeight ?? 12));
+      // Sequential onset with overlap: each letter runs for letterDuration of the timeline
+      const letterDuration = Math.max(0.2, Math.min(0.9, Number(opts?.letterDuration ?? 0.6)));
+      const perDelay = total > 1 ? (1 - letterDuration) / (total - 1) : 0;
+
+      letters.forEach((letter, idx) => {
+        const start = idx * perDelay;
+        const t = (local - start) / letterDuration;
+        if (t <= 0 || t >= 1) {
+          letter.style.transform = 'translate3d(0px, 0px, 0px)';
+          return;
+        }
+        const eased = easeInOutCubic(t);
+        const wave = Math.sin(eased * Math.PI);
+        const lift = -waveHeight * wave;
+        const sway = Math.sin(eased * Math.PI * 2) * 0.6;
+        letter.style.transform = `translate3d(${sway}px, ${lift}px, 0px)`;
+      });
+
       span.style.opacity = '1';
     };
 }

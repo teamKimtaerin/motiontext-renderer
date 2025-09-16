@@ -11,7 +11,48 @@
   "preload": [],
   "timeOffset": [0, 0],
   "schema": {
-    "amplitudePx": { "type": "number", "default": 8, "min": 0, "max": 50, "ui": { "control": "slider", "step": 1 } },
-    "cycles": { "type": "number", "default": 1, "min": 0, "max": 10, "ui": { "control": "slider", "step": 0.5 } }
+    "amplitudePx": {
+      "type": "number",
+      "default": 8,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "ui": {
+        "control": "slider",
+        "unit": "px",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "상하 움직임 폭",
+          "en": "Vertical Movement Range"
+        },
+        "description": {
+          "ko": "텍스트가 위아래로 움직이는 범위 (픽셀)",
+          "en": "Range of vertical text movement in pixels"
+        }
+      }
+    },
+    "cycles": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "반복 횟수",
+          "en": "Repeat Count"
+        },
+        "description": {
+          "ko": "상하 움직임이 반복되는 횟수",
+          "en": "Number of vertical movement cycles"
+        }
+      }
+    }
   }
 }
