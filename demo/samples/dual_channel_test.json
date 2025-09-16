@@ -35,7 +35,7 @@
         "id": "test-text",
         "eType": "text",
         "text": "Spinning Typewriter!",
-        "displayTime": [
+        "baseTime": [
           0,
           10
         ],
