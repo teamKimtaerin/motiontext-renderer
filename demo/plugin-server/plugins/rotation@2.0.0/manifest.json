@@ -9,6 +9,7 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "rotationDegrees": {
       "type": "number",

@@ -5,6 +5,7 @@
   "type": "hybrid",
   "targets": ["text"],
   "capabilities": ["dom", "channel"],
+  "timeOffset": [0, 0],
   "schema": {
     "typingSpeed": {
       "type": "number",

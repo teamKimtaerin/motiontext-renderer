@@ -9,6 +9,7 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [0, 0],
   "schema": {
     "maxScale": { "type": "number", "default": 1.2, "min": 1, "max": 2.5, "ui": { "control": "slider", "step": 0.01 } },
     "cycles": { "type": "number", "default": 1, "min": 0, "max": 10, "ui": { "control": "slider", "step": 0.5 } }

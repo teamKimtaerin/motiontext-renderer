@@ -9,6 +9,7 @@
   "capabilities": ["style-vars"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "staggerDelay": {
       "type": "number",

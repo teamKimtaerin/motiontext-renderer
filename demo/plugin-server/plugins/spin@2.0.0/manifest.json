@@ -9,6 +9,7 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [0, 0],
   "schema": {
     "fullTurns": { "type": "number", "default": 1, "min": 0, "max": 10, "ui": { "control": "slider", "step": 0.5 } }
   }

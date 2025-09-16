@@ -8,6 +8,7 @@
   "targets": ["text"],
   "capabilities": ["style-vars", "dom-manipulation"],
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "speaker": {
       "type": "string",
