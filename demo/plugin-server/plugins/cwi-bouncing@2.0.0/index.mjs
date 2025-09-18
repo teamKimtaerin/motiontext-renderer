@@ -205,11 +205,14 @@ export function evalChannels(spec, progress, ctx) {
   const globalLift = -waveHeight * wave * 0.3; // 전체적인 살짝 위아래 움직임
   const globalSway = Math.sin(eased * Math.PI * 2) * 0.3; // 전체적인 살짝 좌우 흔들림
 
-  // 채널로 반환 (baseWrapper에 적용되어 spin과 합성됨)
+  // 표준 채널 키(tx, ty, sx, sy)를 사용해 baseWrapper에 합성
+  // - 다른 channel 플러그인(spin 등)과 mergeChannels 규칙에 따라 합성됨
+  const scale = 1 + wave * 0.05;  // 살짝 크기 변화
   return {
-    'bounce-tx': globalSway,
-    'bounce-ty': globalLift,
-    'bounce-scale': 1 + wave * 0.05  // 살짝 크기 변화
+    tx: globalSway,
+    ty: globalLift,
+    sx: scale,
+    sy: scale
   };
 }
 

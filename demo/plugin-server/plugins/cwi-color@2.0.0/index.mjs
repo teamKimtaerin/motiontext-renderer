@@ -90,7 +90,9 @@ function ensureLetterSpans(span) {
     Object.assign(letter.style, {
       display: 'inline-block',
       color: WHITE90,
-      transform: 'translate3d(0, 0, 0)',
+      // Use CSS variables for per-letter transforms to allow composition
+      // with other plugins (e.g., bouncing). Avoid hard-coded transform.
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)',
     });
     letters.push(letter);
     span.appendChild(letter);
@@ -98,7 +100,11 @@ function ensureLetterSpans(span) {
 
   if (!letters.length) {
     const placeholder = h('span', { class: 'cwi-letter' }, '\u00A0');
-    Object.assign(placeholder.style, { display: 'inline-block', color: WHITE90 });
+    Object.assign(placeholder.style, {
+      display: 'inline-block',
+      color: WHITE90,
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)'
+    });
     letters.push(placeholder);
     span.appendChild(placeholder);
   }
@@ -135,6 +141,13 @@ export function init(el, opts, ctx) {
     }
     
     const letters = ensureLetterSpans(span);
+    // Ensure existing letters (if pre-letterized by another plugin) use var-based transform
+    for (const letter of letters) {
+      const tr = (letter.style && letter.style.transform) || '';
+      if (!tr || /translate3d\(0px?,\s*0px?,/i.test(tr) || /translate3d\(0,\s*0,/.test(tr)) {
+        letter.style.transform = 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)';
+      }
+    }
     for (const letter of letters) {
       letter.style.color = WHITE90;
     }

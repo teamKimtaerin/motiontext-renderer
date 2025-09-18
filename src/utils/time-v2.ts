@@ -107,14 +107,18 @@ export function computePluginWindow(
 
 /**
  * 문자열 혹은 숫자 오프셋 값을 base_time 기준 절대 시간으로 변환
- * - "50%" → baseStart + baseDuration * 0.5
- * - 2.5 (number) → baseStart + 2.5 (초)
- * - "-1.0" (string, % 없음) → baseStart + (-1.0)
+ * - "50%" → baseStart + baseDuration * 0.5 (양 끝 공통: 비율은 항상 baseStart 기준)
+ * - 숫자(또는 숫자 문자열)는 경계별로 다르게 해석
+ *   - which = 'start' → baseStart + value
+ *   - which = 'end'   → baseEnd   + value
+ *   이를 통해 [0, 2] 같이 숫자로 끝 경계에 여유 시간을 더하는 확장 표현을 지원
  */
 function resolveOffsetToAbsolute(
   bound: unknown,
   baseStart: number,
-  baseDuration: number
+  baseEnd: number,
+  baseDuration: number,
+  which: 'start' | 'end'
 ): number {
   if (typeof bound === 'string') {
     const s = bound.trim();
@@ -124,14 +128,17 @@ function resolveOffsetToAbsolute(
       return baseStart + baseDuration * pct;
     }
     const n = parseFloat(s);
-    return Number.isFinite(n) ? baseStart + n : baseStart;
+    if (Number.isFinite(n)) {
+      return (which === 'start' ? baseStart : baseEnd) + n;
+    }
+    return which === 'start' ? baseStart : baseEnd;
   }
   if (typeof bound === 'number') {
     // 절대 초(오프셋), 음수 허용
-    return baseStart + bound;
+    return (which === 'start' ? baseStart : baseEnd) + bound;
   }
-  // 안전 폴백: 시작 시간
-  return baseStart;
+  // 안전 폴백: 해당 경계 기본
+  return which === 'start' ? baseStart : baseEnd;
 }
 
 /**
@@ -153,8 +160,8 @@ export function computePluginWindowFromBase(
   }
   const bDur = bEnd - bStart;
   const [o0, o1] = Array.isArray(timeOffset) ? timeOffset : ['0%', '100%'];
-  const abs0 = resolveOffsetToAbsolute(o0, bStart, bDur);
-  const abs1 = resolveOffsetToAbsolute(o1, bStart, bDur);
+  const abs0 = resolveOffsetToAbsolute(o0, bStart, bEnd, bDur, 'start');
+  const abs1 = resolveOffsetToAbsolute(o1, bStart, bEnd, bDur, 'end');
   return [abs0, abs1];
 }
 
