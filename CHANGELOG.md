@@ -1,5 +1,16 @@
 # motiontext-renderer
 
+## 1.2.1
+
+### Patch Changes
+
+- fix: demo plugin preview now reads timeOffset from manifest.json
+
+  Demo plugin previews now use timeOffset values from manifest.json files instead of hardcoded ['0%', '100%']. Default fallback is now ['0%', '0%'] to match updated calculation base.
+  - Updated generatePreviewScenario and generateLoopedScenario functions
+  - Added timeOffset field to PluginManifest interface
+  - Changed default timeOffset from ['0%', '100%'] to ['0%', '0%']
+
 ## 1.2.0
 
 ### Minor Changes
