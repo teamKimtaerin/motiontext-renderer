@@ -37,6 +37,15 @@
         "label": { "ko": "고정 색상", "en": "Fixed Color" },
         "description": { "ko": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)", "en": "Direct color specification (overrides palette)" }
       }
+    },
+    "bulk": {
+      "type": "boolean",
+      "default": false,
+      "ui": { "control": "switch", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "일괄 변경 모드", "en": "Bulk Color Mode" },
+        "description": { "ko": "글자별 스윕 대신 전체 단어 색을 동시에 변화", "en": "Change whole word color instead of per-letter sweep" }
+      }
     }
   }
 }

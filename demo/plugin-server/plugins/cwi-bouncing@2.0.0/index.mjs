@@ -71,8 +71,10 @@ function ensureLetterSpans(span) {
     letter.textContent = ch === ' ' ? '\u00A0' : ch;
     Object.assign(letter.style, {
       display: 'inline-block',
-      color: WHITE90,
-      transform: 'translate3d(0, 0, 0)',
+      color: 'inherit',
+      position: 'relative',
+      // CSS 변수 기반 transform 사용 (직접 transform 제거)
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px))',
     });
     letters.push(letter);
     span.appendChild(letter);
@@ -80,7 +82,12 @@ function ensureLetterSpans(span) {
 
   if (!letters.length) {
     const placeholder = h('span', { class: 'cwi-letter' }, '\u00A0');
-    Object.assign(placeholder.style, { display: 'inline-block', color: WHITE90 });
+    Object.assign(placeholder.style, {
+      display: 'inline-block',
+      color: 'inherit',
+      position: 'relative',
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px))'
+    });
     letters.push(placeholder);
     span.appendChild(placeholder);
   }
@@ -90,7 +97,7 @@ function ensureLetterSpans(span) {
 }
 
 export const name = 'cwi-bouncing';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
     const root = el; // effectsRoot
@@ -117,10 +124,11 @@ export function init(el, opts, ctx) {
     }
     
     const letters = ensureLetterSpans(span);
-    for (const letter of letters) {
+    // 글자별 인덱스 설정 (animate에서 사용)
+    letters.forEach((letter, idx) => {
+      letter.setAttribute('data-letter-idx', idx);
       letter.style.color = 'inherit';
-      letter.style.transform = 'translate3d(0px, 0px, 0px)';
-    }
+    });
 
     const waveHeight = Number(opts?.waveHeight ?? (opts?.popScale ? opts.popScale * 8 : 12));
 
@@ -139,19 +147,16 @@ export function init(el, opts, ctx) {
 export function animate(el, opts, ctx, duration) {
     const state = el.__cwiBouncing;
     if (!state) return () => {};
-    
+
     const span = state.span;
     const letters = state.letters || [];
 
-    // Initial baseline
-    span.style.color = WHITE90;
-    span.style.transform = 'translate3d(0px, 0px, 0px)';
+    // Initial baseline (color handled by cwi-color)
     span.style.opacity = '1';
 
     // Seek-applier driven by host progress p (0..1)
     return (p) => {
       const local = Math.max(0, Math.min(1, p || 0));
-      span.style.color = colorFor(state, opts, el);
 
       if (!letters.length) {
         span.style.opacity = '1';
@@ -167,23 +172,56 @@ export function animate(el, opts, ctx, duration) {
       letters.forEach((letter, idx) => {
         const start = idx * perDelay;
         const t = (local - start) / letterDuration;
+
         if (t <= 0 || t >= 1) {
-          letter.style.transform = 'translate3d(0px, 0px, 0px)';
+          // 범위 밖이면 CSS 변수를 0으로 설정
+          letter.style.setProperty('--letter-tx', '0px');
+          letter.style.setProperty('--letter-ty', '0px');
           return;
         }
+
         const eased = easeInOutCubic(t);
         const wave = Math.sin(eased * Math.PI);
         const lift = -waveHeight * wave;
         const sway = Math.sin(eased * Math.PI * 2) * 0.6;
-        letter.style.transform = `translate3d(${sway}px, ${lift}px, 0px)`;
+
+        // CSS 변수로만 설정 (transform 직접 조작 X)
+        letter.style.setProperty('--letter-tx', `${sway}px`);
+        letter.style.setProperty('--letter-ty', `${lift}px`);
       });
 
       span.style.opacity = '1';
     };
 }
 
+// 하이브리드 플러그인: 채널 기반 계산 함수
+export function evalChannels(spec, progress, ctx) {
+  const waveHeight = Number(spec?.params?.waveHeight ?? 12);
+  const letterDuration = Math.max(0.2, Math.min(0.9, Number(spec?.params?.letterDuration ?? 0.6)));
+
+  // 전체 바운싱 효과 계산 (전역 채널)
+  const eased = easeInOutCubic(progress);
+  const wave = Math.sin(eased * Math.PI);
+  const globalLift = -waveHeight * wave * 0.3; // 전체적인 살짝 위아래 움직임
+  const globalSway = Math.sin(eased * Math.PI * 2) * 0.3; // 전체적인 살짝 좌우 흔들림
+
+  // 채널로 반환 (baseWrapper에 적용되어 spin과 합성됨)
+  return {
+    'bounce-tx': globalSway,
+    'bounce-ty': globalLift,
+    'bounce-scale': 1 + wave * 0.05  // 살짝 크기 변화
+  };
+}
+
 export function cleanup(el) {
   if (el && el.__cwiBouncing) {
+    // CSS 변수 정리
+    const letters = el.__cwiBouncing.letters || [];
+    letters.forEach(letter => {
+      letter.style.removeProperty('--letter-tx');
+      letter.style.removeProperty('--letter-ty');
+    });
+
     el.__cwiBouncing = undefined;
   }
 }

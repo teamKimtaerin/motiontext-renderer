@@ -8,7 +8,7 @@ function hexToRgba(hex, alpha) {
 }
 
 export const name = 'glow';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
     // create a radial gradient glow layer

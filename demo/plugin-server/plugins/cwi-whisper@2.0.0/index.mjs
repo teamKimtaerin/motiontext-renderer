@@ -61,7 +61,7 @@ function easeInCubic(x) { return x * x * x; }
 function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
 
 export const name = 'cwi-whisper';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
     const root = el; // effectsRoot
@@ -111,15 +111,14 @@ export function animate(el, opts, ctx, duration) {
     
     const span = state.span;
 
-    // Initial baseline
-    span.style.color = WHITE90;
+    // Initial baseline (color handled by cwi-color)
     span.style.transform = 'translate3d(0px, 0px, 0px) scale(1, 1)';
     span.style.opacity = '1';
 
     // Seek-applier driven by host progress p (0..1)
     return (p) => {
       const local = clamp01(p || 0);
-      span.style.color = colorFor(state, opts, el);
+      // Color is delegated to cwi-color plugin
 
       // Dramatic shape: fast shrink → hold with flutter → fast return
       const shrinkConf = state.shrink || { scale: 0.6, drop: 6 };

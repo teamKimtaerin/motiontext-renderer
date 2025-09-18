@@ -108,7 +108,7 @@ function ensureLetterSpans(span) {
 }
 
 export const name = 'cwi-color';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
     const root = el; // effectsRoot provided by renderer
@@ -154,6 +154,7 @@ export function animate(el, opts, ctx, duration) {
     
     const span = state.span;
     const letters = state.letters || [];
+    const useBulk = Boolean(opts?.bulk);
 
     // Initial baseline
     span.style.color = WHITE90;
@@ -169,10 +170,35 @@ export function animate(el, opts, ctx, duration) {
       const to = hexToRgb(targetColor);
       const clamped = Math.max(0, Math.min(1, progress || 0));
       const total = letters.length || 1;
-      const scaled = clamped * total;
+      // Slight epsilon so boundaries don't stick exactly at 0
+      const scaled = clamped * total + 1e-4;
+
+      if (useBulk) {
+        if (clamped >= 0.985) {
+          span.style.color = targetColor;
+          for (const letter of letters) letter.style.color = targetColor;
+          span.style.opacity = '1';
+          return;
+        }
+        const mix = mixRgb(WHITE_RGB, to, easeOutCubic(clamped));
+        const css = rgbToCss(mix);
+        span.style.color = css;
+        for (const letter of letters) letter.style.color = css;
+        span.style.opacity = '1';
+        return;
+      }
 
       if (!letters.length) {
         span.style.color = clamped >= 1 ? targetColor : WHITE90;
+        return;
+      }
+
+      // Near the end, ensure all letters are fully colored even if progress < 1
+      // This prevents the last few letters from staying white when the renderer
+      // doesn't deliver an exact 1.0 progress frame.
+      if (clamped >= 0.985) {
+        for (const letter of letters) letter.style.color = targetColor;
+        span.style.opacity = '1';
         return;
       }
 
