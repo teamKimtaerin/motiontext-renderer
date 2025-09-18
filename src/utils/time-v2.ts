@@ -125,7 +125,14 @@ function resolveOffsetToAbsolute(
     if (s.endsWith('%')) {
       const n = parseFloat(s.slice(0, -1));
       const pct = Number.isFinite(n) ? n / 100 : 0;
-      return baseStart + baseDuration * pct;
+      // Percentage offsets are applied relative to each boundary:
+      //  - start: baseStart + baseDuration * pct
+      //  - end:   baseEnd   + baseDuration * pct
+      // This allows negative percentages on the end boundary to shorten the window
+      // from the end (e.g., base [2,4], '-20%' → 4 - 0.4 = 3.6).
+      return which === 'start'
+        ? baseStart + baseDuration * pct
+        : baseEnd + baseDuration * pct;
     }
     const n = parseFloat(s);
     if (Number.isFinite(n)) {

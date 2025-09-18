@@ -26,6 +26,7 @@ export interface PluginManifest {
   pluginApi: string
   targets: string[]
   capabilities?: string[]
+  timeOffset?: [string | number, string | number]
   schema: Record<string, SchemaProperty>
 }
 
@@ -120,7 +121,8 @@ export function getDefaultParameters(manifest: PluginManifest): Record<string, u
 export function generatePreviewScenario(
   pluginName: string,
   settings: PreviewSettings,
-  duration: number = 3
+  duration: number = 3,
+  manifest?: PluginManifest
 ): RendererConfig {
   // Center position (always use center for preview)
   const normalizedX = 0.5;
@@ -193,7 +195,7 @@ export function generatePreviewScenario(
                 {
                   name: pluginName,
                   params: settings.pluginParams,
-                  timeOffset: ['0%', '100%'],
+                  timeOffset: manifest?.timeOffset || ['0%', '0%'],
                 },
               ],
             },
@@ -210,7 +212,8 @@ export function generatePreviewScenario(
 export function generateLoopedScenario(
   pluginName: string,
   settings: PreviewSettings,
-  duration: number = 3
+  duration: number = 3,
+  manifest?: PluginManifest
 ): RendererConfig {
   // Center position (always use center for preview)
   const normalizedX = 0.5;
@@ -223,7 +226,7 @@ export function generateLoopedScenario(
     {
       name: pluginName,
       params: settings.pluginParams,
-      timeOffset: ['0%', '100%'],
+      timeOffset: manifest?.timeOffset || ['0%', '0%'],
     }
   ];
   

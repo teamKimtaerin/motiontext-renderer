@@ -5,6 +5,7 @@ import {
   isWithinTimeRange,
   progressInTimeRange,
   computePluginWindow,
+  computePluginWindowFromBase,
   clampTimeRange,
   getTimeRangeDuration,
   timeRangesOverlap,
@@ -91,6 +92,22 @@ describe('time-v2.ts', () => {
       expect(() => computePluginWindow('invalid' as any)).toThrow(TypeError);
       expect(() => computePluginWindow([1, 2], 'invalid' as any)).toThrow(TypeError);
       expect(() => computePluginWindow([NaN, 2])).toThrow(TypeError);
+    });
+  });
+
+  describe('computePluginWindowFromBase', () => {
+    it('handles percentage strings relative to baseTime length per-boundary', () => {
+      const baseTime: [number, number] = [2, 4]; // duration = 2
+      const window = computePluginWindowFromBase(baseTime, ['10%', '-20%']);
+      // start: 2 + 2*0.1 = 2.2, end: 4 + 2*(-0.2) = 3.6
+      expect(window).toEqual([2.2, 3.6]);
+    });
+
+    it('supports numeric and percent mixing', () => {
+      const baseTime: [number, number] = [10, 20]; // duration = 10
+      // start: 10 + 2 = 12 (number), end: 20 + 10%*10 = 21
+      const window = computePluginWindowFromBase(baseTime, [2, '10%']);
+      expect(window).toEqual([12, 21]);
     });
   });
 
