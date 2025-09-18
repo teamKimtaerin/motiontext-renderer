@@ -412,7 +412,10 @@ export class RendererV2 {
         // DOM 플러그인은 윈도우를 벗어났을 때도 상태가 잔류하지 않도록
         // 이미 초기화된 경우에만 p=0 또는 p=1을 적용한다 (새 초기화는 하지 않음)
         const registered = devRegistry.resolve(plugin.name);
-        if (registered?.module && typeof registered.module.animate === 'function') {
+        if (
+          registered?.module &&
+          typeof registered.module.animate === 'function'
+        ) {
           const before = currentTime < pluginWindow[0];
           const p = before ? 0 : 1;
           this.applyDomPluginProgressIfInitialized(plugin, element, p);
@@ -434,11 +437,15 @@ export class RendererV2 {
   ): void {
     const nodeId = (element.dataset.nodeKey || element.dataset.nodeId)!;
     if (!nodeId) return;
-    const nodeStates = this.domPluginStates.get(nodeId) || (() => {
-      // Backward compatibility: prior to fix, keys used bare node.id
-      const fallbackId = nodeId.includes(':') ? nodeId.split(':')[1] : undefined;
-      return fallbackId ? this.domPluginStates.get(fallbackId) : undefined;
-    })();
+    const nodeStates =
+      this.domPluginStates.get(nodeId) ||
+      (() => {
+        // Backward compatibility: prior to fix, keys used bare node.id
+        const fallbackId = nodeId.includes(':')
+          ? nodeId.split(':')[1]
+          : undefined;
+        return fallbackId ? this.domPluginStates.get(fallbackId) : undefined;
+      })();
     if (!nodeStates) return;
     const state = nodeStates.get(plugin.name);
     if (!state || !state.initialized || !state.seekFunction) return;
