@@ -9,8 +9,49 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [0, 0],
   "schema": {
-    "maxScale": { "type": "number", "default": 1.2, "min": 1, "max": 2.5, "ui": { "control": "slider", "step": 0.01 } },
-    "cycles": { "type": "number", "default": 1, "min": 0, "max": 10, "ui": { "control": "slider", "step": 0.5 } }
+    "maxScale": {
+      "type": "number",
+      "default": 1.2,
+      "min": 1,
+      "max": 2.5,
+      "step": 0.01,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "최대 확대 배율",
+          "en": "Maximum Scale"
+        },
+        "description": {
+          "ko": "펄스 효과 시 텍스트가 확대되는 최대 크기 배율",
+          "en": "Maximum scale factor for text during pulse effect"
+        }
+      }
+    },
+    "cycles": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "펄스 반복 횟수",
+          "en": "Pulse Cycles"
+        },
+        "description": {
+          "ko": "펄스 효과가 반복되는 횟수",
+          "en": "Number of pulse effect repetitions"
+        }
+      }
+    }
   }
 }

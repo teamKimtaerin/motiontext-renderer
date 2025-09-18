@@ -223,6 +223,42 @@ export function applyLayoutWithConstraints(
 
   // Group의 자식 레이아웃 적용 (그룹 자체 positioning과 독립적)
   if (layout?.childrenLayout) {
+    // If wrapping is requested (explicit or implied for horizontal), constrain container max width
+    const cl: any = layout.childrenLayout as any;
+    const wantWrap =
+      (cl?.wrap ?? cl?.direction === 'horizontal') && !!el.parentElement;
+    if (wantWrap) {
+      const pw = el.parentElement.clientWidth || 0;
+      const safe = constraints?.safeArea || {};
+      const safeL = Math.max(0, Number(safe.left || 0));
+      const safeR = Math.max(0, Number(safe.right || 0));
+      // 1) ratio-based limit
+      const widthFactorFromSafe = Math.max(0, 1 - (safeL + safeR));
+      const widthFactorFromConstraint = constraints?.maxWidth ?? 1;
+      const widthFactorFromLayoutRel =
+        typeof cl.maxWidthRel === 'number' ? Math.max(0, cl.maxWidthRel) : 1;
+      const widthFactorFromPercent =
+        typeof cl.maxWidth === 'string' && /%$/.test(cl.maxWidth)
+          ? Math.max(0, Math.min(1, parseFloat(cl.maxWidth) / 100))
+          : 1;
+      const ratioLimit = Math.min(
+        widthFactorFromSafe,
+        widthFactorFromConstraint,
+        widthFactorFromLayoutRel,
+        widthFactorFromPercent
+      );
+      const ratioPx = Math.round(pw * ratioLimit);
+      // 2) absolute px limit
+      const absPx =
+        typeof cl.maxWidth === 'number' && Number.isFinite(cl.maxWidth)
+          ? Math.max(0, Math.round(cl.maxWidth))
+          : Number.POSITIVE_INFINITY;
+      // 3) final limit
+      const mw = Math.min(ratioPx, absPx);
+      el.style.maxWidth = `${mw}px`;
+      // Allow natural height growth for multi-line
+      el.style.width = 'auto';
+    }
     applyChildrenLayout(el, layout.childrenLayout);
   }
 }
@@ -447,10 +483,17 @@ export function applyGridContainer(
  * Apply children layout to element (for group elements)
  * This allows groups to control how their children are arranged independently of their own positioning
  */
-function applyChildrenLayout(
+export function applyChildrenLayout(
   el: HTMLElement,
   childrenLayout: NonNullable<Layout['childrenLayout']>
 ): void {
+  // Persist layout spec on the element for later refresh after mutations
+  try {
+    (el as any).__mtxChildrenLayout = childrenLayout;
+  } catch {
+    /* noop */
+  }
+  const cw: any = childrenLayout as any;
   const {
     mode = 'flow',
     direction = 'horizontal',
@@ -458,12 +501,15 @@ function applyChildrenLayout(
     align = 'center',
     justify = 'center',
   } = childrenLayout;
+  const wrap = cw?.wrap ?? direction === 'horizontal';
 
   switch (mode) {
     case 'flow': {
       // Set up flexbox for children
       el.style.display = 'flex';
       el.style.flexDirection = direction === 'horizontal' ? 'row' : 'column';
+      el.style.flexWrap =
+        wrap && direction === 'horizontal' ? 'wrap' : 'nowrap';
 
       // Alignment
       const alignItems =
@@ -484,14 +530,34 @@ function applyChildrenLayout(
       el.style.alignItems = alignItems;
       el.style.justifyContent = justifyContent;
 
-      // Gap
+      // Gap: apply per-child right margin for robust spacing and proper wrapping
       if (gap && el.parentElement) {
         const containerSize =
           direction === 'horizontal'
             ? el.parentElement.clientWidth || 0
             : el.parentElement.clientHeight || 0;
+        const gapPx = Math.round(containerSize * gap);
         const gapProp = direction === 'horizontal' ? 'columnGap' : 'rowGap';
-        (el.style as any)[gapProp] = `${Math.round(containerSize * gap)}px`;
+        // Clear native gap to prevent double spacing when margins are applied
+        (el.style as any)[gapProp] = '';
+
+        // Additionally, enforce fixed spacing using margins so visual space stays uniform
+        const children = Array.from(el.children) as HTMLElement[];
+        for (let i = 0; i < children.length; i++) {
+          const c = children[i];
+          // Normalize spacing-related properties to avoid inherited CSS affecting layout
+          c.style.padding = '0px';
+          c.style.flex = '0 0 auto';
+          if (direction === 'horizontal') {
+            c.style.marginLeft = '0px';
+            c.style.marginRight = `${gapPx}px`;
+            c.style.marginTop = '';
+          } else {
+            c.style.marginTop = i === 0 ? '0' : `${gapPx}px`;
+            c.style.marginLeft = '';
+            c.style.marginRight = '';
+          }
+        }
       }
       break;
     }

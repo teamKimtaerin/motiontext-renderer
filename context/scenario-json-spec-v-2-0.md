@@ -781,6 +781,137 @@ Layout Constraints는 Flutter-like 레이아웃 시스템의 핵심으로, paren
 }
 ```
 
+---
+
+## 📎 Appendix — childrenLayout 확장: 줄바꿈/간격/세이프 에어리어 (v2.1 제안)
+
+본 확장 섹션은 자막과 같이 단어 단위 노드를 수평으로 배치하면서
+줄바꿈과 균일한 간격, 좌우 세이프 에어리어를 동시에 만족시키기 위한
+권장 표기와 동작 규칙을 정의합니다. v2.0 스펙과 상호운용을 해치지 않는
+선에서 확장 필드를 도입합니다.
+
+### 확장 필드 (Group.layout.childrenLayout)
+
+```json
+{
+  "childrenLayout": {
+    "mode": "flow",
+    "direction": "horizontal",
+    "wrap": true,           // [확장] 수평 플로우에서 줄바꿈 허용
+    "gap": 0.012,           // 자식 간 간격(정규화)
+    "maxWidth": "90%",      // [확장] 컨테이너 최대폭: 숫자=px, "%"=비율
+    "align": "center",
+    "justify": "center"
+  }
+}
+```
+
+- `wrap` (boolean, optional) — 수평 플로우에서 여러 줄 줄바꿈을 허용합니다.
+  - 기본값: `false` (명시 사용 권장)
+- `maxWidth` (number | string, optional) — 컨테이너 최대 폭.
+  - 숫자(number): 절대 px 값으로 해석합니다. 예) 680 → 680px
+  - 퍼센트 문자열("%") : 부모 폭에 대한 비율로 해석합니다. 예) "90%" → 0.9 × parentWidth
+  - 생략 시 트랙 제약과 세이프 에어리어만으로 산출합니다.
+  - (이전 호환) `maxWidthRel`(number)을 사용하던 경우 부모 폭 비율로 동작합니다.
+- `gap` (number, optional) — 자식 간 간격(정규화 값).
+  - 해석 기준: 수평 플로우에서는 부모 “폭”, 수직 플로우에서는 부모 “높이” 기준으로 px 환산.
+
+### 폭 계산 규칙 (wrap=true일 때)
+
+컨테이너의 실제 최대 폭 `effectiveMaxWidth`는 아래 요소의 최솟값으로 계산합니다.
+
+```
+// 1) 비율 기반 상한(트랙/세이프/퍼센트형 입력)
+ratioLimit = min(
+  track.defaultConstraints.maxWidth,        // (비율)
+  1 - safeArea.left - safeArea.right,        // (비율)
+  percent(childrenLayout.maxWidth)? : 1,     // ("90%" → 0.9)
+  childrenLayout.maxWidthRel? : 1            // (이전 호환: 비율)
+)
+ratioPx = ratioLimit × parentWidth
+
+// 2) 절대 px 상한(숫자형 입력)
+absPx = number(childrenLayout.maxWidth)? : +∞
+
+// 3) 최종 상한
+effectiveMaxWidth = min(ratioPx, absPx)
+```
+
+- `layout.size.width`가 명시된 경우, 그 폭은 존중하고 `max-width`는 상한으로만 적용합니다.
+- `wrap=false`이면 위 계산을 적용하지 않아도 됩니다(단일 라인).
+
+### 작성 규칙 (Authoring Recommendations)
+
+- 트랙(`subtitle`)의 `defaultConstraints`에 다음을 명시합니다.
+  - `safeArea.left/right` 및 `maxWidth` (예: 0.8)
+- 문장 그룹(root)에는 다음만 기술해도 충분합니다.
+  - `childrenLayout`: `{ mode:'flow', direction:'horizontal', wrap:true, gap:… , align/justify }`
+- 단어 노드는 텍스트에 공백을 포함하지 않습니다(간격은 전적으로 `gap`으로 제어).
+- 글자(문자) 간 간격이 필요하면 표준 필드 `style.letterSpacing`을 사용합니다.
+
+### 상호운용성 및 폴백
+
+- `wrap`, `maxWidthRel`을 모르는 엔진에서는 해당 필드를 무시해도 자연스러운 표시가 가능합니다.
+  - 줄바꿈이 비활성화될 수 있으나, 트랙의 `maxWidth`와 `safeArea`가 적용되어 잘려 보이지 않도록 합니다.
+- `gap` 해석 기준은 본 문서에 명시된대로 고정하며, 구현체는 동일한 기준을 따릅니다.
+
+### 검증/권고 사항
+
+- `wrap:true`인데 트랙에 `maxWidth`와 `safeArea.left/right`가 모두 비어 있으면 경고를 권장합니다
+  (폭이 과도하게 넓어질 수 있음).
+- `gap`이 음수/비수치인 경우 0으로 보정하는 것을 권장합니다.
+
+### 예시
+
+```json
+{
+  "tracks": [
+    {
+      "id": "caption",
+      "type": "subtitle",
+      "layer": 1,
+      "defaultStyle": { "fontSizeRel": 0.07 },
+      "defaultConstraints": {
+        "mode": "flow",
+        "direction": "vertical",
+        "maxWidth": 0.8,
+        "safeArea": { "left": 0.05, "right": 0.05, "bottom": 0.1 },
+        "anchor": "bc"
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "cue-1",
+      "track": "caption",
+      "root": {
+        "eType": "group",
+        "layout": {
+          "anchor": "bc",
+          "position": { "x": 0.5, "y": 0.925 },
+          "safeAreaClamp": true,
+          "childrenLayout": {
+            "mode": "flow",
+            "direction": "horizontal",
+            "wrap": true,
+            "gap": 0.012,
+            "align": "center",
+            "justify": "center"
+          }
+        },
+        "children": [
+          { "id": "w1", "eType": "text", "text": "You",     "displayTime": [0, 2] },
+          { "id": "w2", "eType": "text", "text": "know,",  "displayTime": [0.2, 2] },
+          { "id": "w3", "eType": "text", "text": "we",      "displayTime": [0.4, 2] }
+        ]
+      }
+    }
+  ]
+}
+```
+
+본 확장 규칙을 적용하면 “줄바꿈 + 균일 간격 + 좌우 세이프 에어리어 준수”가 일관되게 구현됩니다.
+
 #### `margin` (object, optional)
 외부 여백. `padding`과 동일한 형식.
 

@@ -8,12 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **MotionText Renderer**는 동영상 위에 정교한 자막과 애니메이션 효과를 렌더링하는 TypeScript 라이브러리입니다.
 
-### 📊 현재 상태 (2025-09-13)
+### 📊 현재 상태 (2025-09-15)
 - **✅ M1-M6 완료**: 타입 시스템, 시간 유틸리티, 파서, 플러그인 체인 합성, v2.0 네이티브 렌더러
 - **🧪 120개 테스트 통과**: 모든 핵심 모듈 검증 완료
 - **🎬 17개 플러그인**: 내장 플러그인 + 외부 플러그인 로더 시스템
 - **🎮 커스텀 컨트롤러**: YouTube 스타일 UI/UX 구현
 - **⚡ v2.0 Native**: v2.0 JSON을 직접 처리하는 네이티브 렌더러 완성
+- **🚧 진행 중**: DOM 플러그인 래퍼 시스템 마이그레이션 (dom-manage-refac-plan.md)
 
 ---
 
@@ -150,6 +151,12 @@ resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
 
 ## 🚀 다음 마일스톤
 
+### DOM 플러그인 래퍼 시스템 (진행 중)
+- **목적**: DOM 플러그인의 생명주기를 렌더러가 중앙 관리
+- **방식**: 각 플러그인마다 전용 래퍼 엘리먼트 생성/제거
+- **효과**: 재초기화 루프 방지, 일관된 DOM 관리
+- **계획**: dom-manage-refac-plan.md 참조
+
 ### M7: 테스트 마이그레이션 및 최적화 (진행 예정)
 - 모든 테스트를 v2.0 기준으로 재작성
 - 성능 최적화 (시간 배열 캐싱, DOM 업데이트 최소화)
@@ -211,14 +218,18 @@ resolveAllDefines(pluginParams) // "define.speakerPalette" → 실제 객체
 # 개발 서버 실행 (localhost:3000, demo 모드)
 pnpm dev
 
-# 플러그인 서버 실행 (개발용)
+# 플러그인 서버 실행 (localhost:3300)
 pnpm plugin:server
+
+# AI 편집기 프록시 서버 (Claude API 프록시)
+pnpm proxy:server
 
 # 테스트 실행
 pnpm test              # 전체 테스트 (Vitest watch 모드)
-pnpm test:run          # 단일 실행 (CI용)
-pnpm test:ui           # Vitest UI
-pnpm test:coverage     # 커버리지 포함
+pnpm test:run          # 단일 실행 (CI용, pool=threads)
+pnpm test:ui           # Vitest UI (브라우저에서 테스트 확인)
+pnpm test:coverage     # 커버리지 포함 (v8 provider)
+# 특정 테스트 실행: pnpm test src/utils/__tests__/time-v2.test.ts
 
 # 코드 품질
 pnpm lint              # ESLint 실행
@@ -228,14 +239,14 @@ pnpm format:check      # 포맷팅 검사
 pnpm typecheck         # TypeScript 타입 체크
 
 # 빌드
-pnpm build             # 라이브러리 빌드 (ES/CJS)
+pnpm build             # 라이브러리 빌드 (ES/CJS 모듈 생성)
 pnpm dev:build         # 빌드 watch 모드
 pnpm clean             # dist 폴더 정리
 
 # 통합 검증
-pnpm verify            # lint + format + typecheck + test (CI 동일)
+pnpm verify            # lint + format:check + typecheck + test:run
 
-# 릴리스 관리
+# 릴리스 관리 (Changesets)
 pnpm changeset         # 변경사항 기록
 pnpm version           # 버전 업데이트
 pnpm release           # NPM 배포
@@ -253,27 +264,53 @@ src/
 │   └── layout.ts       # 레이아웃 타입
 ├── core/               # v2.0 렌더러 코어
 │   ├── RendererV2.ts   # 메인 렌더러
-│   ├── TimelineControllerV2.ts  # 시간 동기화
-│   └── CueManagerV2.ts # DOM 생명주기
+│   ├── TimelineControllerV2.ts  # 시간 동기화 (requestVideoFrameCallback)
+│   ├── CueManagerV2.ts # DOM 생명주기 관리
+│   └── Stage.ts        # 스테이지/비디오 오버레이 관리
 ├── parser/             # v2.0 파서
 │   ├── ScenarioParserV2.ts  # v2.0 전용 파서
 │   ├── DefineResolver.ts    # Define 시스템
-│   └── InheritanceV2.ts     # 상속 처리
+│   ├── InheritanceV2.ts     # 상속 처리
+│   └── ValidationV2.ts      # v2.0 검증
 ├── utils/
-│   └── time-v2.ts      # v2.0 시간 유틸리티
+│   ├── time-v2.ts      # v2.0 시간 유틸리티 (배열 기반)
+│   └── logging.ts      # 디버그 로깅
 ├── composer/
 │   └── PluginChainComposerV2.ts  # v2.0 플러그인 합성
 ├── runtime/
-│   ├── plugins/BuiltinV2.ts      # 17개 내장 플러그인
-│   └── PluginContextV3.ts        # Plugin API v3.0 컨텍스트
-├── loader/dev/         # 개발용 플러그인 로더
+│   ├── plugins/
+│   │   ├── BuiltinV2.ts          # 17개 내장 플러그인
+│   │   └── cwi-*.ts              # CWI 시리즈 플러그인
+│   ├── PluginContextV3.ts        # Plugin API v3.0 컨텍스트
+│   └── ChannelComposer.ts        # CSS 변수 채널 시스템
+├── layout/
+│   ├── LayoutEngine.ts           # 레이아웃 계산 엔진
+│   └── utils/anchors.ts          # 앵커 포인트 유틸
+├── loader/
+│   ├── dev/                      # 개발용 플러그인 로더
+│   │   ├── DevPluginRegistry.ts  # 외부 플러그인 레지스트리
+│   │   └── DevPluginLoader.ts    # 동적 플러그인 로더
+│   └── PluginLoader.ts           # 프로덕션 플러그인 로더
+├── assets/
+│   └── AssetManager.ts           # 에셋 관리 (폰트, 이미지 등)
+├── controller/
+│   └── MotionTextController.ts   # 비디오 컨트롤 UI
 └── index.ts            # v2.0 Native API 진입점
 
 demo/
 ├── index.html          # 데모 페이지
 ├── main.ts             # v2.0 전용 데모 로직
+├── devPlugins.ts       # 개발 플러그인 설정
+├── aiEditor.ts         # AI 편집기 데모
 ├── samples/            # v2.0 샘플 파일들
-└── plugin-server/      # 17개 플러그인 서버
+│   ├── basic.json
+│   ├── animated_subtitle.json
+│   ├── plugin_showcase.json
+│   └── cwi_demo_full.json
+├── plugin-server/      # 로컬 플러그인 서버
+│   ├── server.js
+│   └── plugins/        # 플러그인 모듈들
+└── proxy-server.js     # Claude API 프록시
 ```
 
 ---
@@ -322,21 +359,33 @@ registerExternalPlugin({
 ### 필수 요구사항
 - **Node.js**: >= 18.0.0
 - **pnpm**: >= 8.0.0 (필수, npm/yarn 사용 불가)
-- **TypeScript**: 프로젝트에 포함됨
+- **TypeScript**: 5.3.3 (프로젝트에 포함됨)
+- **GSAP**: ^3.12.0 (peer dependency)
 
 ### 개발 서버 모드
 - **Demo 모드**: `pnpm dev` → `demo/` 폴더를 루트로 Vite 서버 실행 (port 3000)
+- **플러그인 서버**: `pnpm plugin:server` → 로컬 플러그인 서버 (port 3300)
+- **프록시 서버**: `pnpm proxy:server` → Claude API 프록시 (AI 편집기용)
 - **라이브러리 빌드**: `pnpm build` → ES/CJS 모듈 생성 (`dist/`)
 
 ### 테스트 환경
 - **Vitest**: jsdom 환경에서 120개+ 테스트
+- **Watch 모드**: `pnpm test` (파일 변경 시 자동 재실행)
 - **단일 테스트**: `pnpm test src/utils/__tests__/time-v2.test.ts`
+- **UI 모드**: `pnpm test:ui` (브라우저에서 테스트 결과 확인)
 - **커버리지**: `pnpm test:coverage` (v8 기반)
 
 ### 플러그인 개발
 - **로컬 서버**: `pnpm plugin:server` → `http://localhost:3300`
 - **플러그인 경로**: `demo/plugin-server/plugins/<name@version>/`
 - **매니페스트**: `manifest.json` + `index.mjs` 필수
+- **개발 모드 설정**:
+  ```bash
+  # 환경변수로 플러그인 모드 설정
+  VITE_PLUGIN_MODE=server pnpm dev  # 서버 모드
+  VITE_PLUGIN_MODE=local pnpm dev   # 로컬 모드
+  # 기본값: auto (서버 우선, 실패 시 로컬)
+  ```
 
 ---
 
@@ -355,6 +404,21 @@ registerExternalPlugin({
 
 ---
 
-*최종 업데이트: 2025-09-13 - M6 v2.0 네이티브 렌더러 완성*
-- @refactoringv2.md 앞쪽에 서술된 프롬프트를 보고 컨텍스트를 불러올 것, @refactoringv2.md 에 작업 완료사항을 업데이트할 것
-- 패키지매니저로 pnpm을 쓸 것
+*최종 업데이트: 2025-09-15 - DOM 플러그인 래퍼 시스템 진행 중*
+
+## 📌 개발 가이드라인
+
+### 중요 참조 문서
+- **refactoringv2.md**: v2.0 리팩토링 계획 및 진행 상황
+- **dom-manage-refac-plan.md**: DOM 플러그인 래퍼 마이그레이션 계획
+- **context/folder-structure.md**: 프로젝트 구조와 각 모듈의 책임
+- **context/scenario-json-spec-v-2-0.md**: v2.0 JSON 시나리오 스펙
+- **context/plugin-system-architecture-v-3-0.md**: Plugin API v3.0 스펙
+
+### 개발 원칙
+- 패키지 매니저: **pnpm** (npm/yarn 사용 금지)
+- 버전 관리: v2.0 네이티브 중심 (v1.3 레거시 코드 점진적 제거)
+- 테스트: Vitest + jsdom 환경
+- 타입 안전성: TypeScript strict mode 준수
+- 코드 스타일: Prettier + ESLint (자동 포맷팅)
+- 커밋 규칙: Conventional Commits + Changesets

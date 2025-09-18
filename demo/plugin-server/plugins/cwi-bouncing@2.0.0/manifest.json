@@ -1,13 +1,14 @@
 {
   "name": "cwi-bouncing",
   "version": "2.0.0",
-  "type": "dom",
+  "type": "hybrid",
   "pluginApi": "3.0",
   "minRenderer": "2.0.0",
   "entry": "index.mjs",
   "targets": ["text"],
   "capabilities": ["style-vars", "dom-manipulation"],
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "speaker": {
       "type": "string",
@@ -37,16 +38,16 @@
         "description": { "ko": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)", "en": "Direct color specification (overrides palette)" }
       }
     },
-    "popScale": {
+    "waveHeight": {
       "type": "number",
-      "default": 1.15,
-      "min": 1,
-      "max": 2,
-      "step": 0.05,
-      "ui": { "control": "slider", "allowDefine": true },
+      "default": 12,
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "ui": { "control": "slider", "unit": "px", "allowDefine": true },
       "i18n": {
-        "label": { "ko": "팝 스케일", "en": "Pop Scale" },
-        "description": { "ko": "바운싱 시 최대 크기 배율", "en": "Maximum scale factor during bounce" }
+        "label": { "ko": "파도 높이", "en": "Wave Height" },
+        "description": { "ko": "위아래 이동하는 최대 픽셀 높이", "en": "Maximum vertical offset for the wave" }
       }
     }
   }

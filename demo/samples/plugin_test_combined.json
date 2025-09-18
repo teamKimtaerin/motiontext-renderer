@@ -1,0 +1,70 @@
+{
+  "version": "2.0",
+  "timebase": {
+    "unit": "seconds",
+    "fps": 30
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "tracks": [
+    {
+      "id": "test-track",
+      "type": "subtitle",
+      "layer": 10,
+      "defaultStyle": {
+        "fontSize": "3rem",
+        "color": "#FFFFFF",
+        "fontWeight": "600"
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "test-cue-1",
+      "track": "test-track",
+      "displayTime": [1.0, 8.0],
+      "domLifetime": [0.5, 8.5],
+      "root": {
+        "id": "test-text",
+        "eType": "text",
+        "text": "Hello World!",
+        "layout": {
+          "position": { "x": 0.5, "y": 0.5 },
+          "anchor": "cc"
+        },
+        "pluginChain": [
+          {
+            "name": "cwi-color@2.0.0",
+            "params": {
+              "speaker": "",
+              "palette": {},
+              "color": "#FFD700",
+              "bulk": false
+            },
+            "timeOffset": [0.0, 2.0]
+          },
+          {
+            "name": "cwi-bouncing@2.0.0",
+            "params": {
+              "speaker": "",
+              "palette": {},
+              "color": "",
+              "waveHeight": 15,
+              "letterDuration": 0.6
+            },
+            "timeOffset": [0.5, 3.0]
+          },
+          {
+            "name": "spin@2.0.0",
+            "params": {
+              "fullTurns": 2
+            },
+            "compose": "add",
+            "timeOffset": [3.5, 6.0]
+          }
+        ]
+      }
+    }
+  ]
+}

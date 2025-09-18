@@ -1,5 +1,5 @@
 export const name = 'flames';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
     // Mount a background gif image under effectsRoot

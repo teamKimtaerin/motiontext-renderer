@@ -49,24 +49,32 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+function clamp01(x) {
+  return Math.min(1, Math.max(0, x));
+}
+
+function easeInCubic(x) { return x * x * x; }
+function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+
 export const name = 'cwi-whisper';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
-    const host = el.parentElement;
-    if (!host) return;
+    const root = el; // effectsRoot
+    if (!root) return;
     
-    // Wrap text content in a span so we can transform without touching host/base transform
-    let span = host.querySelector(':scope > .cwi-word');
+    // Wrap text content in a span inside effectsRoot
+    let span = root.querySelector(':scope > .cwi-word');
     if (!span) {
-      // Preserve effectsRoot if present
-      const effectsRoot = host.querySelector(':scope > [data-mtx-effects-root]');
-      // Gather existing text nodes into a single string
       let text = '';
-      for (const node of Array.from(host.childNodes)) {
+      for (const node of Array.from(root.childNodes)) {
         if (node.nodeType === 3 /* TEXT_NODE */) {
           text += node.textContent || '';
-          host.removeChild(node);
+          root.removeChild(node);
         }
       }
       span = h('span', { class: 'cwi-word' });
@@ -76,16 +84,23 @@ export function init(el, opts, ctx) {
         color: WHITE90,
         transformOrigin: '50% 50%'
       });
-      if (effectsRoot) host.insertBefore(span, effectsRoot);
-      else host.appendChild(span);
+      root.appendChild(span);
     }
     
     el.__cwiWhisper = {
-      host,
+      root,
       span,
       palette: opts?.palette || {},
       t0: Number(opts?.t0 ?? 0),
       t1: Number(opts?.t1 ?? 0),
+      shrink: {
+        scale: Math.max(0.1, Math.min(1, Number(opts?.shrink?.scale ?? 0.6))),
+        drop: Math.max(0, Number(opts?.shrink?.drop ?? 6)),
+      },
+      flutter: {
+        amp: Math.max(0, Number(opts?.flutter?.amp ?? 0.02)),
+        freq: Math.max(1, Number(opts?.flutter?.freq ?? 8)),
+      },
       speaker: opts?.speaker
     };
 }
@@ -95,32 +110,60 @@ export function animate(el, opts, ctx, duration) {
     if (!state) return () => {};
     
     const span = state.span;
-    const D = Math.max(0.0001, Number(duration) || 0.0001);
-    const t0 = Math.max(0, Number(state.t0 || 0));
-    const t1 = Math.max(t0, Number(state.t1 || 0));
 
-    // Initial baseline
-    span.style.color = WHITE90;
-    span.style.transform = 'translate(0px, 0px) scale(1, 1)';
+    // Initial baseline (color handled by cwi-color)
+    span.style.transform = 'translate3d(0px, 0px, 0px) scale(1, 1)';
     span.style.opacity = '1';
 
     // Seek-applier driven by host progress p (0..1)
     return (p) => {
-      const now = p * D;
-      const active = now >= t0 && now < t1;
-      
-      if (!active) {
-        // Outside window, reset geometry
-        span.style.transform = 'translate(0px, 0px) scale(1, 1)';
-        span.style.opacity = '1';
-        return;
+      const local = clamp01(p || 0);
+      // Color is delegated to cwi-color plugin
+
+      // Dramatic shape: fast shrink → hold with flutter → fast return
+      const shrinkConf = state.shrink || { scale: 0.6, drop: 6 };
+      const flutterConf = state.flutter || { amp: 0.02, freq: 8 };
+      const minScale = Math.max(0.1, Math.min(1, Number(shrinkConf.scale || 0.6)));
+      const dropMax = Math.max(0, Number(shrinkConf.drop || 6));
+      const flutterAmp = Math.max(0, Number(flutterConf.amp || 0.02));
+      const flutterFreq = Math.max(1, Number(flutterConf.freq || 8));
+
+      const edge = 0.12; // 12% fast shrink/return → 더 빠르게 푹 꺼졌다 복귀
+      const holdStart = edge;
+      const holdEnd = 1 - edge;
+
+      let factor = 0; // 0..1 amount of shrink towards minScale
+      if (local < holdStart) {
+        // fast shrink
+        const t = local / holdStart;
+        factor = easeOutCubic(t);
+      } else if (local > holdEnd) {
+        // fast return
+        const t = (local - holdEnd) / (1 - holdEnd);
+        factor = 1 - easeInCubic(t);
+      } else {
+        // hold at min
+        factor = 1;
       }
 
-      // Active window transforms
-      span.style.color = colorFor(state, opts, el);
-      
-      const s = 0.6; // 3%/5% = 0.6
-      span.style.transform = `scale(${s}, ${s})`;
+      const baseScale = 1 - (1 - minScale) * factor;
+      // 더 잘게 많이: 고주파, 저진폭 플러터 + 유지 구간 링(감쇠)
+      const timePhase = local * Math.PI * (flutterFreq * 1.6);
+      const flutter = (flutterAmp * 0.8) * factor * Math.sin(timePhase);
+
+      let ring = 0;
+      if (local >= holdStart && local <= holdEnd) {
+        const tHold = (local - holdStart) / (holdEnd - holdStart);
+        const ringAmp = 0.05;   // 최대 5% 진동 (최소점 주변)
+        const ringFreq = 16;
+        const ringDecay = 3.0;
+        // whisper는 최소점 주변에서 위아래 미세 흔들림 → 스케일을 살짝 더 낮췄다가 회복하는 방향
+        ring = -ringAmp * Math.exp(-ringDecay * tHold) * Math.sin(2 * Math.PI * ringFreq * tHold);
+      }
+
+      const scale = Math.max(minScale, baseScale - flutter + ring);
+      const drop = dropMax * factor;
+      span.style.transform = `translate3d(0px, ${drop}px, 0px) scale(${scale}, ${scale})`;
       span.style.opacity = '1';
     };
 }

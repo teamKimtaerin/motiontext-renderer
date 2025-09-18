@@ -1,0 +1,114 @@
+{
+  "version": "2.0",
+  "timebase": { "unit": "seconds" },
+  "stage": { "baseAspect": "16:9", "backgroundColor": "transparent" },
+  "tracks": [
+    {
+      "id": "preview-track",
+      "type": "free",
+      "layer": 1,
+      "defaultConstraints": {
+        "mode": "flow",
+        "direction": "vertical",
+        "maxWidth": 1,
+        "maxHeight": 1,
+        "anchor": "cc",
+        "constraintMode": "flexible",
+        "breakoutEnabled": true
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "c1",
+      "track": "preview-track",
+      "displayTime": [0, 6],
+      "domLifetime": [0, 6.5],
+      "root": {
+        "id": "sentence",
+        "eType": "group",
+        "layout": {
+          "mode": "absolute",
+          "position": { "x": 0.5, "y": 0.5 },
+          "anchor": "cc",
+          "size": { "width": 0.9, "height": 0.18 },
+          "childrenLayout": {
+            "mode": "flow",
+            "direction": "horizontal",
+            "align": "center",
+            "justify": "center",
+            "gap": 0.02
+          }
+        },
+        "children": [
+          {
+            "id": "w1",
+            "eType": "text",
+            "text": "Riding",
+            "baseTime": [0, 1],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "100%"] },
+              { "name": "cwi-bouncing@2.0.0", "params": { "waveHeight": 14, "letterDuration": 0.6 }, "timeOffset": ["0%", "100%"] }
+            ]
+          },
+          {
+            "id": "w2",
+            "eType": "text",
+            "text": "the",
+            "baseTime": [1, 2],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "0%"] },
+              { "name": "cwi-whisper@2.0.0", "params": { "shrink": { "scale": 0.6, "drop": 8 }, "flutter": { "amp": 0.02, "freq": 8 } }, "timeOffset": ["25%", "55%"] }
+            ]
+          },
+          {
+            "id": "w3",
+            "eType": "text",
+            "text": "wave",
+            "baseTime": [2, 3],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "100%"] },
+              { "name": "cwi-bouncing@2.0.0", "params": { "waveHeight": 16, "letterDuration": 0.6 }, "timeOffset": ["0%", "100%"] }
+            ]
+          },
+          {
+            "id": "w4",
+            "eType": "text",
+            "text": "feels",
+            "baseTime": [3, 4],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "100%"] },
+              { "name": "cwi-bouncing@2.0.0", "params": { "waveHeight": 14, "letterDuration": 0.6 }, "timeOffset": ["0%", "100%"] }
+            ]
+          },
+          {
+            "id": "w5",
+            "eType": "text",
+            "text": "great",
+            "baseTime": [4, 5],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "0%"] },
+              { "name": "cwi-loud@2.0.0", "params": { "pulse": { "scale": 2.1, "lift": 14 }, "tremble": { "ampPx": 1.5, "freq": 12 } }, "timeOffset": ["45%", "75%"] }
+            ]
+          },
+          {
+            "id": "w6",
+            "eType": "text",
+            "text": "today",
+            "baseTime": [5, 6],
+            "style": { "fontSize": "2.4rem", "fontFamily": "Arial, sans-serif", "color": "#ffffff" },
+            "pluginChain": [
+              { "name": "cwi-color@2.0.0", "params": { "color": "#FFD400" }, "timeOffset": ["0%", "100%"] },
+              { "name": "cwi-bouncing@2.0.0", "params": { "waveHeight": 14, "letterDuration": 0.6 }, "timeOffset": ["0%", "100%"] }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

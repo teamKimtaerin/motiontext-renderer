@@ -10,7 +10,7 @@ This guide describes how to develop plugins for MotionText Renderer v2.0.
 
 ```javascript
 export const name = 'my-plugin';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, options, ctx) {
   // Initialize plugin (optional)
@@ -49,7 +49,7 @@ These plugins manipulate DOM elements directly and must implement the `animate` 
 
 ```javascript
 export const name = 'dom-plugin';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, options, ctx) {
   // Setup DOM structure, split text into spans, etc.
@@ -78,7 +78,7 @@ These plugins return channel values that are applied via CSS variables:
 
 ```javascript
 export const name = 'channel-plugin';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function evalChannels(spec, progress, ctx) {
   // Return channels object with numeric values
@@ -265,7 +265,7 @@ export default {
 
 // New (named exports)
 export const name = 'my-plugin';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) { ... }
 

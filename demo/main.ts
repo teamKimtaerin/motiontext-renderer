@@ -18,6 +18,8 @@ import tiltedBox from './samples/tilted_box.json';
 import m5Layout from './samples/m5_layout_features.json';
 import cwiDemoFull from './samples/cwi_demo_full.json';
 import dualChannelTest from './samples/dual_channel_test.json';
+import cwiSentenceWave from './samples/cwi_sentence_wave.json';
+import pluginTestCombined from './samples/plugin_test_combined.json';
 // v2.0 샘플들
 import basicV20 from './samples/v2/basic_v20.json';
 import withAssetsV20 from './samples/v2/with_assets_v20.json';
@@ -91,6 +93,10 @@ const sampleConfigs: Record<string, RendererConfig> = {
   
   // Dual-channel test (spin + typewriter)
   'dual_channel_test (v2.0)': dualChannelTest as RendererConfig,
+  'cwi_sentence_wave (v2.0)': cwiSentenceWave as RendererConfig,
+
+  // Plugin composition test
+  'plugin_test_combined (v2.0)': pluginTestCombined as RendererConfig,
 
   animated: {
     version: '1.3',
@@ -560,6 +566,27 @@ async function reloadCurrentConfig() {
   await loadConfiguration(currentConfig);
 }
 
+// Helper function to compare semantic versions (simple implementation)
+function compareVersions(a: string, b: string): number {
+  const parseVersion = (version: string) => {
+    return version.split('.').map(v => parseInt(v, 10) || 0);
+  };
+
+  const partsA = parseVersion(a);
+  const partsB = parseVersion(b);
+  const maxLength = Math.max(partsA.length, partsB.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const partA = partsA[i] || 0;
+    const partB = partsB[i] || 0;
+
+    if (partA > partB) return 1;
+    if (partA < partB) return -1;
+  }
+
+  return 0;
+}
+
 // Discover available local plugins via Vite glob and populate selector
 async function populatePluginSelector() {
   if (!pluginPreviewSelector) return;
@@ -569,8 +596,10 @@ async function populatePluginSelector() {
       ...(import.meta as any).glob('./plugin-server/plugins/*/manifest.json'),
     };
     const keys = Object.keys(entries);
-    const seen = new Set<string>();
-    const options: { label: string; value: string }[] = [];
+
+    // 플러그인별 최신 버전만 유지하는 Map
+    const latestVersions = new Map<string, { version: string; key: string }>();
+
     for (const p of keys) {
       const m = p.match(/\/plugins\/(.+)\/manifest\.json$/);
       if (!m) continue;
@@ -579,11 +608,25 @@ async function populatePluginSelector() {
       const name = at > 0 ? folder.slice(0, at) : folder;
       const ver = at > 0 ? folder.slice(at + 1) : '1.0.0';
       const key = `${name}@${ver}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      options.push({ label: `${name} ${ver}`, value: key });
+
+      // 기존 버전과 비교하여 더 높은 버전만 유지
+      const existing = latestVersions.get(name);
+      if (!existing || compareVersions(ver, existing.version) > 0) {
+        latestVersions.set(name, { version: ver, key });
+      }
     }
+
+    // 최신 버전만으로 옵션 생성
+    const options: { label: string; value: string }[] = [];
+    for (const [name, info] of latestVersions) {
+      options.push({
+        label: `${name} ${info.version}`,
+        value: info.key
+      });
+    }
+
     options.sort((a, b) => a.label.localeCompare(b.label));
+
     // Clear and append
     pluginPreviewSelector.innerHTML = '<option value="">-- 플러그인 선택 --</option>';
     for (const opt of options) {

@@ -9,47 +9,96 @@
   "capabilities": ["style-vars"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "staggerDelay": {
       "type": "number",
-      "label": "순차 간격",
-      "description": "각 글자가 나타나는 시간 간격 (초)",
       "default": 0.1,
       "min": 0.02,
       "max": 0.5,
-      "step": 0.01
+      "step": 0.01,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "순차 간격",
+          "en": "Stagger Delay"
+        },
+        "description": {
+          "ko": "각 글자가 나타나는 시간 간격 (초)",
+          "en": "Time interval between each character appearance (seconds)"
+        }
+      }
     },
     "animationDuration": {
       "type": "number",
-      "label": "페이드 속도",
-      "description": "각 글자가 완전히 나타나는 데 걸리는 시간 (초)",
       "default": 0.8,
       "min": 0.2,
       "max": 2,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "페이드 속도",
+          "en": "Fade Duration"
+        },
+        "description": {
+          "ko": "각 글자가 완전히 나타나는 데 걸리는 시간 (초)",
+          "en": "Time for each character to fully appear (seconds)"
+        }
+      }
     },
     "startOpacity": {
       "type": "number",
-      "label": "시작 투명도",
-      "description": "애니메이션 시작 시 글자의 투명도",
       "default": 0,
       "min": 0,
       "max": 0.5,
-      "step": 0.05
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "시작 투명도",
+          "en": "Start Opacity"
+        },
+        "description": {
+          "ko": "애니메이션 시작 시 글자의 투명도",
+          "en": "Character opacity at animation start"
+        }
+      }
     },
     "scaleStart": {
       "type": "number",
-      "label": "시작 크기",
-      "description": "페이드인 시작 시 글자의 크기 비율",
       "default": 0.9,
       "min": 0.5,
       "max": 1,
-      "step": 0.05
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "시작 크기",
+          "en": "Start Scale"
+        },
+        "description": {
+          "ko": "페이드인 시작 시 글자의 크기 비율",
+          "en": "Character scale ratio at fade-in start"
+        }
+      }
     },
     "ease": {
-      "type": "select",
-      "label": "이징 타입",
-      "description": "애니메이션의 가속도 곡선을 선택합니다",
+      "type": "string",
       "default": "power2.out",
       "enum": [
         "power1.out",
@@ -57,7 +106,21 @@
         "power3.out",
         "back.out",
         "elastic.out"
-      ]
+      ],
+      "ui": {
+        "control": "select",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "이징 타입",
+          "en": "Easing Type"
+        },
+        "description": {
+          "ko": "애니메이션의 가속도 곎선을 선택합니다",
+          "en": "Selects the acceleration curve of the animation"
+        }
+      }
     }
   }
 }

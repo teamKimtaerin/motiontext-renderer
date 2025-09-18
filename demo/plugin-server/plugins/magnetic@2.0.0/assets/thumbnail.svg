@@ -1,0 +1,160 @@
+<svg width="320" height="240" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="320" height="240" fill="#1a1a1a"/>
+  
+  <!-- Subtle grid -->
+  <defs>
+    <pattern id="magnetGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#333" stroke-width="1" opacity="0.1"/>
+    </pattern>
+    
+    <!-- Magnetic field lines -->
+    <radialGradient id="magnetField" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:0.3"/>
+      <stop offset="50%" style="stop-color:#4a90e2;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  
+  <rect width="320" height="240" fill="url(#magnetGrid)"/>
+  
+  <!-- Magnetic field visualization -->
+  <circle cx="160" cy="120" r="100" fill="url(#magnetField)" opacity="0.5">
+    <animate attributeName="r" values="100;120;100" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Central magnet -->
+  <rect x="150" y="110" width="20" height="20" rx="3" fill="#e74c3c">
+    <animate attributeName="width" values="20;25;20" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="20;25;20" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="x" values="150;147.5;150" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;107.5;110" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- Scattered letters that pull towards center -->
+  <!-- M -->
+  <text x="80" y="80" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    M
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="80 80; 70 85; 130 100; 160 120"
+      dur="2.5s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- A -->
+  <text x="240" y="60" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    A
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="240 60; 220 70; 180 90; 160 120"
+      dur="2.8s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.8s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- G -->
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    G
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="100 180; 120 160; 140 140; 160 120"
+      dur="2.2s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- N -->
+  <text x="260" y="180" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    N
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="260 180; 230 160; 190 140; 160 120"
+      dur="3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- E -->
+  <text x="50" y="120" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    E
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="50 120; 80 120; 120 120; 160 120"
+      dur="2.6s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.6s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- T -->
+  <text x="270" y="120" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    T
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="270 120; 230 120; 190 120; 160 120"
+      dur="2.4s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.4s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- I -->
+  <text x="160" y="50" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    I
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="160 50; 160 70; 160 95; 160 120"
+      dur="2.7s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.7s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- C -->
+  <text x="160" y="200" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.8">
+    C
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="160 200; 160 170; 160 145; 160 120"
+      dur="2.3s"
+      repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;1;1" dur="2.3s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Final assembled word -->
+  <text x="160" y="120" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0">
+    MAGNETIC
+    <animate attributeName="opacity" values="0;0;0;1;1;0;0;0" dur="4s" repeatCount="indefinite"/>
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.8;0.8;0.8;1.2;1;0.8;0.8;0.8"
+      dur="4s"
+      repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Magnetic force lines -->
+  <path d="M 160 120 Q 100 80 60 60" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0.4">
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M 160 120 Q 220 80 260 60" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0.4">
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.2s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M 160 120 Q 100 160 60 180" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0.4">
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.4s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M 160 120 Q 220 160 260 180" stroke="#4a90e2" stroke-width="1" fill="none" opacity="0.4">
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.6s" repeatCount="indefinite"/>
+  </path>
+</svg>

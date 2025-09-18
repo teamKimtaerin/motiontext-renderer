@@ -8,6 +8,7 @@
   "targets": ["text"],
   "capabilities": ["style-vars", "dom-manipulation"],
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "speaker": {
       "type": "string",
@@ -37,13 +38,48 @@
         "description": { "ko": "특정 색상을 직접 지정 (팔레트보다 우선순위 높음)", "en": "Direct color specification (overrides palette)" }
       }
     },
+    "pulse": {
+      "type": "object",
+      "default": { "scale": 2.15, "lift": 12 },
+      "ui": { "control": "object", "allowDefine": true },
+      "i18n": {
+        "label": { "ko": "맥동", "en": "Pulse" },
+        "description": { "ko": "커졌다 작아지는 맥동 강도와 상승량", "en": "Growth intensity and lift for the pulse" }
+      },
+      "properties": {
+        "scale": {
+          "type": "number",
+          "default": 2.15,
+          "min": 1.2,
+          "max": 3,
+          "step": 0.05,
+          "ui": { "control": "slider", "allowDefine": true },
+          "i18n": {
+            "label": { "ko": "최대 스케일", "en": "Max Scale" },
+            "description": { "ko": "맥동 시 최고 확장 배율", "en": "Peak scale reached during pulse" }
+          }
+        },
+        "lift": {
+          "type": "number",
+          "default": 12,
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "ui": { "control": "slider", "unit": "px", "allowDefine": true },
+          "i18n": {
+            "label": { "ko": "상승 높이", "en": "Lift Height" },
+            "description": { "ko": "맥동 정점에서 위로 솟는 픽셀 높이", "en": "Upward offset at pulse crest in pixels" }
+          }
+        }
+      }
+    },
     "tremble": {
       "type": "object",
       "default": { "ampPx": 1.5, "freq": 12 },
       "ui": { "control": "object", "allowDefine": true },
       "i18n": {
-        "label": { "ko": "떨림 효과", "en": "Tremble Effect" },
-        "description": { "ko": "진동 효과의 세부 설정", "en": "Detailed trembling effect settings" }
+        "label": { "ko": "잔떨림", "en": "Tremble" },
+        "description": { "ko": "정점에서의 잔떨림 효과", "en": "Shiver effect near the pulse peak" }
       },
       "properties": {
         "ampPx": {
@@ -54,8 +90,8 @@
           "step": 0.1,
           "ui": { "control": "slider", "unit": "px", "allowDefine": true },
           "i18n": {
-            "label": { "ko": "진동 강도", "en": "Tremble Intensity" },
-            "description": { "ko": "진동의 픽셀 단위 진폭", "en": "Trembling amplitude in pixels" }
+            "label": { "ko": "진폭", "en": "Amplitude" },
+            "description": { "ko": "잔떨림의 픽셀 단위 진폭", "en": "Tremble amplitude in pixels" }
           }
         },
         "freq": {
@@ -66,8 +102,8 @@
           "step": 1,
           "ui": { "control": "slider", "unit": "Hz", "allowDefine": true },
           "i18n": {
-            "label": { "ko": "진동 주파수", "en": "Tremble Frequency" },
-            "description": { "ko": "초당 진동 횟수", "en": "Vibrations per second" }
+            "label": { "ko": "주파수", "en": "Frequency" },
+            "description": { "ko": "초당 잔떨림 횟수", "en": "Tremble cycles per second" }
           }
         }
       }

@@ -9,9 +9,70 @@
   "capabilities": ["portal-breakout"],
   "preload": ["assets/flame.gif"],
   "peer": { "gsap": "^3.12.0" },
+  "timeOffset": [-0.3, 0.3],
   "schema": {
-    "baseOpacity": { "type": "number", "default": 0.8, "min": 0, "max": 1, "ui": { "control": "slider", "step": 0.05 } },
-    "flicker": { "type": "number", "default": 0.3, "min": 0, "max": 1, "ui": { "control": "slider", "step": 0.05 } },
-    "cycles": { "type": "number", "default": 12, "min": 1, "max": 120, "ui": { "control": "slider", "step": 1 } }
+    "baseOpacity": {
+      "type": "number",
+      "default": 0.8,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "기본 투명도",
+          "en": "Base Opacity"
+        },
+        "description": {
+          "ko": "불꽃 효과의 기본 투명도",
+          "en": "Base opacity of the flame effect"
+        }
+      }
+    },
+    "flicker": {
+      "type": "number",
+      "default": 0.3,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "깜빡임 강도",
+          "en": "Flicker Intensity"
+        },
+        "description": {
+          "ko": "불꽃의 깜빡임 효과 강도",
+          "en": "Intensity of the flame flicker effect"
+        }
+      }
+    },
+    "cycles": {
+      "type": "number",
+      "default": 12,
+      "min": 1,
+      "max": 120,
+      "step": 1,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "깜빡임 횟수",
+          "en": "Flicker Cycles"
+        },
+        "description": {
+          "ko": "불꽃이 깜빡이는 총 횟수",
+          "en": "Total number of flame flicker cycles"
+        }
+      }
+    }
   }
 }

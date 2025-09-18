@@ -12,6 +12,9 @@ export function init(el, options, ctx) {
       console.error('GSAP is required for Magnetic effect');
       return;
     }
+    if (el && !el.hasAttribute('data-magnetic')) {
+      el.setAttribute('data-magnetic', '');
+    }
     splitTextIntoCharacters(el);
 }
 
@@ -88,6 +91,9 @@ export function cleanup(el) {
         .map(char => char.textContent)
         .join('');
       el.innerHTML = originalText;
+      if (el.hasAttribute('data-magnetic')) {
+        el.removeAttribute('data-magnetic');
+      }
     }
 }
 

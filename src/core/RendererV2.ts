@@ -27,7 +27,10 @@ import {
   createPluginContextV3,
   type PluginContextV3,
 } from '../runtime/PluginContextV3';
-import { applyLayoutWithConstraints } from '../layout/LayoutEngine';
+import {
+  applyLayoutWithConstraints,
+  applyChildrenLayout,
+} from '../layout/LayoutEngine';
 import { getDefaultTrackConstraints } from '../layout/DefaultConstraints';
 import {
   TimelineControllerV2,
@@ -65,6 +68,8 @@ export interface MountedElement {
   element: HTMLElement;
   cueId: string;
   mountTime: number;
+  parentNodeId?: string;
+  parentElement?: HTMLElement | null;
 }
 
 /**
@@ -285,12 +290,6 @@ export class RendererV2 {
     } catch (_e) {
       void 0;
     }
-    this.mountedElements.set(nodeId, {
-      node,
-      element,
-      cueId: cue.id,
-      mountTime: this.lastUpdateTime,
-    });
     // Determine parent DOM element (group nesting support)
     let parentEl: HTMLElement | null = null;
     if (parentNodeId) {
@@ -298,11 +297,30 @@ export class RendererV2 {
       parentEl = parentMounted?.element || null;
     }
 
+    this.mountedElements.set(nodeId, {
+      node,
+      element,
+      cueId: cue.id,
+      mountTime: this.lastUpdateTime,
+      parentNodeId,
+      parentElement: parentEl || this.container,
+    });
+
     // Fallback to root container when no valid parent
     (parentEl || this.container).appendChild(element);
 
     // 기본 스타일 적용 (레이아웃 + 트랙 기본값)
     this.applyBaseStyle(element, node, track);
+
+    // If appended under a group with childrenLayout, re-apply children layout
+    if (parentNodeId) {
+      const parentMounted = this.mountedElements.get(parentNodeId);
+      const parentLayout = (parentMounted?.node as any)?.layout;
+      const cl = parentLayout?.childrenLayout;
+      if (parentMounted?.element && cl) {
+        applyChildrenLayout(parentMounted.element, cl);
+      }
+    }
 
     this.logger.debug(`[RendererV2] Mounted node: ${nodeId}`, {
       element: element,
@@ -378,7 +396,8 @@ export class RendererV2 {
         resolvedOffset
       );
 
-      if (isWithinTimeRange(currentTime, pluginWindow)) {
+      const active = isWithinTimeRange(currentTime, pluginWindow);
+      if (active) {
         const progress = progressInTimeRange(currentTime, pluginWindow);
 
         const pluginChannels = this.evaluatePlugin(plugin, progress, element);
@@ -389,10 +408,58 @@ export class RendererV2 {
           pluginChannels,
           plugin.compose || 'replace'
         );
+      } else {
+        // DOM 플러그인은 윈도우를 벗어났을 때도 상태가 잔류하지 않도록
+        // 이미 초기화된 경우에만 p=0 또는 p=1을 적용한다 (새 초기화는 하지 않음)
+        const registered = devRegistry.resolve(plugin.name);
+        if (
+          registered?.module &&
+          typeof registered.module.animate === 'function'
+        ) {
+          const before = currentTime < pluginWindow[0];
+          const p = before ? 0 : 1;
+          this.applyDomPluginProgressIfInitialized(plugin, element, p);
+        }
       }
     }
 
     return channels;
+  }
+
+  /**
+   * 이미 초기화된 DOM 플러그인에만 진행도를 적용한다.
+   * 플러그인을 새로 초기화하지 않는다 (메모리/DOM 누수 방지).
+   */
+  private applyDomPluginProgressIfInitialized(
+    plugin: PluginSpec,
+    element: HTMLElement,
+    progress: number
+  ): void {
+    const nodeId = (element.dataset.nodeKey || element.dataset.nodeId)!;
+    if (!nodeId) return;
+    const nodeStates =
+      this.domPluginStates.get(nodeId) ||
+      (() => {
+        // Backward compatibility: prior to fix, keys used bare node.id
+        const fallbackId = nodeId.includes(':')
+          ? nodeId.split(':')[1]
+          : undefined;
+        return fallbackId ? this.domPluginStates.get(fallbackId) : undefined;
+      })();
+    if (!nodeStates) return;
+    const state = nodeStates.get(plugin.name);
+    if (!state || !state.initialized || !state.seekFunction) return;
+
+    try {
+      const fn = state.seekFunction as any;
+      if (typeof fn === 'function') {
+        fn(progress);
+      } else if (fn && typeof fn.progress === 'function') {
+        fn.progress(progress);
+      }
+    } catch (_e) {
+      // non-fatal; skip
+    }
   }
 
   /**
@@ -1200,6 +1267,13 @@ export class RendererV2 {
   }
 
   /**
+   * camelCase를 kebab-case로 변환
+   */
+  private camelToKebab(str: string): string {
+    return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  }
+
+  /**
    * 기본 스타일 적용 (새로운 constraints 시스템 사용)
    */
   private applyBaseStyle(
@@ -1230,7 +1304,7 @@ export class RendererV2 {
     const nodeStyle = node.style || {};
     const mergedStyle = { ...trackDefaults, ...nodeStyle } as any;
 
-    // Apply merged styles
+    // Apply text-related styles (all node types)
     if (mergedStyle.fontSizeRel) {
       // Convert relative size to pixels based on container size
       const container = this.container;
@@ -1243,6 +1317,44 @@ export class RendererV2 {
     if (mergedStyle.fontWeight)
       element.style.fontWeight = String(mergedStyle.fontWeight);
     if (mergedStyle.align) element.style.textAlign = mergedStyle.align;
+
+    // Apply box-related styles only for group nodes
+    if (node.eType === 'group') {
+      // Known text-related properties to skip
+      const textProperties = new Set([
+        'fontSizeRel',
+        'color',
+        'fontFamily',
+        'fontWeight',
+        'align',
+        'fontSize',
+        'textAlign',
+      ]);
+
+      // Apply all other CSS properties from the style object
+      for (const [key, value] of Object.entries(mergedStyle)) {
+        if (!textProperties.has(key) && value !== undefined && value !== null) {
+          // Convert camelCase to kebab-case for CSS property names
+          const cssProperty = this.camelToKebab(key);
+          try {
+            (element.style as any)[key] = String(value);
+          } catch (e) {
+            // Fallback to kebab-case if camelCase fails
+            try {
+              element.style.setProperty(cssProperty, String(value));
+            } catch (e2) {
+              if (this.options.debugMode) {
+                console.warn(
+                  `Failed to apply style property ${key}:`,
+                  value,
+                  e2
+                );
+              }
+            }
+          }
+        }
+      }
+    }
 
     // Apply default text styling for text nodes without explicit style
     if (node.eType === 'text' && !mergedStyle.fontSizeRel) {
@@ -1274,11 +1386,38 @@ export class RendererV2 {
     // DOM 플러그인 정리
     this.cleanupDomPlugin(nodeId);
 
+    // Capture parent info before removal
+    const parentNodeId = mounted.parentNodeId;
+    const parentEl = mounted.element.parentElement;
+
     mounted.element.remove();
     this.mountedElements.delete(nodeId);
 
     if (this.options.debugMode) {
       this.logger.debug(`Unmounted node: ${nodeId}`);
+    }
+
+    // Re-apply parent children layout to normalize spacing after removal
+    if (parentNodeId) {
+      const parentMounted = this.mountedElements.get(parentNodeId);
+      const cl = (parentMounted?.node as any)?.layout?.childrenLayout;
+      if (parentMounted?.element && cl) {
+        try {
+          applyChildrenLayout(parentMounted.element, cl);
+        } catch (_e) {
+          /* noop */
+        }
+      } else if (parentEl) {
+        // Fallback: try from DOM parent if it is still present
+        const maybeCl = (parentEl as any).__mtxChildrenLayout;
+        if (maybeCl) {
+          try {
+            applyChildrenLayout(parentEl as HTMLElement, maybeCl);
+          } catch (_e) {
+            /* noop */
+          }
+        }
+      }
     }
   }
 

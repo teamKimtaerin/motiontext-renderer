@@ -9,42 +9,94 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "magnetStrength": {
       "type": "number",
-      "label": "자기장 강도",
-      "description": "텍스트가 끌리는 힘의 강도를 조절합니다",
       "default": 15,
       "min": 5,
       "max": 50,
-      "step": 5
+      "step": 5,
+      "ui": {
+        "control": "slider",
+        "unit": "px",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "자기장 강도",
+          "en": "Magnet Strength"
+        },
+        "description": {
+          "ko": "텍스트가 끌리는 힘의 강도를 조절합니다",
+          "en": "Controls the strength of the magnetic pull on text"
+        }
+      }
     },
     "animationDuration": {
       "type": "number",
-      "label": "애니메이션 속도",
-      "description": "자기장 효과의 지속 시간 (초)",
       "default": 1.2,
       "min": 0.5,
       "max": 3,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "애니메이션 속도",
+          "en": "Animation Duration"
+        },
+        "description": {
+          "ko": "자기장 효과의 지속 시간 (초)",
+          "en": "Duration of the magnetic effect (seconds)"
+        }
+      }
     },
     "attractionDelay": {
       "type": "number",
-      "label": "끌림 딜레이",
-      "description": "각 글자가 끌리기 시작하는 간격 (초)",
       "default": 0.1,
       "min": 0,
       "max": 0.5,
-      "step": 0.05
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "끌림 딜레이",
+          "en": "Attraction Delay"
+        },
+        "description": {
+          "ko": "각 글자가 끌리기 시작하는 간격 (초)",
+          "en": "Interval before each character starts being attracted (seconds)"
+        }
+      }
     },
     "elasticity": {
       "type": "number",
-      "label": "탄성력",
-      "description": "원위치로 돌아가는 탄성의 강도",
       "default": 0.8,
       "min": 0.1,
       "max": 2,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "탄성력",
+          "en": "Elasticity"
+        },
+        "description": {
+          "ko": "원위치로 돌아가는 탄성의 강도",
+          "en": "Strength of the elastic return to original position"
+        }
+      }
     }
   }
 }

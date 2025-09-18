@@ -9,39 +9,101 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "typingSpeed": {
       "type": "number",
-      "label": "타이핑 속도",
-      "description": "각 글자가 나타나는 간격 (초)",
       "default": 0.05,
       "min": 0.02,
       "max": 0.2,
-      "step": 0.01
+      "step": 0.01,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "타이핑 속도",
+          "en": "Typing Speed"
+        },
+        "description": {
+          "ko": "각 글자가 나타나는 간격 (초)",
+          "en": "Interval between each character appearance (seconds)"
+        }
+      }
     },
     "cursorBlink": {
       "type": "boolean",
-      "label": "커서 깜빡임",
-      "description": "타이핑 커서의 깜빡임 효과를 적용합니다",
-      "default": true
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "커서 깜빡임",
+          "en": "Cursor Blink"
+        },
+        "description": {
+          "ko": "타이핑 커서의 깜빡임 효과를 적용합니다",
+          "en": "Applies blinking effect to typing cursor"
+        }
+      }
     },
     "cursorChar": {
       "type": "string",
-      "label": "커서 문자",
-      "description": "타이핑 커서로 사용할 문자",
-      "default": "|"
+      "default": "|",
+      "ui": {
+        "control": "text",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "커서 문자",
+          "en": "Cursor Character"
+        },
+        "description": {
+          "ko": "타이핑 커서로 사용할 문자",
+          "en": "Character to use as typing cursor"
+        }
+      }
     },
     "showCursor": {
       "type": "boolean",
-      "label": "커서 표시",
-      "description": "타이핑 커서를 표시합니다",
-      "default": true
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "커서 표시",
+          "en": "Show Cursor"
+        },
+        "description": {
+          "ko": "타이핑 커서를 표시합니다",
+          "en": "Displays the typing cursor"
+        }
+      }
     },
     "soundEffect": {
       "type": "boolean",
-      "label": "타이핑 사운드",
-      "description": "타이핑 사운드 효과를 추가합니다 (예정)",
-      "default": false
+      "default": false,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "타이핑 사운드",
+          "en": "Typing Sound"
+        },
+        "description": {
+          "ko": "타이핑 사운드 효과를 추가합니다 (예정)",
+          "en": "Adds typing sound effects (planned feature)"
+        }
+      }
     }
   }
 }

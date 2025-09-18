@@ -73,24 +73,61 @@ function rgbToCss({ r, g, b }) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
+const WHITE_RGB = { r: 255, g: 255, b: 255 };
+
+function ensureLetterSpans(span) {
+  if (!span) return [];
+  const existing = span.querySelectorAll(':scope > .cwi-letter');
+  if (existing.length) return Array.from(existing);
+
+  const text = span.textContent ?? '';
+  span.textContent = '';
+
+  const letters = [];
+  for (const ch of text) {
+    const letter = h('span', { class: 'cwi-letter' });
+    letter.textContent = ch === ' ' ? '\u00A0' : ch;
+    Object.assign(letter.style, {
+      display: 'inline-block',
+      color: WHITE90,
+      // Use CSS variables for per-letter transforms to allow composition
+      // with other plugins (e.g., bouncing). Avoid hard-coded transform.
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)',
+    });
+    letters.push(letter);
+    span.appendChild(letter);
+  }
+
+  if (!letters.length) {
+    const placeholder = h('span', { class: 'cwi-letter' }, '\u00A0');
+    Object.assign(placeholder.style, {
+      display: 'inline-block',
+      color: WHITE90,
+      transform: 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)'
+    });
+    letters.push(placeholder);
+    span.appendChild(placeholder);
+  }
+
+  span.dataset.cwiLetterized = 'true';
+  return letters;
+}
+
 export const name = 'cwi-color';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
-    const host = el.parentElement;
-    if (!host) return;
+    const root = el; // effectsRoot provided by renderer
+    if (!root) return;
     
-    // Wrap text content in a span so we can transform without touching host/base transform
-    let span = host.querySelector(':scope > .cwi-word');
+    // Wrap text content in a span inside effectsRoot
+    let span = root.querySelector(':scope > .cwi-word');
     if (!span) {
-      // Preserve effectsRoot if present
-      const effectsRoot = host.querySelector(':scope > [data-mtx-effects-root]');
-      // Gather existing text nodes into a single string
       let text = '';
-      for (const node of Array.from(host.childNodes)) {
+      for (const node of Array.from(root.childNodes)) {
         if (node.nodeType === 3 /* TEXT_NODE */) {
           text += node.textContent || '';
-          host.removeChild(node);
+          root.removeChild(node);
         }
       }
       span = h('span', { class: 'cwi-word' });
@@ -100,13 +137,25 @@ export function init(el, opts, ctx) {
         color: WHITE90,
         transformOrigin: '50% 50%'
       });
-      if (effectsRoot) host.insertBefore(span, effectsRoot);
-      else host.appendChild(span);
+      root.appendChild(span);
     }
     
+    const letters = ensureLetterSpans(span);
+    // Ensure existing letters (if pre-letterized by another plugin) use var-based transform
+    for (const letter of letters) {
+      const tr = (letter.style && letter.style.transform) || '';
+      if (!tr || /translate3d\(0px?,\s*0px?,/i.test(tr) || /translate3d\(0,\s*0,/.test(tr)) {
+        letter.style.transform = 'translateX(var(--letter-tx, 0px)) translateY(var(--letter-ty, 0px)) translateZ(0)';
+      }
+    }
+    for (const letter of letters) {
+      letter.style.color = WHITE90;
+    }
+
     el.__cwiColor = {
-      host,
+      root,
       span,
+      letters,
       palette: opts?.palette || {},
       speaker: opts?.speaker
     };
@@ -117,6 +166,8 @@ export function animate(el, opts, ctx, duration) {
     if (!state) return () => {};
     
     const span = state.span;
+    const letters = state.letters || [];
+    const useBulk = Boolean(opts?.bulk);
 
     // Initial baseline
     span.style.color = WHITE90;
@@ -128,19 +179,53 @@ export function animate(el, opts, ctx, duration) {
       // progress is already 0-1 from the renderer's time_offset calculations
       // No need for absolute time calculations - just interpolate colors based on progress
       
-      if (progress <= 0) {
-        // Before animation starts: white
-        span.style.color = WHITE90;
-      } else if (progress >= 1) {
-        // After animation ends: target color
-        span.style.color = colorFor(state, opts, el);
-      } else {
-        // During animation: interpolate from white to target color
-        const from = hexToRgb('#ffffff');
-        const to = hexToRgb(colorFor(state, opts, el));
-        const c = mixRgb(from, to, easeOutCubic(progress));
-        span.style.color = rgbToCss(c);
+      const targetColor = colorFor(state, opts, el);
+      const to = hexToRgb(targetColor);
+      const clamped = Math.max(0, Math.min(1, progress || 0));
+      const total = letters.length || 1;
+      // Slight epsilon so boundaries don't stick exactly at 0
+      const scaled = clamped * total + 1e-4;
+
+      if (useBulk) {
+        if (clamped >= 0.985) {
+          span.style.color = targetColor;
+          for (const letter of letters) letter.style.color = targetColor;
+          span.style.opacity = '1';
+          return;
+        }
+        const mix = mixRgb(WHITE_RGB, to, easeOutCubic(clamped));
+        const css = rgbToCss(mix);
+        span.style.color = css;
+        for (const letter of letters) letter.style.color = css;
+        span.style.opacity = '1';
+        return;
       }
+
+      if (!letters.length) {
+        span.style.color = clamped >= 1 ? targetColor : WHITE90;
+        return;
+      }
+
+      // Near the end, ensure all letters are fully colored even if progress < 1
+      // This prevents the last few letters from staying white when the renderer
+      // doesn't deliver an exact 1.0 progress frame.
+      if (clamped >= 0.985) {
+        for (const letter of letters) letter.style.color = targetColor;
+        span.style.opacity = '1';
+        return;
+      }
+
+      letters.forEach((letter, idx) => {
+        const local = Math.max(0, Math.min(1, scaled - idx));
+        if (local <= 0) {
+          letter.style.color = WHITE90;
+        } else if (local >= 1) {
+          letter.style.color = targetColor;
+        } else {
+          const c = mixRgb(WHITE_RGB, to, easeOutCubic(local));
+          letter.style.color = rgbToCss(c);
+        }
+      });
       span.style.opacity = '1';
     };
 }

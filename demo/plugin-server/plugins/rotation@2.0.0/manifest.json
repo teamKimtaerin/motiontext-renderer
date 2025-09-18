@@ -9,60 +9,149 @@
   "capabilities": ["style-vars", "dom-manipulation"],
   "peer": { "gsap": "^3.12.0" },
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "rotationDegrees": {
       "type": "number",
-      "label": "회전 각도",
-      "description": "텍스트가 회전하는 최대 각도",
       "default": 360,
       "min": 90,
       "max": 720,
-      "step": 90
+      "step": 90,
+      "ui": {
+        "control": "slider",
+        "unit": "°",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "회전 각도",
+          "en": "Rotation Degrees"
+        },
+        "description": {
+          "ko": "텍스트가 회전하는 최대 각도",
+          "en": "Maximum rotation angle for text"
+        }
+      }
     },
     "animationDuration": {
       "type": "number",
-      "label": "애니메이션 속도",
-      "description": "회전 애니메이션의 지속 시간 (초)",
       "default": 1.5,
       "min": 0.5,
       "max": 3,
-      "step": 0.1
+      "step": 0.1,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "애니메이션 속도",
+          "en": "Animation Duration"
+        },
+        "description": {
+          "ko": "회전 애니메이션의 지속 시간 (초)",
+          "en": "Duration of rotation animation (seconds)"
+        }
+      }
     },
     "staggerDelay": {
       "type": "number",
-      "label": "글자 간격",
-      "description": "각 글자 사이의 시작 간격 (초)",
       "default": 0.1,
       "min": 0,
       "max": 0.3,
-      "step": 0.05
+      "step": 0.05,
+      "ui": {
+        "control": "slider",
+        "unit": "s",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "글자 간격",
+          "en": "Character Delay"
+        },
+        "description": {
+          "ko": "각 글자 사이의 시작 간격 (초)",
+          "en": "Start delay between each character (seconds)"
+        }
+      }
     },
     "perspective": {
       "type": "number",
-      "label": "3D 시점",
-      "description": "3D 회전 효과의 시점 거리",
       "default": 800,
       "min": 200,
       "max": 1500,
-      "step": 100
+      "step": 100,
+      "ui": {
+        "control": "slider",
+        "unit": "px",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "3D 시점",
+          "en": "3D Perspective"
+        },
+        "description": {
+          "ko": "3D 회전 효과의 시점 거리",
+          "en": "Perspective distance for 3D rotation effect"
+        }
+      }
     },
     "axisX": {
       "type": "boolean",
-      "label": "X축 회전",
-      "description": "X축을 중심으로 회전합니다",
-      "default": false
+      "default": false,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "X축 회전",
+          "en": "X-Axis Rotation"
+        },
+        "description": {
+          "ko": "X축을 중심으로 회전합니다",
+          "en": "Rotates around the X-axis"
+        }
+      }
     },
     "axisY": {
       "type": "boolean",
-      "label": "Y축 회전",
-      "description": "Y축을 중심으로 회전합니다",
-      "default": true
+      "default": true,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "Y축 회전",
+          "en": "Y-Axis Rotation"
+        },
+        "description": {
+          "ko": "Y축을 중심으로 회전합니다",
+          "en": "Rotates around the Y-axis"
+        }
+      }
     },
     "axisZ": {
       "type": "boolean",
-      "label": "Z축 회전",
-      "description": "Z축을 중심으로 회전합니다",
-      "default": false
+      "default": false,
+      "ui": {
+        "control": "checkbox",
+        "allowDefine": true
+      },
+      "i18n": {
+        "label": {
+          "ko": "Z축 회전",
+          "en": "Z-Axis Rotation"
+        },
+        "description": {
+          "ko": "Z축을 중심으로 회전합니다",
+          "en": "Rotates around the Z-axis"
+        }
+      }
     }
   }
 }

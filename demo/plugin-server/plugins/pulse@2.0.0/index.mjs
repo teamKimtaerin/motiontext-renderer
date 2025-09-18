@@ -1,5 +1,5 @@
 export const name = 'pulse';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function animate(el, opts, ctx, duration) {
     const maxScale = Number(opts?.maxScale ?? 1.2);

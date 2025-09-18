@@ -49,24 +49,32 @@ function colorFor(state, opts, el) {
   return '#FFD400';
 }
 
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+function clamp01(x) {
+  return Math.min(1, Math.max(0, x));
+}
+
+function easeInCubic(x) { return x * x * x; }
+function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+
 export const name = 'cwi-loud';
-export const version = '1.0.0';
+export const version = '2.0.0';
 
 export function init(el, opts, ctx) {
-    const host = el.parentElement;
-    if (!host) return;
+    const root = el; // effectsRoot
+    if (!root) return;
     
-    // Wrap text content in a span so we can transform without touching host/base transform
-    let span = host.querySelector(':scope > .cwi-word');
+    // Wrap text content in a span within effectsRoot
+    let span = root.querySelector(':scope > .cwi-word');
     if (!span) {
-      // Preserve effectsRoot if present
-      const effectsRoot = host.querySelector(':scope > [data-mtx-effects-root]');
-      // Gather existing text nodes into a single string
       let text = '';
-      for (const node of Array.from(host.childNodes)) {
+      for (const node of Array.from(root.childNodes)) {
         if (node.nodeType === 3 /* TEXT_NODE */) {
           text += node.textContent || '';
-          host.removeChild(node);
+          root.removeChild(node);
         }
       }
       span = h('span', { class: 'cwi-word' });
@@ -76,17 +84,23 @@ export function init(el, opts, ctx) {
         color: WHITE90,
         transformOrigin: '50% 50%'
       });
-      if (effectsRoot) host.insertBefore(span, effectsRoot);
-      else host.appendChild(span);
+      root.appendChild(span);
     }
     
     el.__cwiLoud = {
-      host,
+      root,
       span,
       palette: opts?.palette || {},
       t0: Number(opts?.t0 ?? 0),
       t1: Number(opts?.t1 ?? 0),
-      tremble: Object.assign({ ampPx: 1.5, freq: 12 }, opts?.tremble || {}),
+      pulse: {
+        scale: Math.max(1.1, Number(opts?.pulse?.scale ?? 2.15)),
+        lift: Math.max(0, Number(opts?.pulse?.lift ?? 12)),
+      },
+      tremble: {
+        ampPx: Math.max(0, Number(opts?.tremble?.ampPx ?? 1.5)),
+        freq: Math.max(1, Number(opts?.tremble?.freq ?? 12)),
+      },
       speaker: opts?.speaker
     };
 }
@@ -96,39 +110,61 @@ export function animate(el, opts, ctx, duration) {
     if (!state) return () => {};
     
     const span = state.span;
-    const D = Math.max(0.0001, Number(duration) || 0.0001);
-    const t0 = Math.max(0, Number(state.t0 || 0));
-    const t1 = Math.max(t0, Number(state.t1 || 0));
 
-    // Initial baseline
-    span.style.color = WHITE90;
-    span.style.transform = 'translate(0px, 0px) scale(1, 1)';
+    // Initial baseline (color handled by cwi-color)
+    span.style.transform = 'translate3d(0px, 0px, 0px) scale(1, 1)';
     span.style.opacity = '1';
 
     // Seek-applier driven by host progress p (0..1)
     return (p) => {
-      const now = p * D;
-      const active = now >= t0 && now < t1;
-      
-      if (!active) {
-        // Outside window, reset geometry
-        span.style.transform = 'translate(0px, 0px) scale(1, 1)';
-        span.style.opacity = '1';
-        return;
+      const local = clamp01(p || 0);
+      // Color is delegated to cwi-color plugin
+
+      // Dramatic shape: fast grow → hold with tremble → fast shrink
+      const pulseConf = state.pulse || { scale: 2.15, lift: 12 };
+      const trem = state.tremble || { ampPx: 1.5, freq: 12 };
+      const maxScale = Math.max(1.01, Number(pulseConf.scale || 2.15));
+      const lift = Math.max(0, Number(pulseConf.lift || 12));
+      const edge = 0.12; // 12% rise, 12% fall, 76% hold → 더 빠른 팍! 성장/복귀
+      const holdStart = edge;
+      const holdEnd = 1 - edge;
+
+      let factor = 0; // 0..1 scale factor towards peak
+      if (local < holdStart) {
+        // fast grow
+        const t = local / holdStart;
+        factor = easeOutCubic(t);
+      } else if (local > holdEnd) {
+        // fast shrink
+        const t = (local - holdEnd) / (1 - holdEnd);
+        factor = 1 - easeInCubic(t);
+      } else {
+        // hold at peak
+        factor = 1;
       }
 
-      // Active window transforms
-      span.style.color = colorFor(state, opts, el);
-      
-      const w = Math.max(0.0001, (t1 - t0) || 0.0001);
-      const pw = (now - t0) / w;
-      
-      const baseScale = 2.4; // 12%/5%
-      const trem = state.tremble || { ampPx: 1.5, freq: 12 };
-      const s = baseScale + 0.1 * Math.sin(pw * Math.PI);
-      const dx = trem.ampPx * Math.sin(pw * 2 * Math.PI * trem.freq);
-      const dy = trem.ampPx * 0.6 * Math.cos(pw * 2 * Math.PI * trem.freq);
-      span.style.transform = `translate(${dx}px, ${dy - 8}px) scale(${s}, ${s})`;
+      const baseScale = 1 + (maxScale - 1) * factor;
+      const crest = Math.pow(factor, 1.5);
+      const timePhase = local * Math.PI * trem.freq;
+      // 기본 잔떨림: 더 잘게(고주파), 살짝(저진폭)
+      const scaleJitter = 0.03 * crest * Math.sin(timePhase * 1.2);
+
+      // 푸딩 느낌의 링(overshoot): 유지 구간에서만 고주파+감쇠 진동
+      let ring = 0;
+      if (local >= holdStart && local <= holdEnd) {
+        const tHold = (local - holdStart) / (holdEnd - holdStart);
+        const ringAmp = 0.06;      // 최대 6% 추가 진동
+        const ringFreq = 18;       // 잘게 많이
+        const ringDecay = 3.0;     // 유지 구간 따라 점차 잦아듦
+        ring = ringAmp * Math.exp(-ringDecay * tHold) * Math.sin(2 * Math.PI * ringFreq * tHold);
+      }
+
+      const scale = baseScale + scaleJitter + ring;
+
+      // 위치 미세 떨림도 살짝 가미(고주파, 소진폭)
+      const dx = trem.ampPx * 0.8 * crest * Math.sin(timePhase * 1.6);
+      const dy = -lift * factor + trem.ampPx * 0.5 * crest * Math.cos(timePhase * 1.9);
+      span.style.transform = `translate3d(${dx}px, ${dy}px, 0px) scale(${scale}, ${scale})`;
       span.style.opacity = '1';
     };
 }

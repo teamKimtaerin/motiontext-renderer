@@ -83,6 +83,7 @@ plugins/
     "assets/background.mp4",
     "assets/effect-sound.mp3"
   ],
+  "timeOffset": [0, 0],
   "integrity": {
     "entry": "sha384-abc123...",
     "assets": {
@@ -174,6 +175,13 @@ plugins/
 
 #### `lazyLoad` (array, optional)
 지연 로딩할 에셋 목록. 실제 사용 시점에 로드.
+
+#### `timeOffset` (array, optional)
+플러그인의 기본 시간 오프셋을 정의하는 `[start, end]` 배열 (단위: 초).
+- 플러그인이 요소의 displayTime을 기준으로 얼마나 일찍/늦게 시작/종료할지 설정
+- 예: `[-0.3, 0.3]`은 요소가 표시되기 0.3초 전부터 0.3초 후까지 플러그인 실행
+- 시나리오의 `time_offset` 필드가 우선하며, 없을 때 이 값을 기본값으로 사용
+- 기본값: `[0, 0]` (오프셋 없음)
 
 #### `schema` 확장
 - **`dependencies`**: 조건부 필드 표시
@@ -953,6 +961,7 @@ export default {
   "targets": ["text"],
   "capabilities": ["style-vars"],
   "lazyLoad": ["assets/heavy-texture.png"],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "color": {
       "default": "define.brand_colors.primary"
@@ -1057,6 +1066,7 @@ export default {
     "assets/particles.png",
     "assets/whoosh.mp3"
   ],
+  "timeOffset": [-0.2, 0.2],
   "schema": {
     "effect": {
       "type": "string",

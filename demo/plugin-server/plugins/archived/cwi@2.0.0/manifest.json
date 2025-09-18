@@ -8,6 +8,7 @@
   "targets": ["text"],
   "capabilities": [],
   "preload": [],
+  "timeOffset": [-0.3, 0.3],
   "schema": {
     "tokens": { "type": "array", "items": "object" },
     "palette": { "type": "object" },
