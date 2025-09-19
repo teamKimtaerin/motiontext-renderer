@@ -13,7 +13,15 @@
     "speaker": {
       "type": "string",
       "default": "",
-      "ui": { "control": "text", "allowDefine": true },
+      "ui": {
+        "control": "text",
+        "allowDefine": true,
+        "autofill": {
+          "enabled": true,
+          "source": "clip.speaker",
+          "description": "현재 선택된 화자 ID가 자동으로 입력됩니다"
+        }
+      },
       "i18n": {
         "label": { "ko": "화자 ID", "en": "Speaker ID" },
         "description": { "ko": "화자별 색상을 적용할 때 사용되는 화자 식별자", "en": "Speaker identifier for color mapping" }
@@ -22,7 +30,15 @@
     "palette": {
       "type": "object",
       "default": {},
-      "ui": { "control": "object", "allowDefine": true },
+      "ui": {
+        "control": "object",
+        "allowDefine": true,
+        "autofill": {
+          "enabled": true,
+          "source": "editor.speakerColors",
+          "description": "에디터에서 설정한 화자별 색상 팔레트가 자동 입력됩니다"
+        }
+      },
       "i18n": {
         "label": { "ko": "색상 팔레트", "en": "Color Palette" },
         "description": { "ko": "화자별 색상 매핑 객체", "en": "Speaker-to-color mapping object" }
