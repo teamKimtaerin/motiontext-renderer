@@ -1,5 +1,17 @@
 # motiontext-renderer
 
+## 1.3.1
+
+### Patch Changes
+
+- Fix style inheritance priority to respect node-specific styles over track defaults
+  - Fixed mergeStyles() and mergeBoxStyles() functions to prioritize node-specific styles over track defaults
+  - Node-specific styles now correctly override track defaultStyle/defaultBoxStyle
+  - Resolves issue where group nodes' individual styles were ignored in favor of track defaults
+  - Maintains backward compatibility with existing scenarios
+
+  Fixes: Style inheritance priority not respecting the intended hierarchy in v2.0 scenarios
+
 ## 1.3.0
 
 ### Minor Changes

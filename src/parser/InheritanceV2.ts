@@ -332,15 +332,16 @@ function inheritField(
 
 /**
  * 스타일 병합 유틸리티
- * @param styles - 병합할 스타일 배열 (나중 것이 우선)
- * @returns 병합된 스타일
+ * @param styles - 병합할 스타일 배열 (우선순위 순: direct → parent → track)
+ * @returns 병합된 스타일 (direct가 최우선)
  */
 function mergeStyles(...styles: TextStyle[]): TextStyle {
   const merged: TextStyle = {};
 
-  for (const style of styles) {
-    if (style) {
-      // 깊은 복사로 병합
+  // 역순으로 병합하여 첫 번째(direct) 값이 우선하도록
+  for (let i = styles.length - 1; i >= 0; i--) {
+    const style = styles[i];
+    if (style && typeof style === 'object') {
       Object.assign(merged, style);
     }
   }
@@ -350,15 +351,14 @@ function mergeStyles(...styles: TextStyle[]): TextStyle {
 
 /**
  * BoxStyle 병합 함수
- * 우선순위에 따라 BoxStyle 객체들을 병합 (나중 객체가 우선)
+ * 우선순위에 따라 BoxStyle 객체들을 병합 (direct가 최우선)
  * @param styles - 병합할 BoxStyle 배열 (우선순위 순: direct → track)
  * @returns 병합된 BoxStyle
  */
 function mergeBoxStyles(...styles: BoxStyle[]): BoxStyle {
   const merged: BoxStyle = {};
 
-  // 순서대로 병합하여 나중 값이 우선하도록 (direct가 먼저, track이 나중이므로 track이 덮어씀)
-  // 하지만 우리는 direct가 우선해야 하므로 역순으로 병합
+  // 역순으로 병합하여 첫 번째(direct) 값이 우선하도록
   for (let i = styles.length - 1; i >= 0; i--) {
     const style = styles[i];
     if (style && typeof style === 'object') {
