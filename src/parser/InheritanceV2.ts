@@ -197,7 +197,14 @@ function applyNodeInheritance(
       } = legacyStyle;
 
       // If any box-related properties exist, split them
-      if (backgroundColor || boxBg || border || padding || borderRadius || opacity !== undefined) {
+      if (
+        backgroundColor ||
+        boxBg ||
+        border ||
+        padding ||
+        borderRadius ||
+        opacity !== undefined
+      ) {
         groupNode.style = textStyle;
         groupNode.boxStyle = {
           backgroundColor,
@@ -205,7 +212,7 @@ function applyNodeInheritance(
           border,
           padding,
           borderRadius,
-          opacity
+          opacity,
         };
       }
     }
@@ -328,8 +335,8 @@ function inheritField(
  * @param styles - 병합할 스타일 배열 (나중 것이 우선)
  * @returns 병합된 스타일
  */
-function mergeStyles(...styles: Style[]): Style {
-  const merged: Style = {};
+function mergeStyles(...styles: TextStyle[]): TextStyle {
+  const merged: TextStyle = {};
 
   for (const style of styles) {
     if (style) {

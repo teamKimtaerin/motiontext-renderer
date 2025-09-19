@@ -1268,13 +1268,6 @@ export class RendererV2 {
   }
 
   /**
-   * camelCase를 kebab-case로 변환
-   */
-  private camelToKebab(str: string): string {
-    return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-  }
-
-  /**
    * 기본 스타일 적용 (새로운 constraints 시스템 사용)
    */
   private applyBaseStyle(
@@ -1307,7 +1300,12 @@ export class RendererV2 {
 
     // Apply text-related styles using StyleApply function
     const containerHeight = this.container.clientHeight || 720;
-    applyTextStyle(element, containerHeight, mergedTextStyle, trackTextDefaults);
+    applyTextStyle(
+      element,
+      containerHeight,
+      mergedTextStyle,
+      trackTextDefaults
+    );
 
     // Apply box styles for group nodes only
     if (node.eType === 'group') {
@@ -1321,7 +1319,11 @@ export class RendererV2 {
     }
 
     // Apply default text styling for text nodes without explicit style
-    if (node.eType === 'text' && !mergedTextStyle.fontSizeRel && !mergedTextStyle.fontSize) {
+    if (
+      node.eType === 'text' &&
+      !mergedTextStyle.fontSizeRel &&
+      !mergedTextStyle.fontSize
+    ) {
       element.style.fontSize = '2rem'; // Default visible size
       element.style.color = element.style.color || '#ffffff'; // Default white text
       element.style.fontWeight = element.style.fontWeight || 'bold';

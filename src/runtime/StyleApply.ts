@@ -59,7 +59,8 @@ export function applyTextStyle(
   }
   // Text alignment
   if (s.align) el.style.textAlign = s.align;
-  if (s.whiteSpace) el.style.whiteSpace = s.whiteSpace === 'wrap' ? 'normal' : s.whiteSpace;
+  if (s.whiteSpace)
+    el.style.whiteSpace = s.whiteSpace === 'wrap' ? 'normal' : s.whiteSpace;
 }
 
 // Apply box/container styles for group nodes only
@@ -89,7 +90,10 @@ export function applyGroupStyle(
     el.style.borderWidth = `${wpx}px`;
     el.style.borderColor = String(boxStyle.border.color || '#000');
     if (boxStyle.border.radiusRel != null) {
-      const rpx = Math.max(0, Math.round(containerHeight * boxStyle.border.radiusRel));
+      const rpx = Math.max(
+        0,
+        Math.round(containerHeight * boxStyle.border.radiusRel)
+      );
       el.style.borderRadius = `${rpx}px`;
     }
   }
@@ -99,7 +103,10 @@ export function applyGroupStyle(
     if (typeof boxStyle.borderRadius === 'string') {
       el.style.borderRadius = boxStyle.borderRadius;
     } else {
-      const rpx = Math.max(0, Math.round(containerHeight * boxStyle.borderRadius));
+      const rpx = Math.max(
+        0,
+        Math.round(containerHeight * boxStyle.borderRadius)
+      );
       el.style.borderRadius = `${rpx}px`;
     }
   }

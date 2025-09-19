@@ -8,7 +8,13 @@
 // - 노드 ID 의무화
 // - Define 시스템 지원
 
-import type { Layout, Style, EffectScope, LayoutConstraints } from './layout';
+import type {
+  Layout,
+  TextStyle,
+  BoxStyle,
+  EffectScope,
+  LayoutConstraints,
+} from './layout';
 import type { PluginSpec } from './plugin-v3';
 
 // ============================================================================
