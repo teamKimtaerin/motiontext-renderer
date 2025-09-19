@@ -1,0 +1,173 @@
+{
+  "version": "2.0",
+  "timebase": {
+    "unit": "seconds"
+  },
+  "stage": {
+    "baseAspect": "16:9"
+  },
+  "tracks": [
+    {
+      "id": "subtitle",
+      "type": "subtitle",
+      "layer": 1,
+      "defaultStyle": {
+        "fontFamily": "Arial, sans-serif",
+        "color": "#ffffff",
+        "fontSizeRel": 0.05,
+        "fontWeight": "bold",
+        "textAlign": "center"
+      },
+      "defaultBoxStyle": {
+        "backgroundColor": "rgba(0, 0, 0, 0.85)",
+        "border": {
+          "widthRel": 0.003,
+          "color": "#00ffff",
+          "radiusRel": 0.01
+        },
+        "padding": "20px 30px",
+        "borderRadius": "8px"
+      }
+    }
+  ],
+  "cues": [
+    {
+      "id": "cue-1",
+      "track": "subtitle",
+      "domLifetime": [1.5, 5.5],
+      "root": {
+        "id": "group-1",
+        "eType": "group",
+        "displayTime": [2, 5],
+        "layout": {
+          "position": [0.5, 0.3],
+          "anchor": "cc",
+          "childrenLayout": {
+            "mode": "flow",
+            "direction": "vertical",
+            "gap": 0.02,
+            "align": "center"
+          }
+        },
+        "children": [
+          {
+            "id": "text-1-1",
+            "eType": "text",
+            "text": "첫 번째 그룹 - 첫 번째 텍스트",
+            "displayTime": [2, 5]
+          },
+          {
+            "id": "text-1-2",
+            "eType": "text",
+            "text": "첫 번째 그룹 - 두 번째 텍스트",
+            "displayTime": [2.5, 5],
+            "style": {
+              "color": "#ffff00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue-2",
+      "track": "subtitle",
+      "domLifetime": [5.5, 9.5],
+      "root": {
+        "id": "group-2",
+        "eType": "group",
+        "displayTime": [6, 9],
+        "layout": {
+          "position": [0.5, 0.7],
+          "anchor": "cc",
+          "childrenLayout": {
+            "mode": "flow",
+            "direction": "horizontal",
+            "gap": 0.03,
+            "align": "center",
+            "wrap": true,
+            "maxWidth": "80%"
+          }
+        },
+        "children": [
+          {
+            "id": "text-2-1",
+            "eType": "text",
+            "text": "두 번째 그룹",
+            "displayTime": [6, 9]
+          },
+          {
+            "id": "text-2-2",
+            "eType": "text",
+            "text": "같은 boxStyle",
+            "displayTime": [6.5, 9],
+            "style": {
+              "color": "#ff6b35"
+            }
+          },
+          {
+            "id": "text-2-3",
+            "eType": "text",
+            "text": "상속 받음",
+            "displayTime": [7, 9],
+            "style": {
+              "color": "#4ecdc4"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue-3",
+      "track": "subtitle",
+      "domLifetime": [9.5, 13.5],
+      "root": {
+        "id": "group-3",
+        "eType": "group",
+        "displayTime": [10, 13],
+        "layout": {
+          "position": [0.5, 0.5],
+          "anchor": "cc"
+        },
+        "children": [
+          {
+            "id": "text-3-1",
+            "eType": "text",
+            "text": "세 번째 그룹도 동일한 박스 스타일을 상속받습니다",
+            "displayTime": [10, 13],
+            "style": {
+              "fontSizeRel": 0.04,
+              "color": "#ffffff"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cue-explanation",
+      "track": "subtitle",
+      "domLifetime": [13.5, 17.5],
+      "root": {
+        "id": "group-explanation",
+        "eType": "group",
+        "displayTime": [14, 17],
+        "layout": {
+          "position": [0.5, 0.15],
+          "anchor": "cc"
+        },
+        "children": [
+          {
+            "id": "text-explanation",
+            "eType": "text",
+            "text": "✓ 모든 그룹이 트랙의 defaultBoxStyle 상속 ✓ 텍스트 노드는 개별 박스 없음",
+            "displayTime": [14, 17],
+            "style": {
+              "fontSizeRel": 0.035,
+              "color": "#00ff00"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "define": {}
+}

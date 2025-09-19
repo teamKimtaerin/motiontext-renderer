@@ -1,6 +1,6 @@
 // Applies composed style/layout transforms and CSS variables into DOM elements.
 import type { Channels } from '../composer/PluginChainComposer';
-import type { Style, Layout } from '../types/layout';
+import type { TextStyle, BoxStyle, Layout } from '../types/layout';
 
 export function buildTransform(base: string | undefined, ch: Channels): string {
   const parts: string[] = [];
@@ -31,10 +31,10 @@ export function applyChannels(
 export function applyTextStyle(
   el: HTMLElement,
   containerHeight: number,
-  style?: Style,
-  trackDefault?: Style
+  style?: TextStyle,
+  trackDefault?: TextStyle
 ) {
-  const s = { ...(trackDefault || {}), ...(style || {}) } as any;
+  const s = { ...(trackDefault || {}), ...(style || {}) };
   if (s.color) el.style.color = String(s.color);
   if (s.textShadow) el.style.textShadow = String(s.textShadow);
   // Typography
@@ -57,34 +57,78 @@ export function applyTextStyle(
     // Default readable outline if none specified
     el.style.textShadow = '0 0 2px #000, 0 0 4px #000, 0 0 8px #000';
   }
+  // Text alignment
+  if (s.align) el.style.textAlign = s.align;
+  if (s.whiteSpace)
+    el.style.whiteSpace = s.whiteSpace === 'wrap' ? 'normal' : s.whiteSpace;
 }
 
-// Apply minimal group-level visual styles (box background, border, padding).
+// Apply box/container styles for group nodes only
 export function applyGroupStyle(
   el: HTMLElement,
   containerHeight: number,
-  style?: Style,
+  boxStyle?: BoxStyle,
   layout?: Layout
 ) {
-  const s = style || {};
-  // Background fill
-  if (s.boxBg) (el.style as any).background = String(s.boxBg);
+  if (!boxStyle) return;
+
+  // Background color
+  if (boxStyle.backgroundColor) {
+    el.style.backgroundColor = String(boxStyle.backgroundColor);
+  } else if (boxStyle.boxBg) {
+    // Backward compatibility
+    el.style.backgroundColor = String(boxStyle.boxBg);
+  }
+
   // Border
-  if (s.border) {
+  if (boxStyle.border) {
     const wpx = Math.max(
       0,
-      Math.round(containerHeight * (s.border.widthRel || 0))
+      Math.round(containerHeight * (boxStyle.border.widthRel || 0))
     );
-    (el.style as any).borderStyle = 'solid';
-    (el.style as any).borderWidth = `${wpx}px`;
-    (el.style as any).borderColor = String(s.border.color || '#000');
-    if (s.border.radiusRel != null) {
-      const rpx = Math.max(0, Math.round(containerHeight * s.border.radiusRel));
-      (el.style as any).borderRadius = `${rpx}px`;
+    el.style.borderStyle = 'solid';
+    el.style.borderWidth = `${wpx}px`;
+    el.style.borderColor = String(boxStyle.border.color || '#000');
+    if (boxStyle.border.radiusRel != null) {
+      const rpx = Math.max(
+        0,
+        Math.round(containerHeight * boxStyle.border.radiusRel)
+      );
+      el.style.borderRadius = `${rpx}px`;
     }
   }
-  // Padding from layout (normalized relative to stage height)
-  if (layout?.padding) {
+
+  // Border radius (direct CSS value)
+  if (boxStyle.borderRadius) {
+    if (typeof boxStyle.borderRadius === 'string') {
+      el.style.borderRadius = boxStyle.borderRadius;
+    } else {
+      const rpx = Math.max(
+        0,
+        Math.round(containerHeight * boxStyle.borderRadius)
+      );
+      el.style.borderRadius = `${rpx}px`;
+    }
+  }
+
+  // Padding
+  if (boxStyle.padding) {
+    if (typeof boxStyle.padding === 'string') {
+      el.style.padding = boxStyle.padding;
+    } else {
+      // Vec2Rel format
+      const px = Math.max(
+        0,
+        Math.round(containerHeight * (boxStyle.padding.x || 0))
+      );
+      const py = Math.max(
+        0,
+        Math.round(containerHeight * (boxStyle.padding.y || 0))
+      );
+      el.style.padding = `${py}px ${px}px`;
+    }
+  } else if (layout?.padding) {
+    // Fallback to layout padding
     const px = Math.max(
       0,
       Math.round(containerHeight * (layout.padding.x || 0))
@@ -94,5 +138,10 @@ export function applyGroupStyle(
       Math.round(containerHeight * (layout.padding.y || 0))
     );
     el.style.padding = `${py}px ${px}px`;
+  }
+
+  // Opacity
+  if (boxStyle.opacity != null) {
+    el.style.opacity = String(boxStyle.opacity);
   }
 }

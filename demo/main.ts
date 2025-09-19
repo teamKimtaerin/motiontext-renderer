@@ -20,6 +20,7 @@ import cwiDemoFull from './samples/cwi_demo_full.json';
 import dualChannelTest from './samples/dual_channel_test.json';
 import cwiSentenceWave from './samples/cwi_sentence_wave.json';
 import pluginTestCombined from './samples/plugin_test_combined.json';
+import boxstyleInheritanceDemo from './samples/boxstyle_inheritance_demo.json';
 // v2.0 샘플들
 import basicV20 from './samples/v2/basic_v20.json';
 import withAssetsV20 from './samples/v2/with_assets_v20.json';
@@ -97,6 +98,9 @@ const sampleConfigs: Record<string, RendererConfig> = {
 
   // Plugin composition test
   'plugin_test_combined (v2.0)': pluginTestCombined as RendererConfig,
+
+  // BoxStyle inheritance demo
+  boxstyle_inheritance_demo: boxstyleInheritanceDemo as RendererConfig,
 
   animated: {
     version: '1.3',

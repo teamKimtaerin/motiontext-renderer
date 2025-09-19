@@ -15,7 +15,7 @@ import type {
   TimeRange,
   ResolvedNodeUnion,
 } from '../types/scenario-v2';
-import type { Style } from '../types/layout';
+import type { TextStyle, BoxStyle } from '../types/layout';
 
 // 상속 우선순위 설정
 type InheritancePriority = 'direct' | 'parent' | 'track' | 'system';
@@ -46,7 +46,12 @@ const INHERITANCE_RULES: Record<string, FieldInheritanceRule> = {
   },
   style: {
     priority: ['direct', 'parent', 'track'],
-    merge: true, // 스타일은 병합
+    merge: true, // 텍스트 스타일은 병합
+    systemDefault: undefined,
+  },
+  boxStyle: {
+    priority: ['direct', 'track'], // 부모에서 상속받지 않음, 그룹 노드만 트랙에서 상속
+    merge: true, // 박스 스타일은 병합
     systemDefault: undefined,
   },
   pluginChain: {
@@ -175,6 +180,44 @@ function applyNodeInheritance(
     }
   }
 
+  // Backward compatibility: automatically split legacy style into style and boxStyle
+  if (node.eType === 'group') {
+    const groupNode = inheritedNode as any;
+    const legacyStyle = groupNode.style;
+
+    if (legacyStyle && !groupNode.boxStyle) {
+      const {
+        backgroundColor,
+        boxBg,
+        border,
+        padding,
+        borderRadius,
+        opacity,
+        ...textStyle
+      } = legacyStyle;
+
+      // If any box-related properties exist, split them
+      if (
+        backgroundColor ||
+        boxBg ||
+        border ||
+        padding ||
+        borderRadius ||
+        opacity !== undefined
+      ) {
+        groupNode.style = textStyle;
+        groupNode.boxStyle = {
+          backgroundColor,
+          boxBg,
+          border,
+          padding,
+          borderRadius,
+          opacity,
+        };
+      }
+    }
+  }
+
   // 노드 타입별 처리
   if (node.eType === 'group') {
     const groupNode = inheritedNode as ResolvedNodeUnion & {
@@ -240,6 +283,11 @@ function inheritField(
         // 특정 필드에 대한 트랙 기본값 처리
         if (fieldName === 'style') {
           value = track?.defaultStyle;
+        } else if (fieldName === 'boxStyle') {
+          // boxStyle은 그룹 노드일 때만 트랙에서 상속
+          if (node.eType === 'group') {
+            value = track?.defaultBoxStyle;
+          }
         } else if (
           fieldName === 'anchor' &&
           track?.defaultConstraints?.anchor
@@ -272,6 +320,8 @@ function inheritField(
   if (rule.merge) {
     if (fieldName === 'style') {
       return mergeStyles(...values.filter((v) => v !== undefined));
+    } else if (fieldName === 'boxStyle') {
+      return mergeBoxStyles(...values.filter((v) => v !== undefined));
     }
     // layout 병합 제거 - layout은 더이상 상속하지 않음
   }
@@ -285,12 +335,33 @@ function inheritField(
  * @param styles - 병합할 스타일 배열 (나중 것이 우선)
  * @returns 병합된 스타일
  */
-function mergeStyles(...styles: Style[]): Style {
-  const merged: Style = {};
+function mergeStyles(...styles: TextStyle[]): TextStyle {
+  const merged: TextStyle = {};
 
   for (const style of styles) {
     if (style) {
       // 깊은 복사로 병합
+      Object.assign(merged, style);
+    }
+  }
+
+  return merged;
+}
+
+/**
+ * BoxStyle 병합 함수
+ * 우선순위에 따라 BoxStyle 객체들을 병합 (나중 객체가 우선)
+ * @param styles - 병합할 BoxStyle 배열 (우선순위 순: direct → track)
+ * @returns 병합된 BoxStyle
+ */
+function mergeBoxStyles(...styles: BoxStyle[]): BoxStyle {
+  const merged: BoxStyle = {};
+
+  // 순서대로 병합하여 나중 값이 우선하도록 (direct가 먼저, track이 나중이므로 track이 덮어씀)
+  // 하지만 우리는 direct가 우선해야 하므로 역순으로 병합
+  for (let i = styles.length - 1; i >= 0; i--) {
+    const style = styles[i];
+    if (style && typeof style === 'object') {
       Object.assign(merged, style);
     }
   }

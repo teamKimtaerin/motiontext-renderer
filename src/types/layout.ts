@@ -76,19 +76,32 @@ export interface StyleBorder {
   radiusRel?: number;
 }
 
-export interface Style {
+// Text-related styles (for text nodes and text inheritance)
+export interface TextStyle {
   fontFamily?: string;
   fontWeight?: number | string;
   fontSizeRel?: number; // relative to stage dims
+  fontSize?: string; // absolute font size (px, em, rem)
   lineHeight?: number;
   color?: string;
   textShadow?: string;
-  boxBg?: string;
   stroke?: StyleStroke;
-  border?: StyleBorder;
   align?: 'left' | 'center' | 'right';
   whiteSpace?: 'wrap' | 'nowrap';
 }
+
+// Box/container styles (for group nodes only)
+export interface BoxStyle {
+  backgroundColor?: string;
+  boxBg?: string; // alias for backward compatibility
+  border?: StyleBorder;
+  padding?: string | Vec2Rel; // CSS string like "8px 16px" or normalized values
+  borderRadius?: string | number; // CSS string like "4px" or normalized value
+  opacity?: number;
+}
+
+// Combined style interface for backward compatibility
+export type Style = TextStyle & BoxStyle;
 
 export interface EffectScopeBreakout {
   mode: 'portal' | 'lift'; // preferred: portal (temporary reparent)

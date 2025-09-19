@@ -1,5 +1,15 @@
 # motiontext-renderer
 
+## 1.2.2
+
+### Patch Changes
+
+- fix: relative time offset calculation for plugin end boundaries
+  - Fixed percentage-based time offset calculation when applied to end boundaries
+  - Negative percentages on end boundaries now correctly shorten the window from the end
+  - Example: base [2,4] with '-20%' offset now correctly calculates to 3.6 instead of wrong value
+  - Added comprehensive test cases for edge cases in time offset calculations
+
 ## 1.2.1
 
 ### Patch Changes
