@@ -89,7 +89,8 @@ export interface Track {
   type: TrackType;
   layer: number; // higher is above
   overlapPolicy?: DefineReference<OverlapPolicy>; // default push
-  defaultStyle?: DefineReference<Style>;
+  defaultStyle?: DefineReference<TextStyle>; // text style defaults for this track
+  defaultBoxStyle?: DefineReference<BoxStyle>; // box style defaults for group nodes in this track
   defaultConstraints?: DefineReference<LayoutConstraints>; // default layout constraints for this track
 }
 
@@ -110,7 +111,7 @@ export interface BaseNode {
   displayTime?: DefineReference<TimeRange>; // [start, end] - inherited from parent if omitted
   baseTime?: DefineReference<TimeRange>; // [start, end] - base time for time_offset calculations
   layout?: DefineReference<Layout>;
-  style?: DefineReference<Style>;
+  style?: DefineReference<TextStyle>; // text styles only (font, color, etc.)
   pluginChain?: DefineReference<PluginSpec[]>;
   effectScope?: DefineReference<EffectScope>;
 }
@@ -118,11 +119,13 @@ export interface BaseNode {
 export interface GroupNode extends BaseNode {
   eType: 'group';
   children?: Node[];
+  boxStyle?: DefineReference<BoxStyle>; // box/container styles for group nodes only
 }
 
 export interface TextNode extends BaseNode {
   eType: 'text';
   text: DefineReference<string>;
+  // Note: TextNode does not have boxStyle field - only inherits text styles
 }
 
 export interface ImageNode extends BaseNode {
@@ -179,7 +182,7 @@ export interface ResolvedNode
   displayTime: TimeRange;
   baseTime?: TimeRange;
   layout?: Layout;
-  style?: Style;
+  style?: TextStyle;
   pluginChain?: PluginSpec[];
   effectScope?: EffectScope;
 }
@@ -206,6 +209,7 @@ export interface ResolvedVideoNode extends ResolvedNode {
 export interface ResolvedGroupNode extends ResolvedNode {
   eType: 'group';
   children?: ResolvedNodeUnion[];
+  boxStyle?: BoxStyle;
 }
 
 export type ResolvedNodeUnion =
