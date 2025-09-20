@@ -92,6 +92,12 @@ export class MotionTextRenderer {
     this.renderer.update(timeSec);
   }
 
+  clear() {
+    // Clear current scenario while keeping renderer alive
+    this.renderer.clear();
+    this.scenario = null;
+  }
+
   dispose() {
     this.renderer.dispose();
     this.assetManager.dispose();

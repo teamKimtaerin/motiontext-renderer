@@ -24,7 +24,7 @@ export function getDefaultTrackConstraints(
         anchor: 'bc', // bottom-center default for subtitles
         constraintMode: 'flexible', // allow some flexibility
         breakoutEnabled: false, // subtitles shouldn't escape bounds
-        safeArea: { bottom: 0.1, left: 0.05, right: 0.05 }, // safe area for subtitles
+        safeArea: { bottom: 0.075, left: 0.05, right: 0.05 }, // safe area for subtitles
       };
 
     case 'free':

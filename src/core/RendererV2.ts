@@ -132,6 +132,13 @@ export class RendererV2 {
    * v2.0 시나리오 로드
    * @param scenario - 파싱된 v2.0 시나리오
    */
+  clear(): void {
+    this.logger.debug('clear called - removing current scenario');
+    this.unmountAll(); // 기존 요소들 정리
+    this.scenario = null;
+    this.defineResolver = new DefineResolver(); // 빈 DefineResolver로 초기화
+  }
+
   setScenario(scenario: Scenario): void {
     // 상속 시스템에서 사용할 수 있도록 전역 변수에 debugMode 설정
     (globalThis as any).__MTX_DEBUG_MODE__ = this.options.debugMode;

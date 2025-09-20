@@ -1,5 +1,16 @@
 # motiontext-renderer
 
+## 1.4.0
+
+### Minor Changes
+
+- Add clear() method for explicit scenario cleanup
+  - Add `clear()` method to MotionTextRenderer public API for removing current scenario while keeping renderer alive
+  - Add `clear()` method to RendererV2 internal API for comprehensive cleanup
+  - Enables explicit scenario removal without requiring a new scenario load
+  - Maintains renderer instance for reuse after clearing
+  - Provides alternative to `dispose()` which terminates the entire renderer
+
 ## 1.3.1
 
 ### Patch Changes
