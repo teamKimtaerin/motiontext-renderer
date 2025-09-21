@@ -129,16 +129,61 @@ export class RendererV2 {
   }
 
   /**
-   * v2.0 시나리오 로드
-   * @param scenario - 파싱된 v2.0 시나리오
+   * 현재 시나리오를 비동기적으로 정리 (DOM 정리 완료 보장)
    */
-  clear(): void {
-    this.logger.debug('clear called - removing current scenario');
-    this.unmountAll(); // 기존 요소들 정리
+  async clearAsync(): Promise<void> {
+    this.logger.debug('clearAsync called - removing current scenario');
+    await this.unmountAllAsync(); // 비동기 정리로 DOM 완전 제거 보장
     this.scenario = null;
     this.defineResolver = new DefineResolver(); // 빈 DefineResolver로 초기화
   }
 
+  /**
+   * v2.0 시나리오 비동기 로드 (DOM 정리 완료 보장)
+   * @param scenario - 파싱된 v2.0 시나리오
+   */
+  async setScenarioAsync(scenario: Scenario): Promise<void> {
+    // 상속 시스템에서 사용할 수 있도록 전역 변수에 debugMode 설정
+    (globalThis as any).__MTX_DEBUG_MODE__ = this.options.debugMode;
+
+    this.logger.debug('setScenarioAsync called', {
+      version: scenario.version,
+      cuesCount: scenario.cues?.length || 0,
+      tracksCount: scenario.tracks?.length || 0,
+      hasDefine: !!scenario.define,
+    });
+
+    if (scenario.version !== '2.0') {
+      throw new Error(
+        `RendererV2 only supports v2.0 scenarios, got version "${scenario.version}"`
+      );
+    }
+
+    // 기존 시나리오가 있다면 비동기 정리 (DOM 완전 제거 보장)
+    if (this.scenario !== null) {
+      await this.unmountAllAsync();
+    }
+
+    this.scenario = scenario;
+
+    // DefineResolver 초기화 - scenario의 define 섹션으로 새로 생성
+    if (scenario.define) {
+      this.defineResolver = new DefineResolver(scenario.define);
+    }
+
+    // Stage에 시나리오 설정
+    this.stage.setScenario(scenario);
+
+    // TrackManager에 시나리오 설정
+    this.trackManager.setScenario(scenario);
+
+    this.logger.debug('setScenarioAsync completed');
+  }
+
+  /**
+   * v2.0 시나리오 로드 (동기)
+   * @param scenario - 파싱된 v2.0 시나리오
+   */
   setScenario(scenario: Scenario): void {
     // 상속 시스템에서 사용할 수 있도록 전역 변수에 debugMode 설정
     (globalThis as any).__MTX_DEBUG_MODE__ = this.options.debugMode;
@@ -156,8 +201,12 @@ export class RendererV2 {
       );
     }
 
+    // 기존 시나리오가 있다면 정리 (clear() 호출하지 않은 경우)
+    if (this.scenario !== null) {
+      this.unmountAll(); // 기존 요소들 정리
+    }
+
     this.scenario = scenario;
-    this.unmountAll(); // 기존 요소들 정리
 
     // DefineResolver 초기화 - scenario의 define 섹션으로 새로 생성
     if (scenario.define) {
@@ -1406,6 +1455,23 @@ export class RendererV2 {
     for (const [nodeId] of this.mountedElements) {
       this.unmountNode(nodeId);
     }
+  }
+
+  private async unmountAllAsync(): Promise<void> {
+    const nodeIds = Array.from(this.mountedElements.keys());
+
+    // 모든 노드 언마운트
+    for (const nodeId of nodeIds) {
+      this.unmountNode(nodeId);
+    }
+
+    // DOM 업데이트가 완료될 때까지 다음 프레임 대기
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        // 추가로 한 프레임 더 대기하여 완전한 DOM 정리 보장
+        requestAnimationFrame(() => resolve());
+      });
+    });
   }
 
   private setupContainer(): void {

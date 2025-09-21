@@ -63,14 +63,27 @@ export class MotionTextRenderer {
   async loadConfig(config: any) {
     // Parse v2.0 scenario
     this.scenario = parseScenario(config);
-    
+
     // Load assets from define section if present
     if (this.scenario.define) {
       await this.assetManager.loadAssetsFromDefines(this.scenario.define);
     }
-    
+
     // Set scenario to renderer
     this.renderer.setScenario(this.scenario);
+  }
+
+  async loadConfigAsync(config: any) {
+    // Parse v2.0 scenario
+    this.scenario = parseScenario(config);
+
+    // Load assets from define section if present
+    if (this.scenario.define) {
+      await this.assetManager.loadAssetsFromDefines(this.scenario.define);
+    }
+
+    // Set scenario to renderer with async cleanup guarantee
+    await this.renderer.setScenarioAsync(this.scenario);
   }
 
   attachMedia(video: HTMLVideoElement) {
@@ -92,9 +105,9 @@ export class MotionTextRenderer {
     this.renderer.update(timeSec);
   }
 
-  clear() {
-    // Clear current scenario while keeping renderer alive
-    this.renderer.clear();
+  async clearAsync() {
+    // Clear current scenario while keeping renderer alive (DOM cleanup guaranteed)
+    await this.renderer.clearAsync();
     this.scenario = null;
   }
 

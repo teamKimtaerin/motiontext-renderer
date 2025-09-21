@@ -1,5 +1,18 @@
 # motiontext-renderer
 
+## 1.5.0
+
+### Minor Changes
+
+- Add async cleanup methods to fix scenario overlap issues
+  - **BREAKING**: Remove synchronous `clear()` method that caused DOM overlap issues
+  - Add `clearAsync()` method with guaranteed DOM cleanup completion via requestAnimationFrame
+  - Add `loadConfigAsync()` method for race-condition-free scenario loading
+  - Add `setScenarioAsync()` internal method with proper async cleanup
+  - Fix scenario overlap rendering when rapidly switching between scenarios
+  - Ensures complete DOM cleanup before new scenario rendering starts
+  - Maintains renderer instance for reuse after clearing
+
 ## 1.4.0
 
 ### Minor Changes
