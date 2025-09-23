@@ -164,10 +164,11 @@ export function init(el, opts, ctx) {
 export function animate(el, opts, ctx, duration) {
     const state = el.__cwiColor;
     if (!state) return () => {};
-    
+
     const span = state.span;
     const letters = state.letters || [];
-    const useBulk = Boolean(opts?.bulk);
+    // Auto-enable bulk mode for very short durations (< 0.1 seconds)
+    const shouldUseBulk = Boolean(opts?.bulk) || (duration < 0.1);
 
     // Initial baseline
     span.style.color = WHITE90;
@@ -186,7 +187,7 @@ export function animate(el, opts, ctx, duration) {
       // Slight epsilon so boundaries don't stick exactly at 0
       const scaled = clamped * total + 1e-4;
 
-      if (useBulk) {
+      if (shouldUseBulk) {
         if (clamped >= 0.985) {
           span.style.color = targetColor;
           for (const letter of letters) letter.style.color = targetColor;

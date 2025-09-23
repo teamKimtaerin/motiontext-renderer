@@ -8,7 +8,7 @@
   "targets": ["text"],
   "capabilities": ["style-vars", "dom-manipulation"],
   "preload": [],
-  "timeOffset": [-0.3, 0.3],
+  "timeOffset": [-0.1, 0.1],
   "schema": {
     "speaker": {
       "type": "string",
@@ -40,7 +40,7 @@
     },
     "waveHeight": {
       "type": "number",
-      "default": 12,
+      "default": 7,
       "min": 0,
       "max": 60,
       "step": 1,
