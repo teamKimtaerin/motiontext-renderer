@@ -183,10 +183,10 @@ export function animate(el, opts, ctx, duration) {
         const eased = easeInOutCubic(t);
         const wave = Math.sin(eased * Math.PI);
         const lift = -waveHeight * wave;
-        const sway = Math.sin(eased * Math.PI * 2) * 0.6;
 
         // CSS 변수로만 설정 (transform 직접 조작 X)
-        letter.style.setProperty('--letter-tx', `${sway}px`);
+        // 좌우 변위 제거 - 수직 바운싱만 적용
+        letter.style.setProperty('--letter-tx', '0px');
         letter.style.setProperty('--letter-ty', `${lift}px`);
       });
 
@@ -203,16 +203,15 @@ export function evalChannels(spec, progress, ctx) {
   const eased = easeInOutCubic(progress);
   const wave = Math.sin(eased * Math.PI);
   const globalLift = -waveHeight * wave * 0.3; // 전체적인 살짝 위아래 움직임
-  const globalSway = Math.sin(eased * Math.PI * 2) * 0.3; // 전체적인 살짝 좌우 흔들림
 
   // 표준 채널 키(tx, ty, sx, sy)를 사용해 baseWrapper에 합성
   // - 다른 channel 플러그인(spin 등)과 mergeChannels 규칙에 따라 합성됨
-  const scale = 1 + wave * 0.05;  // 살짝 크기 변화
+  // 크기 변화 제거 - 순수한 수직 바운싱만
   return {
-    tx: globalSway,
+    tx: 0,  // 좌우 변위 제거
     ty: globalLift,
-    sx: scale,
-    sy: scale
+    sx: 1,  // 크기 변화 없음
+    sy: 1   // 크기 변화 없음
   };
 }
 
