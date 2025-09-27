@@ -13,41 +13,6 @@ function h(tag, attrs = {}, ...children) {
   return el;
 }
 
-function colorFor(state, opts, el) {
-  if (opts?.color) return opts.color;
-  
-  // Try palette from params first
-  let pal = state.palette || opts?.palette;
-  
-  // If no palette, try to find from parent elements with data-palette
-  if (!pal) {
-    let current = el?.parentElement;
-    while (current && !pal) {
-      const paletteData = current.getAttribute('data-palette');
-      if (paletteData) {
-        try {
-          pal = JSON.parse(paletteData);
-        } catch (e) {
-          // ignore parse errors
-        }
-      }
-      current = current.parentElement;
-    }
-  }
-  
-  // If still no palette, try to find from window.motionTextDefinitions (fallback)
-  if (!pal && typeof window !== 'undefined' && window.motionTextDefinitions?.speakerPalette) {
-    pal = window.motionTextDefinitions.speakerPalette;
-  }
-  
-  // Use speaker color if available
-  if (state.speaker && pal && pal[state.speaker]) {
-    return pal[state.speaker];
-  }
-  
-  // Default fallback
-  return '#FFD400';
-}
 
 function easeInOutCubic(x) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -136,11 +101,9 @@ export function init(el, opts, ctx) {
       root,
       span,
       letters,
-      palette: opts?.palette || {},
       t0: Number(opts?.t0 ?? 0),
       t1: Number(opts?.t1 ?? 0),
       waveHeight: Number.isFinite(waveHeight) ? waveHeight : 12,
-      speaker: opts?.speaker
     };
 }
 

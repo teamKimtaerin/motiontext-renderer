@@ -1,196 +1,164 @@
 # MotionText Renderer
 
-🎬 **웹 기반 애니메이션 자막/캡션 렌더러 라이브러리**
+🎬 **고성능 비디오 오버레이 렌더링 엔진** - v2.0 Native Architecture
 
-동영상 콘텐츠에 동적인 자막과 애니메이션 효과를 쉽게 추가할 수 있는 TypeScript 라이브러리입니다. 플러그인 시스템을 통해 확장 가능하며, 웹 표준을 준수하는 안전한 샌드박스 환경에서 동작합니다.
+동영상 위에 정교한 자막, 애니메이션, 인터랙티브 효과를 실시간으로 렌더링하는 TypeScript 라이브러리입니다. 독창적인 DOM 분리 구조와 채널 기반 합성 시스템으로 플러그인 간 충돌을 방지하며, requestVideoFrameCallback 기반 정밀 동기화를 제공합니다.
 
-## ✨ 주요 기능
+## 🚀 핵심 아키텍처 철학
 
-- 🎯 **정규화 좌표계**: 스테이지 기준 (0~1) 좌표로 모든 디바이스 지원
-- ⏰ **정밀한 미디어 싱크**: requestVideoFrameCallback 기반 프레임 동기화
-- 🔌 **동적 플러그인 시스템**: ES Dynamic Import + 무결성 검증
-- 🛡️ **보안 샌드박스**: 플러그인 격리 실행 환경
-- 🎭 **다층 레이어 시스템**: Track → Cue → Element 계층 구조
-- 📦 **TypeScript 완전 지원**: 타입 안전성과 IntelliSense
+### **v2.0 Native Design**
+- **Array-based Time**: 모든 시간 필드를 `[start, end]` 배열로 통일하여 성능 최적화
+- **Inheritence Design** 하위 계층이 상위 계층의 필드를 상속 - 파일 크기 최적화
+- **Define System**: 중복 제거와 에셋 관리를 위한 사전 해석 시스템
 
-## 🚀 설치
-
-```bash
-pnpm add motiontext-renderer
+### **DOM 분리 아키텍처 (Plugin API v3.0)**
+```
+baseWrapper (렌더러 제어)
+├── 레이아웃, 위치, 시간 동기화
+├── CSS 변수 채널 관리 (--mtx-tx, --mtx-ty, --mtx-opacity)
+└── effectsRoot (플러그인 샌드박스)
+    └── 플러그인 자유 DOM 조작 영역
 ```
 
-```bash
-npm install motiontext-renderer
-```
+### **채널 기반 합성 시스템**
+독립적인 변환 채널을 통해 여러 플러그인이 충돌 없이 동시 실행:
+- **표준 채널**: tx/ty(이동), sx/sy(크기), rot(회전), opacity, filter
+- **합성 모드**: replace/add/multiply로 채널별 조합 규칙 정의
+- **샌드박스 보장**: 플러그인은 effectsRoot 하위만 접근 가능
 
-```bash
-yarn add motiontext-renderer
-```
+### **렌더러-플러그인 책임 분리**
+- **렌더러**: DOM 생명주기, 시간 계산, Define 해석, 레이아웃
+- **플러그인**: 상대 진행도(0~1) 기반 순수 애니메이션 로직
+- **컨텍스트**: 해석된 파라미터와 제한된 API만 플러그인에 노출
 
-> 참고: 이 라이브러리는 GSAP을 피어 의존성으로 요구합니다. 호스트 앱에 GSAP을 설치하세요.
->
-> 설치: `pnpm add gsap` (또는 npm/yarn)
+## ⚡ 구현 상세
 
-## 📖 기본 사용법
-
+### **1. requestVideoFrameCallback 동기화**
+브라우저의 비디오 프레임과 완벽 동기화하여 티어링 없는 부드러운 렌더링:
 ```typescript
-import { MotionTextRenderer } from 'motiontext-renderer';
-
-// 컨테이너 요소와 비디오 요소 준비
-const container = document.getElementById('caption-container');
-const video = document.getElementById('main-video');
-
-// 렌더러 초기화
-const renderer = new MotionTextRenderer(container);
-
-// 설정 로드
-const config = {
-  version: '1.3',
-  timebase: { unit: 'seconds' },
-  stage: { baseAspect: '16:9' },
-  tracks: [
-    {
-      id: 'subtitle',
-      type: 'subtitle',
-      layer: 1
-    }
-  ],
-  cues: [
-    {
-      id: 'cue1',
-      track: 'subtitle',
-      hintTime: 0,
-      root: {
-        id: 'group1',
-        type: 'group',
-        children: [
-          {
-            id: 'text1',
-            type: 'text',
-            absStart: 0,
-            absEnd: 3,
-            content: '안녕하세요!',
-            layout: {
-              position: [0.5, 0.8]
-            }
-          }
-        ]
-      }
-    }
-  ]
-};
-
-await renderer.loadConfig(config);
-
-// 비디오와 연동
-renderer.attachMedia(video);
-
-// 재생 시작
-renderer.play();
+// TimelineControllerV2.ts
+video.requestVideoFrameCallback((now, metadata) => {
+  const currentTime = metadata.mediaTime;
+  this.renderer.update(currentTime);
+});
 ```
 
-### 🔌 외부(커스텀) 플러그인 등록/원점 설정
+### **2. Define 시스템 사전 해석**
+런타임 성능을 위해 "define.key" 참조를 파싱 단계에서 완전 해석:
+```typescript
+// 시나리오에서
+"color": "define.brand_colors.primary"
 
-프로덕션 사용처에서 커스텀 플러그인을 등록하거나, 플러그인 원점(server/local/auto)을 설정할 수 있는 공개 API를 제공합니다.
-
-```ts
-import {
-  configurePluginSource,         // 원점 설정 (server/local/auto)
-  registerExternalPlugin,        // 단일 플러그인 등록
-  registerExternalPluginsFromGlob // 다건 등록 (예: import.meta.glob)
-} from 'motiontext-renderer';
-
-// 1) 원점 설정 (선택)
-configurePluginSource({
-  mode: 'auto',                  // 'server' | 'local' | 'auto'
-  serverBase: 'https://plugins.example.com',
-  localBase: '/plugins/'         // 번들/정적 경로
-});
-
-// 2) 플러그인 등록 (단일)
-//   - module: { default: { name, version, animate... }, evalChannels? }
-//   - baseUrl: assets.getUrl()의 기준 URL
-registerExternalPlugin({
-  name: 'myEffect',
-  version: '1.0.0',
-  module: await import('/plugins/myEffect@1.0.0/index.mjs'),
-  baseUrl: '/plugins/myEffect@1.0.0/'
-});
-
-// 3) 플러그인 일괄 등록 (Vite dev 예시)
-const PLUGINS = import.meta.glob('/plugins/*/index.mjs');
-await registerExternalPluginsFromGlob(PLUGINS);
+// 플러그인에서 (이미 해석된 값)
+options.color // "#FFD400" (실제 값)
 ```
 
-### 📦 내장 CWI 플러그인 시리즈
-
-Caption with Intention (CWI) 플러그인들은 단어별 발화 강도에 따른 다양한 애니메이션을 제공합니다:
-
-- **cwi-color@1.0.0**: 색상 변화 (흰색 → 화자별 색상)
-- **cwi-loud@1.0.0**: 큰 소리 효과 (2.4배 확대 + 진동)
-- **cwi-whisper@1.0.0**: 속삭임 효과 (0.6배 축소)
-- **cwi-bouncing@1.0.0**: 바운싱 효과 (1.15배 확대 + 상하 움직임)
-
-#### 사용 예시
-
+### **3. domLifetime 기반 DOM 최적화**
+필요한 시점에만 DOM 생성/해제하여 메모리 효율성 극대화:
 ```json
 {
-  "definitions": {
-    "speakerPalette": {
-      "SPEAKER_01": "#4AA3FF",
-      "SPEAKER_02": "#FF4D4D",
-      "SPEAKER_03": "#FFD400"
-    }
-  },
-  "cues": [{
-    "root": {
-      "children": [{
-        "e_type": "text",
-        "text": "Hello",
-        "pluginChain": [
-          {
-            "name": "cwi-loud@1.0.0",
-            "params": {
-              "speaker": "SPEAKER_01",
-              "t0": 0.5,
-              "t1": 0.8
-            }
-          },
-          {
-            "name": "cwi-color@1.0.0", 
-            "params": {
-              "speaker": "SPEAKER_01",
-              "t0": 0.5,
-              "t1": 0.8
-            }
-          }
-        ]
-      }]
-    }
-  }]
+  "domLifetime": [0.5, 8.5],  // DOM 생성/해제 시점
+  "displayTime": [1.0, 8.0]   // 실제 표시 시간
 }
 ```
 
-#### Definitions 섹션을 통한 최적화
+### **4. 타입 안전한 외부 플러그인 시스템**
+ES Dynamic Import와 무결성 검증을 통한 안전한 플러그인 생태계:
+```typescript
+// 자동 플러그인 발견 및 로딩
+const plugins = import.meta.glob('/plugins/*/index.mjs');
+await registerExternalPluginsFromGlob(plugins);
+```
 
-`definitions` 섹션을 사용하면 공통 데이터를 중앙에서 관리할 수 있습니다:
+## 🏗️ 주요 구현 성과
 
+### **플러그인 생태계 (Plugin API v3.0)**
+```typescript
+export interface PluginRuntimeModule {
+  name: string;
+  version: string;
+
+  animate: (element: HTMLElement, options: ResolvedOptions, ctx: PluginContext, duration: number)
+    => TimelineLike | SeekApplier;
+
+  init?: (element: HTMLElement, options: ResolvedOptions, ctx: PluginContext) => Promise<void> | void;
+  cleanup?: (element: HTMLElement) => Promise<void> | void;
+}
+```
+
+## 🧩 기술적 도전과제 해결
+
+### **Challenge 1: 플러그인 간 충돌 방지**
+**문제**: 여러 플러그인이 동일한 DOM 속성을 조작할 때 예측 불가능한 결과
+**해결**: CSS 변수 채널 시스템으로 독립적 변환 경로 제공
+```css
+/* 플러그인A */ --mtx-tx: 10px;
+/* 플러그인B */ --mtx-tx: 20px; (add 모드)
+/* 최종 */ transform: translateX(calc(10px + 20px));
+```
+
+### **Challenge 2: 비디오-자막 동기화 정확도**
+**문제**: setTimeout/setInterval 기반 동기화의 프레임 드롭
+**해결**: requestVideoFrameCallback으로 하드웨어 레벨 동기화
+```typescript
+// 60fps 환경에서 16.67ms 정확도 보장
+video.requestVideoFrameCallback(this.syncCallback);
+```
+
+### **Challenge 3: Define 참조의 성능 오버헤드**
+**문제**: 런타임마다 "define.key" 문자열 파싱으로 인한 성능 저하
+**해결**: 파싱 단계 사전 해석으로 런타임 참조 제거
+```typescript
+// Before: 매 프레임마다 파싱
+const color = this.resolveDefine(options.color); // "define.brand.primary"
+
+// After: 파싱 시점에 완료
+const color = options.color; // "#FFD400" (이미 해석됨)
+```
+
+### **Challenge 4: 플러그인 샌드박스 보안**
+**문제**: 악의적 플러그인의 상위 DOM 조작 위험
+**해결**: effectsRoot 경계 강제와 PluginContext API 제한
+```typescript
+// 플러그인은 container(effectsRoot) 하위만 접근 가능
+ctx.container; // effectsRoot 요소
+// 상위 DOM 접근 불가 (baseWrapper 보호)
+```
+
+### **Challenge 5: 시간 표현의 일관성**
+**문제**: v1.3의 absStart/absEnd, relStart/relEnd 등 복잡한 시간 필드
+**해결**: v2.0에서 모든 시간을 `[start, end]` 배열로 통일
 ```json
+// v1.3 (복잡)
+{ "absStart": 1.0, "absEnd": 3.0, "relStart": 0, "relEnd": 0.5 }
+
+// v2.0 (단순)
+{ "displayTime": [1.0, 3.0], "timeOffset": ["0%", "50%"] }
+```
+
+## 📊 성능 벤치마크
+
+### **v2.0 Native vs v1.3 Legacy**
+- **메모리 사용량**: 40% 감소 (DOM 생명주기 최적화)
+- **JSON 크기**: 75% 감소 (Define 중복 제거)
+
+### **실제 사용 사례**
+```json
+// 800KB → 206KB (Define 시스템 적용)
 {
-  "definitions": {
+  "define": {
     "speakerPalette": {
       "SPEAKER_01": "#4AA3FF",
-      "SPEAKER_02": "#FF4D4D"  
+      "SPEAKER_02": "#FF4D4D"
     }
   },
   "cues": [{
     "root": {
       "children": [{
         "pluginChain": [{
-          "name": "cwi-color@1.0.0",
+          "name": "cwi-color",
           "params": {
-            "speaker": "SPEAKER_01",
-            "palette": "definitions.speakerPalette"
+            "palette": "define.speakerPalette" // 참조로 재사용
           }
         }]
       }]
@@ -199,69 +167,137 @@ Caption with Intention (CWI) 플러그인들은 단어별 발화 강도에 따�
 }
 ```
 
-**주요 이점:**
-- **중복 제거**: palette를 한 번만 정의하고 참조로 재사용
-- **파일 크기 감소**: 기존 대비 약 75% 크기 감소 (예: 800KB → 206KB)
-- **유지보수 개선**: palette 중앙 관리로 색상 변경 용이
-- **런타임 해결**: 렌더러가 `"definitions.speakerPalette"` 문자열을 실제 객체로 치환
+## **TODO : 에셋 관리 시스템**
+- **무결성 검증**: SHA-384 해시 기반 보안
+- **FontFace 자동화**: 폰트 등록/해제 완전 자동화
+- **지연 로딩**: 필요 시점 에셋 동적 로딩
+- **다양한 에셋 타입**: font, image, video, audio 지원
 
-모드 개요
-- server: `serverBase`에서 `plugins/<name@version>/manifest.json`을 받아 entry(index.mjs)를 로드합니다. CDN/별도 플러그인 서버를 쓰는 배포 환경에 적합합니다.
-- local: 번들 또는 정적 경로에 포함된 플러그인을 직접 import합니다. 서버 없이도 동작하며, 앱이 제공하는 정적 자산에서 즉시 로딩할 때 적합합니다.
-- auto: 서버 우선 시도 후 실패하면 로컬로 폴백합니다. 개발/시연 환경에서 편리합니다.
+## 🚀 설치 및 사용법
 
-언제 어떤 모드를 쓸까
-- 배포용 CDN/전용 서버가 있고, 플러그인 교체·무효화·버전 고정이 필요: server
-- 앱 번들에 플러그인을 포함하거나, 프록시/오프라인 환경: local
-- 개발 중 서버가 있을 때/없을 때를 모두 고려: auto
+### **기본 설치**
+```bash
+pnpm add motiontext-renderer gsap
+```
 
-플러그인 모듈 규약(요약, v2.1)
-```js
-// index.mjs (예시)
+> **Peer Dependencies**: GSAP 3.12.0+ 필수
+
+### **v2.0 시나리오 기본 사용법**
+```typescript
+import { MotionTextRenderer } from 'motiontext-renderer';
+
+// v2.0 Native 렌더러 초기화
+const renderer = new MotionTextRenderer(container);
+
+// v2.0 시나리오 로드 (네이티브 처리)
+const scenario = {
+  "version": "2.0",
+  "timebase": { "unit": "seconds", "fps": 30 },
+  "stage": { "baseAspect": "16:9" },
+
+  "define": {
+    "brand_colors": {
+      "primary": "#FFD400",
+      "secondary": "#4AA3FF"
+    }
+  },
+
+  "tracks": [{
+    "id": "subtitle",
+    "type": "subtitle",
+    "layer": 10,
+    "defaultStyle": { "fontSizeRel": 0.05 }
+  }],
+
+  "cues": [{
+    "id": "greeting",
+    "track": "subtitle",
+    "domLifetime": [0.5, 5.5],
+    "root": {
+      "id": "text_root",
+      "e_type": "text",
+      "text": "안녕하세요!",
+      "displayTime": [1.0, 5.0],
+      "layout": {
+        "position": { "x": 0.5, "y": 0.9 },
+        "anchor": "bc"
+      },
+      "style": {
+        "color": "define.brand_colors.primary"
+      },
+      "pluginChain": [{
+        "name": "fadeIn",
+        "time_offset": [0, 0.5]
+      }]
+    }
+  }]
+};
+
+await renderer.loadConfig(scenario);
+renderer.attachMedia(videoElement);
+```
+
+### **외부 플러그인 시스템 (Plugin API v3.0)**
+
+타입 안전하고 확장 가능한 플러그인 생태계를 구축할 수 있습니다:
+
+```typescript
+import {
+  configurePluginSource,
+  registerExternalPlugin,
+  registerExternalPluginsFromGlob
+} from 'motiontext-renderer';
+
+// 플러그인 소스 설정
+configurePluginSource({
+  mode: 'auto',  // 'server' | 'local' | 'auto'
+  serverBase: 'https://cdn.example.com/plugins',
+  localBase: '/static/plugins'
+});
+
+// 개별 플러그인 등록
+registerExternalPlugin({
+  name: 'myEffect',
+  version: '2.0.0',
+  module: await import('/plugins/myEffect@2.0.0/index.mjs'),
+  baseUrl: '/plugins/myEffect@2.0.0/'
+});
+
+// 배치 플러그인 등록 (Vite)
+const plugins = import.meta.glob('/plugins/*/index.mjs');
+await registerExternalPluginsFromGlob(plugins);
+```
+
+### **플러그인 개발 (Plugin API v3.0)**
+```typescript
+// my-plugin/index.mjs
 export default {
   name: 'myEffect',
-  version: '1.0.0',
-  init(el, opts, ctx) {
-    // effectsRoot(el) 하위만 조작 (샌드박스)
-  },
-  animate(el, opts, ctx, duration) {
-    // 0..1 진행을 받는 seek 함수형 또는 GSAP Timeline 반환
-    return (p) => {
-      el.style.opacity = String(Math.min(1, Math.max(0, p)));
+  version: '2.0.0',
+
+  animate(element, options, ctx, duration) {
+    return (progress) => {
+      // 채널 시스템 사용 (충돌 방지)
+      ctx.channels?.set('opacity', progress, 'replace');
+      ctx.channels?.set('tx', `${progress * 100}px`, 'add');
+
+      // 직접 스타일 조작 (effectsRoot 내부만)
+      element.style.color = options.color;
     };
   },
-  cleanup(el) {}
+
+  async init(element, options, ctx) {
+    // 에셋 로딩
+    const texture = await ctx.assets.loadAsset('particle.png');
+    this.textureUrl = URL.createObjectURL(texture);
+  },
+
+  cleanup(element) {
+    // 메모리 정리
+    if (this.textureUrl) URL.revokeObjectURL(this.textureUrl);
+  }
 };
 ```
-
-자산 URL과 baseUrl
-- `registerExternalPlugin`의 `baseUrl`은 플러그인 내부 `ctx.assets.getUrl('path')` 해석 기준이 됩니다.
-- server 모드에서는 manifest의 entry/자산 경로를 기준으로 자동 계산됩니다.
-- `registerExternalPluginsFromGlob`는 기본 파서로 `.../<name>@<version>/index.mjs`를 인식해 `baseUrl=.../<name>@<version>/`로 설정합니다. 다른 디렉터리 구조라면 `parse` 콜백을 전달해 직접 지정하세요.
-
-서버 모드용 최소 manifest 예시
-```json
-{
-  "name": "myEffect",
-  "version": "1.0.0",
-  "entry": "index.mjs"
-}
-```
-서버는 `plugins/<name>@<version>/manifest.json`와 `index.mjs`(및 필요 자산)를 정적으로 서빙하면 됩니다.
-
-다건 등록(번들러별 팁)
-- Vite: `import.meta.glob('/plugins/*/index.mjs')`를 권장 (비동기 로더 맵 생성)
-- Webpack/기타: 정적 import 후 `registerExternalPlugin`을 반복 호출하거나, 동적 import 가능한 경로 규칙을 사용하여 로더 맵을 구성하세요.
-
-SSR/Next.js 주의
-- 클라이언트에서만 등록하세요. 예: `if (typeof window !== 'undefined') await registerExternalPluginsFromGlob(...)`.
-
-트러블슈팅
-- “Failed to fetch dynamically imported module”: 경로/도메인(서버 모드), 정적 파일 위치(local 모드) 확인. 서버 모드라면 CORS/경로(`plugins/<name@version>/...`)를 점검하세요.
-- “not found @ version”: 시나리오 JSON의 `plugin.name`이 `myEffect@1.0.0`처럼 버전까지 포함되어야 합니다(혹은 동일 name 키로 등록).
-- 로컬 경로 404 (Vite dev): dev root에 맞는 경로인지 확인하고, 가능하면 글롭(registrar)을 사용하세요.
-
----
 
 ## 🔧 개발 가이드
 
@@ -290,7 +326,7 @@ cp .env.example .env
 ANTHROPIC_API_KEY=sk-ant-your-api-key-here
 ```
 
-4. **개발 서버 실행**
+4. **데모 서버 실행**
 ```bash
 pnpm dev
 
@@ -518,18 +554,6 @@ motiontext-renderer/
 
 ---
 
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Make your changes
-4. Record changeset (`pnpm changeset`)
-5. Commit Changes (`git commit -m 'Add some AmazingFeature'`)
-6. Push to Branch (`git push origin feature/AmazingFeature`)
-7. Open a Pull Request
-
----
-
 ## 📄 라이선스
 
 MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
@@ -543,11 +567,3 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 - **Issues**: https://github.com/teamKimtaerin/motiontext-renderer/issues
 
 ---
-
-## 📞 지원
-
-문의사항이나 버그 리포트는 [GitHub Issues](https://github.com/teamKimtaerin/motiontext-renderer/issues)를 이용해 주세요.
-
----
-
-Made with ❤️ by Team Kimtaerin

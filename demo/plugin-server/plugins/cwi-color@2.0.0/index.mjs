@@ -167,8 +167,8 @@ export function animate(el, opts, ctx, duration) {
 
     const span = state.span;
     const letters = state.letters || [];
-    // Auto-enable bulk mode for very short durations (< 0.1 seconds)
-    const shouldUseBulk = Boolean(opts?.bulk) || (duration < 0.1);
+    // Auto-enable bulk mode for very short durations (< 0.15 seconds)
+    const shouldUseBulk = Boolean(opts?.bulk) || (duration < 0.15);
 
     // Initial baseline
     span.style.color = WHITE90;
@@ -188,16 +188,11 @@ export function animate(el, opts, ctx, duration) {
       const scaled = clamped * total + 1e-4;
 
       if (shouldUseBulk) {
-        if (clamped >= 0.985) {
-          span.style.color = targetColor;
-          for (const letter of letters) letter.style.color = targetColor;
-          span.style.opacity = '1';
-          return;
-        }
-        const mix = mixRgb(WHITE_RGB, to, easeOutCubic(clamped));
-        const css = rgbToCss(mix);
-        span.style.color = css;
-        for (const letter of letters) letter.style.color = css;
+        // Bulk mode: instant color change regardless of progress
+        // This ensures color is visible immediately for very short durations
+        const targetColor = colorFor(state, opts, el);
+        span.style.color = targetColor;
+        for (const letter of letters) letter.style.color = targetColor;
         span.style.opacity = '1';
         return;
       }
@@ -210,7 +205,8 @@ export function animate(el, opts, ctx, duration) {
       // Near the end, ensure all letters are fully colored even if progress < 1
       // This prevents the last few letters from staying white when the renderer
       // doesn't deliver an exact 1.0 progress frame.
-      if (clamped >= 0.985) {
+      // Lowered threshold for better short-duration performance
+      if (clamped >= 0.8) {
         for (const letter of letters) letter.style.color = targetColor;
         span.style.opacity = '1';
         return;
